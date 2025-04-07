@@ -1,4 +1,3 @@
-# db_service.py
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
@@ -18,7 +17,7 @@ except Exception as e:
 
 # 3) Choose the database name that actually contains your data
 #    Since you said "test-db" in your screenshot, let's use that:
-db = client["test-db"]
+db = client["mobility-mate"]
 
 # 4) Provide a helper to get a reference to a collection
 def get_collection(name: str):

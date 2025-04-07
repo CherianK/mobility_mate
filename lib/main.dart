@@ -40,62 +40,51 @@ class _MapHomePageState extends State<MapHomePage> {
   @override
   void initState() {
     super.initState();
-    fetchLocations(); // Fetch markers on widget load
+    fetchToiletLocations(); // Fetch markers on widget load
   }
 
   /// Fetch all locations from Flask and convert them into Marker objects
-  Future<void> fetchLocations() async {
+  Future<void> fetchToiletLocations() async {
     try {
-      debugPrint("Starting to fetch locations...");
 
-      
-      final response = await http.get(Uri.parse('http://127.0.0.1:5000/location-points'));
-      debugPrint("Response: $response");
-      debugPrint("HTTP request completed with status code: ${response.statusCode}");
+      debugPrint("Starting to fetch locations...");
+      final response = await http.get(Uri.parse('http://127.0.0.1:5000/toilet-location-points'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         debugPrint("Data fetched successfully: $data");
 
-        setState(() {
-          _markers = data.map<Marker>((location) {
-            final double lat = location['lat'];
-            final double lon = location['lon'];
-            debugPrint("Creating marker for location: lat=$lat, lon=$lon");
+      setState(() {
+        _markers = data.map<Marker>((location) {
+          // Update keys to match your MongoDB document structure
+          final double lat = (location['Location_Lat'] as num).toDouble();
+          final double lon = (location['Location_Lon'] as num).toDouble();
+          //debugPrint("Creating marker for location: lat=$lat, lon=$lon");
 
-            // 'properties' is optional; handle gracefully if it doesn't exist
-            final Map<String, dynamic>? properties = location['properties'] as Map<String, dynamic>?;
-
-            // For UI clarity, define the name or fallback to "Unknown"
-            final String locationName = location['name'] ?? "Unknown Location";
-
-            return Marker(
-              point: LatLng(lat, lon),
-              width: 40,
-              height: 40,
-              child: GestureDetector(
-                onTap: () {
-                  // Add your onTap functionality here
-                  debugPrint("Marker tapped at lat=$lat, lon=$lon");
-                },
-                child: const Icon(
-                  Icons.location_on,
-                  size: 36,
-                  color: Colors.red,
-                ),
+          return Marker(
+            point: LatLng(lat, lon),
+            width: 40,
+            height: 40,
+            child: GestureDetector(
+              child: const Icon(
+                Icons.location_on,
+                size: 36,
+                color: Colors.red,
               ),
-            );
-          }).toList();
-        });
+            ),
+          );
+        }).toList();
+      });
 
-        debugPrint("Markers created: ${_markers.length}");
-      } else {
-        debugPrint("Failed to load locations. Status code: ${response.statusCode}");
-      }
-    } catch (e) {
-      debugPrint("Error fetching locations: $e");
+      debugPrint("Markers created: ${_markers.length}");
+    } else {
+      debugPrint("Failed to load locations. Status code: ${response.statusCode}");
     }
+  } catch (e) {
+    debugPrint("Error fetching locations: $e");
   }
+}
+
   
 
   /// Helper to build a label-value row
