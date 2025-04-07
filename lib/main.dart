@@ -48,7 +48,7 @@ class _MapHomePageState extends State<MapHomePage> {
     try {
       debugPrint("Starting to fetch locations...");
 
-      // Replace 'localhost' with '10.0.2.2' if testing on Android emulator
+      
       final response = await http.get(Uri.parse('http://127.0.0.1:5000/location-points'));
       debugPrint("Response: $response");
       debugPrint("HTTP request completed with status code: ${response.statusCode}");
@@ -134,12 +134,13 @@ class _MapHomePageState extends State<MapHomePage> {
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(
-        initialCenter: LatLng(-38.76, 143.37),
+        initialCenter: LatLng(-37.8136, 144.9631),
         initialZoom: 13.0,
       ),
       children: [
         TileLayer(
           urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          subdomains: ['a', 'b', 'c'],
           userAgentPackageName: 'cher0022@student.monash.edu',
         ),
         MarkerLayer(markers: _markers),
