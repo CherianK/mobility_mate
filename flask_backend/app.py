@@ -13,5 +13,8 @@ app.register_blueprint(location_bp)
 def home():
     return "Welcome to MobilityMate API "
 
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
