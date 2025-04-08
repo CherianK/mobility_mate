@@ -48,7 +48,9 @@ class _MapHomePageState extends State<MapHomePage> {
     try {
 
       debugPrint("Starting to fetch locations...");
+
       final response = await http.get(Uri.parse('https://mobility-mate.onrender.com/toilet-location-points'));
+
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);

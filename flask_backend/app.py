@@ -1,8 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
 from routes.location_routes import location_bp
-import os
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
