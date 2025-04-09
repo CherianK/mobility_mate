@@ -4,12 +4,10 @@ import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +23,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MapHomePage extends StatefulWidget {
-  const MapHomePage({super.key});
+  const MapHomePage({Key? key}) : super(key: key);
 
   @override
   State<MapHomePage> createState() => _MapHomePageState();
@@ -34,74 +32,111 @@ class MapHomePage extends StatefulWidget {
 class _MapHomePageState extends State<MapHomePage> {
   final MapController _mapController = MapController();
 
-  /// Holds dynamically loaded markers from the backend
+  /// Holds the combined markers (toilets, trains, trams)
   List<Marker> _markers = [];
 
   @override
   void initState() {
     super.initState();
-    fetchToiletLocations(); // Fetch markers on widget load
+    fetchAllLocations();
   }
 
-  /// Fetch all locations from Flask and convert them into Marker objects
-  Future<void> fetchToiletLocations() async {
+  /// Fetch toilets, trains, and trams from separate endpoints,
+  /// then create different markers for each dataset.
+  Future<void> fetchAllLocations() async {
     try {
-      debugPrint("Starting to fetch locations...");
-
-      // Previous version: No bounding box, fetches all
-      final response = await http.get(
+      // Fetch toilet data
+      final toiletResponse = await http.get(
         Uri.parse('https://mobility-mate.onrender.com/toilet-location-points'),
       );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        debugPrint("Data fetched successfully: $data");
+      // Fetch train data
+      final trainResponse = await http.get(
+        Uri.parse('https://mobility-mate.onrender.com/train-location-points'),
+      );
+
+      // Fetch tram data
+      final tramResponse = await http.get(
+        Uri.parse('https://mobility-mate.onrender.com/tram-location-points'),
+      );
+
+      if (toiletResponse.statusCode == 200 &&
+          trainResponse.statusCode == 200 &&
+          tramResponse.statusCode == 200) {
+        final List<dynamic> toiletData = json.decode(toiletResponse.body);
+        final List<dynamic> trainData = json.decode(trainResponse.body);
+        final List<dynamic> tramData = json.decode(tramResponse.body);
+
+        // Markers for toilets -> Red location pin
+        final toiletMarkers = toiletData.map<Marker>((doc) {
+          final lat = (doc['Location_Lat'] as num).toDouble();
+          final lon = (doc['Location_Lon'] as num).toDouble();
+
+          return Marker(
+            point: LatLng(lat, lon),
+            width: 40,
+            height: 40,
+            child: const Icon(
+              Icons.location_on,
+              size: 36,
+              color: Colors.red,
+            ),
+          );
+        }).toList();
+
+        // Markers for trains -> Blue train icon
+        final trainMarkers = trainData.map<Marker>((doc) {
+          final lat = (doc['Location_Lat'] as num).toDouble();
+          final lon = (doc['Location_Lon'] as num).toDouble();
+
+          return Marker(
+            point: LatLng(lat, lon),
+            width: 40,
+            height: 40,
+            child: const Icon(
+              Icons.train,
+              size: 36,
+              color: Colors.blue,
+            ),
+          );
+        }).toList();
+
+        // Markers for trams -> Green tram icon
+        final tramMarkers = tramData.map<Marker>((doc) {
+          final lat = (doc['Location_Lat'] as num).toDouble();
+          final lon = (doc['Location_Lon'] as num).toDouble();
+
+          return Marker(
+            point: LatLng(lat, lon),
+            width: 40,
+            height: 40,
+            child: const Icon(
+              Icons.tram,
+              size: 36,
+              color: Colors.green,
+            ),
+          );
+        }).toList();
 
         setState(() {
-          _markers = data.map<Marker>((location) {
-            final double lat = (location['Location_Lat'] as num).toDouble();
-            final double lon = (location['Location_Lon'] as num).toDouble();
-
-            return Marker(
-              point: LatLng(lat, lon),
-              width: 40,
-              height: 40,
-              child: GestureDetector(
-                child: const Icon(
-                  Icons.location_on,
-                  size: 36,
-                  color: Colors.red,
-                ),
-              ),
-            );
-          }).toList();
+          // Combine all markers into one list
+          _markers = [
+            ...toiletMarkers,
+            ...trainMarkers,
+            ...tramMarkers,
+          ];
         });
-
-        debugPrint("Markers created: ${_markers.length}");
       } else {
-        debugPrint("Failed to load locations. Status code: ${response.statusCode}");
+        debugPrint(
+          'Failed to load data. Status codes: '
+          'Toilets=${toiletResponse.statusCode}, '
+          'Trains=${trainResponse.statusCode}, '
+          'Trams=${tramResponse.statusCode}',
+        );
       }
     } catch (e) {
-      debugPrint("Error fetching locations: $e");
+      debugPrint('Error fetching data: $e');
     }
-  }
-
-  /// Helper to build a label-value row
-  Widget _buildPropertyRow(String label, dynamic value) {
-    // If value is null, show "N/A"
-    final displayValue = value ?? 'N/A';
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Text(
-            '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Text('$displayValue'),
-        ],
-      ),
-    );
   }
 
   @override
@@ -111,7 +146,7 @@ class _MapHomePageState extends State<MapHomePage> {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.star),
         onPressed: () {
-          // Recenter the map to Melbourne
+          // Re-center the map on Melbourne
           _mapController.move(LatLng(-37.8136, 144.9631), 13.0);
         },
       ),
