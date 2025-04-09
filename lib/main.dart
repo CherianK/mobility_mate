@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'splash_screen.dart';
+import 'search_page.dart';
 
 void main() => runApp(const MyApp());
 
@@ -340,80 +341,119 @@ class _MapHomePageState extends State<MapHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          _buildMap(),
-          
-          // Bottom sheet
-          if (_isBottomSheetVisible)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: GestureDetector(
-                onVerticalDragUpdate: (details) {
-                  // Allow dragging the sheet up and down
-                  if (details.primaryDelta! < 0) {
-                    // Dragging up
-                    setState(() {
-                      _isBottomSheetVisible = true;
-                    });
-                  } else if (details.primaryDelta! > 50) {
-                    // Dragging down significantly
-                    setState(() {
-                      _isBottomSheetVisible = false;
-                    });
-                  }
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  height: MediaQuery.of(context).size.height * 0.4,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 10,
-                        offset: const Offset(0, -5),
-                      ),
-                    ],
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Stack(
+      children: [
+        _buildMap(),
+
+        // Floating search bar
+        Positioned(
+          top: 50,
+          left: 20,
+          right: 20,
+          child: GestureDetector(
+            onTap: () async {
+              final selected = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SearchPage()),
+              );
+              if (selected != null) {
+                debugPrint("User selected: $selected");
+                // Later: recenter map here
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
-                  child: Column(
-                    children: [
-                      // Handle bar for dragging
-                      Center(
-                        child: Container(
-                          margin: const EdgeInsets.only(top: 8, bottom: 8),
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+                ],
+              ),
+              child: Row(
+                children: const [
+                  Icon(Icons.search, color: Colors.grey),
+                  SizedBox(width: 8),
+                  Text(
+                    "Search for a location...",
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // Bottom sheet
+        if (_isBottomSheetVisible)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: GestureDetector(
+              onVerticalDragUpdate: (details) {
+                if (details.primaryDelta! < 0) {
+                  setState(() {
+                    _isBottomSheetVisible = true;
+                  });
+                } else if (details.primaryDelta! > 50) {
+                  setState(() {
+                    _isBottomSheetVisible = false;
+                  });
+                }
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height: MediaQuery.of(context).size.height * 0.4,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, -5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Center(
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 8, bottom: 8),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      Expanded(
-                        child: _buildBottomSheetContent(),
-                      ),
-                    ],
-                  ),
+                    ),
+                    Expanded(
+                      child: _buildBottomSheetContent(),
+                    ),
+                  ],
                 ),
               ),
             ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.star),
-        onPressed: () {
-          // Re-center the map on Melbourne
-          _mapController.moveAndRotate(LatLng(-37.8136, 144.9631), 13.0, 0.0);
-        },
-      ),
-    );
-  }
+          ),
+      ],
+    ),
+    floatingActionButton: FloatingActionButton(
+      child: const Icon(Icons.star),
+      onPressed: () {
+        _mapController.moveAndRotate(LatLng(-37.8136, 144.9631), 13.0, 0.0);
+      },
+    ),
+  );
+}
+
 
   Widget _buildMap() {
     return FlutterMap(
