@@ -1,5 +1,6 @@
-// lib/search_page.dart
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -10,22 +11,33 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _controller = TextEditingController();
-  List<String> allLocations = [
-    'Melbourne',
-    'Richmond',
-    'Brunswick',
-    'Carlton',
-    'Docklands',
-    'Footscray',
-    'Southbank'
-  ]; // dummy list for now
 
-  List<String> filteredLocations = [];
+  List<Map<String, dynamic>> allLocations = [];      // Was allStations
+  List<Map<String, dynamic>> filteredLocations = []; // Was filteredStations
 
+  @override
+  void initState() {
+    super.initState();
+    loadLocationData(); // renamed method
+  }
+
+  /// Loads suburb or station data from JSON file
+  Future<void> loadLocationData() async {
+    final String jsonString =
+        await rootBundle.loadString('assets/suburb_stations.json');
+    final List<dynamic> data = json.decode(jsonString);
+    setState(() {
+      allLocations = data.cast<Map<String, dynamic>>();
+    });
+  }
+
+  /// Filters location list based on search query
   void _filterLocations(String query) {
-    final filtered = allLocations
-        .where((loc) => loc.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    final filtered = allLocations.where((location) {
+      final name = location['Name'].toString().toLowerCase();
+      return name.contains(query.toLowerCase());
+    }).toList();
+
     setState(() {
       filteredLocations = filtered;
     });
@@ -45,7 +57,7 @@ class _SearchPageState extends State<SearchPage> {
               controller: _controller,
               onChanged: _filterLocations,
               decoration: InputDecoration(
-                hintText: 'Enter location name...',
+                hintText: 'Search suburb or station...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -57,12 +69,16 @@ class _SearchPageState extends State<SearchPage> {
             child: ListView.builder(
               itemCount: filteredLocations.length,
               itemBuilder: (context, index) {
+                final location = filteredLocations[index];
                 return ListTile(
                   leading: const Icon(Icons.location_on),
-                  title: Text(filteredLocations[index]),
+                  title: Text(location['Name']),
                   onTap: () {
-                    // later: send selected location back to map
-                    Navigator.pop(context, filteredLocations[index]);
+                    Navigator.pop(context, {
+                      'lat': location['Latitude'],
+                      'lon': location['Longitude'],
+                      'name': location['Name'],
+                    });
                   },
                 );
               },
