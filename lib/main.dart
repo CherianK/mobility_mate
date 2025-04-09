@@ -44,10 +44,12 @@ class _MapHomePageState extends State<MapHomePage> {
   List<Marker> _markers = [];
   
   /// Current zoom level of the map
-  double _currentZoom = 13.0;
+  double _currentZoom = 15.0;
   
   /// Currently selected toilet data
   Map<String, dynamic>? _selectedToilet;
+  Map<String, dynamic>? _selectedTrain;
+  Map<String, dynamic>? _selectedTram;
   
   /// Bottom sheet visibility
   bool _isBottomSheetVisible = false;
@@ -104,7 +106,12 @@ class _MapHomePageState extends State<MapHomePage> {
             height: 40,
             child: GestureDetector(
               onTap: () {
+                _mapController.moveAndRotate(LatLng(lat, lon), _currentZoom, 0.0);
+                _popupController.hideAllPopups();
                 setState(() {
+                  _selectedTrain = null;
+                  _selectedTram = null;
+
                   _selectedToilet = {
                     'Tags': doc['Tags'] ?? {},
                   };
@@ -113,9 +120,9 @@ class _MapHomePageState extends State<MapHomePage> {
                 debugPrint('Toilet marker tapped, showing bottom sheet');
               },
               child: const Icon(
-                Icons.location_on,
-                size: 36,
-                color: Colors.red,
+                Icons.wc,
+                size: 42,
+                color: Color.fromRGBO(255, 0, 0, 1),
               ),
             ),
           );
@@ -130,11 +137,27 @@ class _MapHomePageState extends State<MapHomePage> {
             point: LatLng(lat, lon),
             width: 40,
             height: 40,
-            child: const Icon(
-              Icons.train,
-              size: 36,
-              color: Colors.blue,
-            ),
+            child: GestureDetector(
+              onTap: () {
+                _mapController.moveAndRotate(LatLng(lat, lon), _currentZoom, 0.0);
+                _popupController.hideAllPopups();
+                setState(() {
+                  _selectedToilet = null;
+                  _selectedTram = null;                  
+                  
+                  _selectedTrain = {
+                    'Tags': doc['Tags'] ?? {},
+                  };
+                  _isBottomSheetVisible = true;
+                });
+                debugPrint('Train marker tapped, showing bottom sheet');
+              },
+              child: const Icon(
+                Icons.train,
+                size: 42,
+                color: Color.fromRGBO(25, 0, 255, 1),
+              ),
+            )
           );
         }).toList();
 
@@ -147,11 +170,27 @@ class _MapHomePageState extends State<MapHomePage> {
             point: LatLng(lat, lon),
             width: 40,
             height: 40,
-            child: const Icon(
-              Icons.tram,
-              size: 36,
-              color: Colors.green,
-            ),
+            child: GestureDetector(
+              onTap: () {
+                _mapController.moveAndRotate(LatLng(lat, lon), _currentZoom, 0.0);
+                _popupController.hideAllPopups();
+                setState(() {
+                  _selectedToilet = null;
+                  _selectedTrain = null;
+
+                  _selectedTram = {
+                    'Tags': doc['Tags'] ?? {},
+                  };
+                  _isBottomSheetVisible = true;
+                });
+                debugPrint('Tram marker tapped, showing bottom sheet');
+              },
+              child: const Icon(
+                Icons.tram,
+                size: 42,
+                color: Color.fromRGBO(255, 94, 0, 1),
+              ),
+            )
           );
         }).toList();
 
@@ -253,92 +292,311 @@ class _MapHomePageState extends State<MapHomePage> {
     return filteredTags;
   }
 
+/// Returns a neatly formatted string for a given tag key and value.
+/// It replaces underscores in the key with spaces and capitalizes each word.
+/// It also capitalizes the value if appropriate.
+String formatTag(String key, dynamic value) {
+  // Replace underscores with spaces, and capitalize each word in the key.
+  List<String> words = key.split('_');
+  String formattedKey = words
+      .map((word) => word.isNotEmpty
+          ? word[0].toUpperCase() + word.substring(1).toLowerCase()
+          : '')
+      .join(' ');
+
+  // Format the value as a string.
+  String formattedValue = value.toString();
+  if (formattedValue.isNotEmpty) {
+    // Capitalize first letter and make the rest lowercase.
+    formattedValue =
+        formattedValue[0].toUpperCase() + formattedValue.substring(1).toLowerCase();
+  }
+
+  return '$formattedKey: $formattedValue';
+}
+
   /// Build the bottom sheet content
   Widget _buildBottomSheetContent() {
-    if (_selectedToilet == null) {
-      return const Center(child: Text('No toilet selected'));
-    }
-
-    // Extract tags from the selected toilet
-    final Map<String, dynamic> tags = _selectedToilet!['Tags'] ?? {};
-    
-    // Process the tags
-    final List<MapEntry<String, dynamic>> filteredTags = _processTags(tags);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Handle bar for dragging
-        Center(
-          child: Container(
-            margin: const EdgeInsets.only(top: 8, bottom: 8),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-        ),
-        
-        const Divider(),
-        
-        // Accessibility features
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            'Accessibility Features',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ),
-        
-        // Grid of accessibility features
-        if (filteredTags.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text('No accessibility information available'),
-          )
-        else
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 1,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
+  // If a train is selected
+    if (_selectedTrain != null) {
+      final doc = _selectedTrain!;
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Draggable handle
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 10, bottom: 2),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              itemCount: filteredTags.length,
-              itemBuilder: (context, index) {
-                final entry = filteredTags[index];
-                final String key = entry.key;
-                final String value = entry.value.toString();
-                final IconData icon = _getIconForTag(key, value);
-                
-                return Card(
-                  elevation: 2,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(icon, size: 36),
-                      const SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          '$key: $value',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 10),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
             ),
-          ),
-      ],
-    );
+            Text('Train Information', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+
+            // Display lat/lon or anything else from doc
+            // Text('Latitude: ${doc['Location_Lat']}'),
+            // Text('Longitude: ${doc['Location_Lon']}'),
+
+            // Possibly also show tags
+            if (doc['Tags'] != null && doc['Tags'] is Map) ...[
+              const SizedBox(height: 8),
+              Text('Tags:'),
+              Builder(
+                builder: (context) {
+                  final tagMap = doc['Tags'] as Map<String, dynamic>;
+                  final tagString = tagMap.entries
+                      .map((entry) => formatTag(entry.key, entry.value))
+                      .join('\n');
+                  return Text(tagString);
+                },
+              )
+            ],
+          ],
+        ),
+      );
+    }
+    // If a tram is selected
+    else if (_selectedTram != null) {
+      final doc = _selectedTram!;
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Draggable handle
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 10, bottom: 2),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Text('Tram Information', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+
+            // Text('Latitude: ${doc['Location_Lat']}'),
+            // Text('Longitude: ${doc['Location_Lon']}'),
+
+            if (doc['Tags'] != null && doc['Tags'] is Map) ...[
+              const SizedBox(height: 8),
+              Text('Tags:'),
+              Builder(
+                builder: (context) {
+                  final tagMap = doc['Tags'] as Map<String, dynamic>;
+                  final tagString = tagMap.entries
+                      .map((entry) => formatTag(entry.key, entry.value))
+                      .join('\n');
+                  return Text(tagString);
+                },
+              )
+            ],
+          ],
+        ),
+      );
+    }
+    // Otherwise, if a toilet is selected, show the existing toilet content
+    else if (_selectedToilet != null) {
+      final Map<String, dynamic> tags = _selectedToilet!['Tags'] ?? {};
+      final List<MapEntry<String, dynamic>> filteredTags = _processTags(tags);
+
+      if (filteredTags.isEmpty) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 10, bottom: 2),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text('No accessibility information available'),
+            ),
+          ],
+        );
+      } else {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 10, bottom: 2),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
+              child: Text(
+                'Accessibility Features',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            Flexible(
+              fit: FlexFit.loose,
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16.0),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 1,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                ),
+                itemCount: filteredTags.length,
+                itemBuilder: (context, index) {
+                  final entry = filteredTags[index];
+                  final String key = entry.key;
+                  final String value = entry.value.toString();
+                  final IconData icon = _getIconForTag(key, value);
+
+                  return Card(
+                    elevation: 2,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(icon, size: 36),
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            '$key: $value',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      }
+    } else {
+      // If nothing is selected
+      return const Center(
+        child: Text('No marker selected'),
+      );
+    }
   }
+  
+  // Widget _buildBottomSheetContent() {
+  //   if (_selectedToilet == null) {
+  //     return const Center(child: Text('No toilet selected'));
+  //   }
+
+  //   // Extract tags from the selected toilet
+  //   final Map<String, dynamic> tags = _selectedToilet!['Tags'] ?? {};
+    
+  //   // Process the tags
+  //   final List<MapEntry<String, dynamic>> filteredTags = _processTags(tags);
+
+  //   return Column(
+  //     mainAxisSize: MainAxisSize.min,
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       //Handle bar for dragging
+  //       Center(
+  //         child: Container(
+  //           margin: const EdgeInsets.only(top: 10, bottom: 2),
+  //           width: 40,
+  //           height: 4,
+  //           decoration: BoxDecoration(
+  //             color: Colors.white,
+  //             borderRadius: BorderRadius.circular(2),
+  //           ),
+  //         ),
+  //       ),
+        
+  //       // const Divider(),
+        
+  //       //Accessibility features
+  //       Padding(
+  //         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
+  //         child: Text(
+  //           'Accessibility Features',
+  //           style: Theme.of(context).textTheme.titleMedium,
+  //         ),
+  //       ),
+        
+  //       // Grid of accessibility features
+  //       if (filteredTags.isEmpty)
+  //         const Padding(
+  //           padding: EdgeInsets.all(16.0),
+  //           child: Text('No accessibility information available'),
+  //         )
+  //       else
+  //         Flexible(
+  //           fit: FlexFit.loose,
+  //           child: GridView.builder(
+  //             shrinkWrap: true,
+  //             physics: const NeverScrollableScrollPhysics(),
+  //             padding: const EdgeInsets.all(16.0),
+  //             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+  //               crossAxisCount: 3,
+  //               childAspectRatio: 1,
+  //               crossAxisSpacing: 16,
+  //               mainAxisSpacing: 16,
+  //             ),
+  //             itemCount: filteredTags.length,
+  //             itemBuilder: (context, index) {
+  //               final entry = filteredTags[index];
+  //               final String key = entry.key;
+  //               final String value = entry.value.toString();
+  //               final IconData icon = _getIconForTag(key, value);
+                
+  //               return Card(
+  //                 elevation: 2,
+  //                 child: Column(
+  //                   mainAxisAlignment: MainAxisAlignment.center,
+  //                   children: [
+  //                     Icon(icon, size: 36),
+  //                     const SizedBox(height: 8),
+  //                     Padding(
+  //                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+  //                       child: Text(
+  //                         '$key: $value',
+  //                         textAlign: TextAlign.center,
+  //                         style: const TextStyle(fontSize: 12),
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               );
+  //             },
+  //           ),
+  //         ),
+  //     ],
+  //   );
+  // }
 
   @override
 Widget build(BuildContext context) {
@@ -363,13 +621,13 @@ Widget build(BuildContext context) {
                 final lon = result['lon'] as double;
 
                 debugPrint("Centering map to: $lat, $lon");
-                _mapController.moveAndRotate(LatLng(lat, lon), 16.0, 0.0);
+                _mapController.moveAndRotate(LatLng(lat, lon), 15.0, 0.0);
               }
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color.fromRGBO(255, 255, 255, 1),
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
@@ -395,55 +653,58 @@ Widget build(BuildContext context) {
 
         // Bottom sheet
         if (_isBottomSheetVisible)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: GestureDetector(
-              onVerticalDragUpdate: (details) {
-                if (details.primaryDelta! < 0) {
-                  setState(() {
-                    _isBottomSheetVisible = true;
-                  });
-                } else if (details.primaryDelta! > 50) {
-                  setState(() {
-                    _isBottomSheetVisible = false;
-                  });
-                }
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                height: MediaQuery.of(context).size.height * 0.4,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, -5),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Center(
-                      child: Container(
-                        margin: const EdgeInsets.only(top: 8, bottom: 8),
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(2),
+          NotificationListener<DraggableScrollableNotification>(
+            onNotification: (notification) {
+              // When dragged fully down (extent near the minimum), hide the sheet.
+              if (notification.extent <= 0.22) {
+                setState(() {
+                  _isBottomSheetVisible = false;
+                });
+              }
+              return true;
+            },
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.4, // Starts at 40% of screen height
+              minChildSize: 0.2,     // Allows collapsing
+              maxChildSize: 0.85,    // Allows pulling up to 85% of screen
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 8,
+                        offset: Offset(0, -2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Handle bar
+                      Center(
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: _buildBottomSheetContent(),
-                    ),
-                  ],
-                ),
-              ),
+                      // Scrollable content
+                      Expanded(
+                        child: SingleChildScrollView(
+                          controller: scrollController,
+                          child: _buildBottomSheetContent(),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
       ],
@@ -463,7 +724,7 @@ Widget build(BuildContext context) {
       mapController: _mapController,
       options: MapOptions(
         initialCenter: LatLng(-37.8136, 144.9631),
-        initialZoom: 13.0,
+        initialZoom: 15.0,
         onTap: (_, __) {
           _popupController.hideAllPopups();
           setState(() {
@@ -474,13 +735,15 @@ Widget build(BuildContext context) {
       children: [
         TileLayer(
           urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          //urlTemplate: "http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", 
           subdomains: ['a', 'b', 'c'],
           userAgentPackageName: 'cher0022@student.monash.edu',
         ),
         MarkerClusterLayerWidget(
           options: MarkerClusterLayerOptions(
-            maxClusterRadius: 120,
-            size: const Size(40, 40),
+            disableClusteringAtZoom: 16,
+            maxClusterRadius: 60  ,
+            size: const Size(30, 30),
             markers: _markers,
             polygonOptions: const PolygonOptions(
               borderColor: Colors.blueAccent,
