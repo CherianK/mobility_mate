@@ -3,7 +3,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:async';
 
 void main() {
   runApp(const MyApp());
@@ -37,7 +36,6 @@ class _MapHomePageState extends State<MapHomePage> {
 
   /// Holds dynamically loaded markers from the backend
   List<Marker> _markers = [];
-  Timer? _debounce;
 
   @override
   void initState() {
@@ -48,55 +46,45 @@ class _MapHomePageState extends State<MapHomePage> {
   /// Fetch all locations from Flask and convert them into Marker objects
   Future<void> fetchToiletLocations() async {
     try {
-
       debugPrint("Starting to fetch locations...");
 
-      final bounds = _mapController.camera.visibleBounds;
-      debugPrint("Bounds: ${bounds.southWest.latitude}, ${bounds.northEast.latitude}, ${bounds.southWest.longitude}, ${bounds.northEast.longitude}");
-      final response = await http.get(Uri.parse(
-              'https://mobility-mate.onrender.com/toilet-location-points'
-              '?minLat=${bounds.southWest.latitude}'
-              '&maxLat=${bounds.northEast.latitude}'
-              '&minLon=${bounds.southWest.longitude}'
-              '&maxLon=${bounds.northEast.longitude}'
-            ));
+      // Previous version: No bounding box, fetches all
+      final response = await http.get(
+        Uri.parse('https://mobility-mate.onrender.com/toilet-location-points'),
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        //debugPrint("Data fetched successfully: $data");
+        debugPrint("Data fetched successfully: $data");
 
-      setState(() {
-        _markers = data.map<Marker>((location) {
-          // Update keys to match your MongoDB document structure
-          final double lat = (location['Location_Lat'] as num).toDouble();
-          final double lon = (location['Location_Lon'] as num).toDouble();
-          //debugPrint("Creating marker for location: lat=$lat, lon=$lon");
+        setState(() {
+          _markers = data.map<Marker>((location) {
+            final double lat = (location['Location_Lat'] as num).toDouble();
+            final double lon = (location['Location_Lon'] as num).toDouble();
 
-          return Marker(
-            point: LatLng(lat, lon),
-            width: 40,
-            height: 40,
-            child: GestureDetector(
-              child: const Icon(
-                Icons.location_on,
-                size: 36,
-                color: Colors.red,
+            return Marker(
+              point: LatLng(lat, lon),
+              width: 40,
+              height: 40,
+              child: GestureDetector(
+                child: const Icon(
+                  Icons.location_on,
+                  size: 36,
+                  color: Colors.red,
+                ),
               ),
-            ),
-          );
-        }).toList();
-      });
+            );
+          }).toList();
+        });
 
-      debugPrint("Markers created: ${_markers.length}");
-    } else {
-      debugPrint("Failed to load locations. Status code: ${response.statusCode}");
+        debugPrint("Markers created: ${_markers.length}");
+      } else {
+        debugPrint("Failed to load locations. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("Error fetching locations: $e");
     }
-  } catch (e) {
-    debugPrint("Error fetching locations: $e");
   }
-}
-
-  
 
   /// Helper to build a label-value row
   Widget _buildPropertyRow(String label, dynamic value) {
@@ -136,16 +124,6 @@ class _MapHomePageState extends State<MapHomePage> {
       options: MapOptions(
         initialCenter: LatLng(-37.8136, 144.9631),
         initialZoom: 13.0,
-        onMapReady: () => fetchToiletLocations(),
-        onPositionChanged: (MapPosition pos, bool hasGesture) {
-              if (hasGesture) {
-                  if (_debounce?.isActive ?? false) _debounce!.cancel();
-
-                   _debounce = Timer(const Duration(milliseconds: 500), () {
-                          fetchToiletLocations();
-                       });
-  }
-                      },
       ),
       children: [
         TileLayer(
@@ -157,12 +135,4 @@ class _MapHomePageState extends State<MapHomePage> {
       ],
     );
   }
-
-@override
-void dispose() {
-  _debounce?.cancel(); 
-  _mapController.dispose(); 
-  super.dispose(); 
-}
-
 }
