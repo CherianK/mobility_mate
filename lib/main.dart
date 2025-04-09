@@ -354,13 +354,16 @@ Widget build(BuildContext context) {
           right: 20,
           child: GestureDetector(
             onTap: () async {
-              final selected = await Navigator.push(
+              final result = await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const SearchPage()),
               );
-              if (selected != null) {
-                debugPrint("User selected: $selected");
-                // Later: recenter map here
+              if (result != null && result is Map<String, dynamic>) {
+                final lat = result['lat'] as double;
+                final lon = result['lon'] as double;
+
+                debugPrint("Centering map to: $lat, $lon");
+                _mapController.moveAndRotate(LatLng(lat, lon), 16.0, 0.0);
               }
             },
             child: Container(
