@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 
 void main() {
   runApp(const MyApp());
@@ -36,6 +37,7 @@ class _MapHomePageState extends State<MapHomePage> {
 
   /// Holds dynamically loaded markers from the backend
   List<Marker> _markers = [];
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -49,12 +51,19 @@ class _MapHomePageState extends State<MapHomePage> {
 
       debugPrint("Starting to fetch locations...");
 
-      final response = await http.get(Uri.parse('https://mobility-mate.onrender.com/toilet-location-points'));
-
+      final bounds = _mapController.camera.visibleBounds;
+      debugPrint("Bounds: ${bounds.southWest.latitude}, ${bounds.northEast.latitude}, ${bounds.southWest.longitude}, ${bounds.northEast.longitude}");
+      final response = await http.get(Uri.parse(
+              'https://mobility-mate.onrender.com/toilet-location-points'
+              '?minLat=${bounds.southWest.latitude}'
+              '&maxLat=${bounds.northEast.latitude}'
+              '&minLon=${bounds.southWest.longitude}'
+              '&maxLon=${bounds.northEast.longitude}'
+            ));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        debugPrint("Data fetched successfully: $data");
+        //debugPrint("Data fetched successfully: $data");
 
       setState(() {
         _markers = data.map<Marker>((location) {
@@ -127,6 +136,16 @@ class _MapHomePageState extends State<MapHomePage> {
       options: MapOptions(
         initialCenter: LatLng(-37.8136, 144.9631),
         initialZoom: 13.0,
+        onMapReady: () => fetchToiletLocations(),
+        onPositionChanged: (MapPosition pos, bool hasGesture) {
+              if (hasGesture) {
+                  if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+                   _debounce = Timer(const Duration(milliseconds: 500), () {
+                          fetchToiletLocations();
+                       });
+  }
+                      },
       ),
       children: [
         TileLayer(
@@ -138,4 +157,12 @@ class _MapHomePageState extends State<MapHomePage> {
       ],
     );
   }
+
+@override
+void dispose() {
+  _debounce?.cancel(); 
+  _mapController.dispose(); 
+  super.dispose(); 
+}
+
 }

@@ -1,5 +1,5 @@
 # location_routes.py
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from services.db_service import get_collection
 import logging
 
@@ -15,12 +15,31 @@ logger = logging.getLogger(__name__)
 @location_bp.route('/toilet-location-points', methods=['GET'])
 def get_toilet_location_points():
     try:
-        # Retrieve all documents in the collection, excluding the _id field
-        docs = list(toilet_locations.find({}, {"_id": 0}))
-        if not docs:
-            logger.info("No documents found in the collection.")
-            return jsonify([])
-        logger.info(f"Retrieved {len(docs)} documents.")
+        # Get bounding box from frontend (map viewport)
+        min_lat = float(request.args.get("minLat"))
+        max_lat = float(request.args.get("maxLat"))
+        min_lon = float(request.args.get("minLon"))
+        max_lon = float(request.args.get("maxLon"))
+
+        # Filter only documents within the visible map area
+        query = {
+            "Location_Lat": { "$gte": min_lat, "$lte": max_lat },
+            "Location_Lon": { "$gte": min_lon, "$lte": max_lon }
+        }
+
+        # Return only essential fields
+        projection = {
+            "_id": 0,
+            "Location_Lat": 1,
+            "Location_Lon": 1,
+            "Tags": 1,
+            "Accessibility_Type_Name": 1  #  include this field
+        }
+
+        # Limit results for performance (can adjust depending on zoom level)
+        docs = list(toilet_locations.find(query, projection).limit(200))
+
+        logger.info(f"Returned {len(docs)} toilets within bounds.")
         return jsonify(docs)
     except Exception as e:
         logger.error(f"Error fetching toilet locations: {e}")
