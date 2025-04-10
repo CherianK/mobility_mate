@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -14,14 +15,17 @@ class _SearchPageState extends State<SearchPage> {
 
   List<Map<String, dynamic>> allLocations = [];
   List<Map<String, dynamic>> filteredLocations = [];
+  List<Map<String, dynamic>> recentSearches = [];
+
+  static const _recentKey = 'recent_searches';
 
   @override
   void initState() {
     super.initState();
     loadLocationData();
+    loadRecentSearches();
   }
 
-  /// Loads suburb or station data from JSON file
   Future<void> loadLocationData() async {
     final String jsonString =
         await rootBundle.loadString('assets/suburb_stations.json');
@@ -31,7 +35,6 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  /// Filters location list based on search query
   void _filterLocations(String query) {
     final filtered = allLocations.where((location) {
       final name = location['Name'].toString().toLowerCase();
@@ -43,8 +46,39 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
+  void _addToRecentSearches(Map<String, dynamic> location) async {
+    recentSearches.removeWhere((loc) => loc['Name'] == location['Name']);
+    recentSearches.insert(0, location);
+    if (recentSearches.length > 5) {
+      recentSearches = recentSearches.sublist(0, 5);
+    }
+    await saveRecentSearches();
+  }
+
+  Future<void> saveRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> encoded =
+        recentSearches.map((loc) => json.encode(loc)).toList();
+    await prefs.setStringList(_recentKey, encoded);
+  }
+
+  Future<void> loadRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String>? encoded = prefs.getStringList(_recentKey);
+    if (encoded != null) {
+      final List<Map<String, dynamic>> decoded = encoded
+          .map((e) => Map<String, dynamic>.from(json.decode(e)))
+          .toList();
+      setState(() {
+        recentSearches = decoded;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isSearching = _controller.text.isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search Locations'),
@@ -66,31 +100,59 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
           Expanded(
-            child: filteredLocations.isEmpty && _controller.text.isNotEmpty
-                ? const Center(
-                    child: Text(
-                      'Location not found',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: filteredLocations.length,
-                    itemBuilder: (context, index) {
-                      final location = filteredLocations[index];
-                      return ListTile(
-                        leading: const Icon(Icons.location_on),
-                        title: Text(location['Name']),
-                        onTap: () {
-                          Navigator.pop(context, {
-                            'lat': location['Latitude'],
-                            'lon': location['Longitude'],
-                            'name': location['Name'],
-                          });
+            child: isSearching
+                ? (filteredLocations.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Location not found',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: filteredLocations.length,
+                        itemBuilder: (context, index) {
+                          final location = filteredLocations[index];
+                          return ListTile(
+                            leading: const Icon(Icons.location_on),
+                            title: Text(location['Name']),
+                            onTap: () {
+                              _addToRecentSearches(location);
+                              Navigator.pop(context, {
+                                'lat': location['Latitude'],
+                                'lon': location['Longitude'],
+                                'name': location['Name'],
+                              });
+                            },
+                          );
                         },
-                      );
-                    },
+                      ))
+                : ListView(
+                    children: [
+                      if (recentSearches.isNotEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Text(
+                            'Recent Searches',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ),
+                      ...recentSearches.map((location) {
+                        return ListTile(
+                          leading: const Icon(Icons.history),
+                          title: Text(location['Name']),
+                          onTap: () {
+                            Navigator.pop(context, {
+                              'lat': location['Latitude'],
+                              'lon': location['Longitude'],
+                              'name': location['Name'],
+                            });
+                          },
+                        );
+                      }).toList()
+                    ],
                   ),
-          )
+          ),
         ],
       ),
     );
