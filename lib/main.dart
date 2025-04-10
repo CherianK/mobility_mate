@@ -88,12 +88,18 @@ class _MapHomePageState extends State<MapHomePage> {
         Uri.parse('https://mobility-mate.onrender.com/tram-location-points'),
       );
 
+      final medicalResponse = await http.get(
+        Uri.parse('https://mobility-mate.onrender.com/medical-location-points'),
+      );
+
       if (toiletResponse.statusCode == 200 &&
           trainResponse.statusCode == 200 &&
-          tramResponse.statusCode == 200) {
+          tramResponse.statusCode == 200 &&
+          medicalResponse.statusCode == 200) {
         final List<dynamic> toiletData = json.decode(toiletResponse.body);
         final List<dynamic> trainData = json.decode(trainResponse.body);
         final List<dynamic> tramData = json.decode(tramResponse.body);
+        final List<dynamic> medicalData = json.decode(medicalResponse.body);
 
         // Markers for toilets -> Red location pin
         final toiletMarkers = toiletData.map<Marker>((doc) {
@@ -111,7 +117,6 @@ class _MapHomePageState extends State<MapHomePage> {
                 setState(() {
                   _selectedTrain = null;
                   _selectedTram = null;
-
                   _selectedToilet = {
                     'Tags': doc['Tags'] ?? {},
                   };
@@ -128,7 +133,7 @@ class _MapHomePageState extends State<MapHomePage> {
           );
         }).toList();
 
-        // Markers for trains -> Blue train icon
+        // Markers for trains
         final trainMarkers = trainData.map<Marker>((doc) {
           final lat = (doc['Location_Lat'] as num).toDouble();
           final lon = (doc['Location_Lon'] as num).toDouble();
@@ -143,8 +148,7 @@ class _MapHomePageState extends State<MapHomePage> {
                 _popupController.hideAllPopups();
                 setState(() {
                   _selectedToilet = null;
-                  _selectedTram = null;                  
-                  
+                  _selectedTram = null;
                   _selectedTrain = {
                     'Tags': doc['Tags'] ?? {},
                   };
@@ -157,11 +161,11 @@ class _MapHomePageState extends State<MapHomePage> {
                 size: 42,
                 color: Color.fromRGBO(25, 0, 255, 1),
               ),
-            )
+            ),
           );
         }).toList();
 
-        // Markers for trams -> Green tram icon
+        // Markers for trams
         final tramMarkers = tramData.map<Marker>((doc) {
           final lat = (doc['Location_Lat'] as num).toDouble();
           final lon = (doc['Location_Lon'] as num).toDouble();
@@ -177,7 +181,6 @@ class _MapHomePageState extends State<MapHomePage> {
                 setState(() {
                   _selectedToilet = null;
                   _selectedTrain = null;
-
                   _selectedTram = {
                     'Tags': doc['Tags'] ?? {},
                   };
@@ -190,16 +193,47 @@ class _MapHomePageState extends State<MapHomePage> {
                 size: 42,
                 color: Color.fromRGBO(255, 94, 0, 1),
               ),
-            )
+            ),
+          );
+        }).toList();
+
+        // Markers for medical locations -> Purple medical icon
+        final medicalMarkers = medicalData.map<Marker>((doc) {
+          final lat = (doc['Location_Lat'] as num).toDouble();
+          final lon = (doc['Location_Lon'] as num).toDouble();
+
+          return Marker(
+            point: LatLng(lat, lon),
+            width: 40,
+            height: 40,
+            child: GestureDetector(
+              onTap: () {
+                _mapController.moveAndRotate(LatLng(lat, lon), _currentZoom, 0.0);
+                _popupController.hideAllPopups();
+                setState(() {
+                  // Don't show bottom sheet for medical points
+                  _selectedToilet = null;
+                  _selectedTrain = null;
+                  _selectedTram = null;
+                  _isBottomSheetVisible = false;
+                });
+                debugPrint('Medical marker tapped, no bottom sheet shown');
+              },
+              child: const Icon(
+                Icons.local_hospital,
+                size: 42,
+                color: Color.fromRGBO(128, 0, 128, 1), // Purple
+              ),
+            ),
           );
         }).toList();
 
         setState(() {
-          // Combine all markers into one list
           _markers = [
             ...toiletMarkers,
             ...trainMarkers,
             ...tramMarkers,
+            ...medicalMarkers,
           ];
         });
       } else {
