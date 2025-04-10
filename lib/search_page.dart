@@ -12,13 +12,13 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _controller = TextEditingController();
 
-  List<Map<String, dynamic>> allLocations = [];      // Was allStations
-  List<Map<String, dynamic>> filteredLocations = []; // Was filteredStations
+  List<Map<String, dynamic>> allLocations = [];
+  List<Map<String, dynamic>> filteredLocations = [];
 
   @override
   void initState() {
     super.initState();
-    loadLocationData(); // renamed method
+    loadLocationData();
   }
 
   /// Loads suburb or station data from JSON file
@@ -66,23 +66,30 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: filteredLocations.length,
-              itemBuilder: (context, index) {
-                final location = filteredLocations[index];
-                return ListTile(
-                  leading: const Icon(Icons.location_on),
-                  title: Text(location['Name']),
-                  onTap: () {
-                    Navigator.pop(context, {
-                      'lat': location['Latitude'],
-                      'lon': location['Longitude'],
-                      'name': location['Name'],
-                    });
-                  },
-                );
-              },
-            ),
+            child: filteredLocations.isEmpty && _controller.text.isNotEmpty
+                ? const Center(
+                    child: Text(
+                      'Location not found',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: filteredLocations.length,
+                    itemBuilder: (context, index) {
+                      final location = filteredLocations[index];
+                      return ListTile(
+                        leading: const Icon(Icons.location_on),
+                        title: Text(location['Name']),
+                        onTap: () {
+                          Navigator.pop(context, {
+                            'lat': location['Latitude'],
+                            'lon': location['Longitude'],
+                            'name': location['Name'],
+                          });
+                        },
+                      );
+                    },
+                  ),
           )
         ],
       ),

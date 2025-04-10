@@ -10,6 +10,7 @@ location_bp = Blueprint('location_routes', __name__)
 toilet_locations = get_collection("toilets-victoria")
 train_locations = get_collection("trains-victoria")
 tram_locations = get_collection("trams-victoria")
+medical_locations = get_collection("medical-victoria")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,6 +43,17 @@ def get_tram_location_points():
     try:
         docs = list(tram_locations.find({}, {"_id": 0}))
         logger.info(f"Retrieved {len(docs)} tram documents.")
+        return jsonify(docs)
+    except Exception as e:
+        logger.error(f"Error fetching tram locations: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@location_bp.route('/medical-location-points', methods=['GET'])
+def get_medical_location_points():
+    """Returns documents from 'medical-victoria'."""
+    try:
+        docs = list(medical_locations.find({}, {"_id": 0}))
+        logger.info(f"Retrieved {len(docs)} medical documents.")
         return jsonify(docs)
     except Exception as e:
         logger.error(f"Error fetching tram locations: {e}")

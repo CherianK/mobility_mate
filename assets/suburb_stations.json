@@ -17298,6 +17298,280 @@
       "Name": "Donnybrook Station",
       "Latitude": -37.5419879,
       "Longitude": 144.9702272
-    }
-    
-  ]
+    },
+    {
+      "Name": "Amcal, Portland",
+      "Latitude": -38.345893,
+      "Longitude": 141.6035342
+  },
+  {
+      "Name": "Karuna-Maya Medicine, Jan Juc",
+      "Latitude": -38.3494923,
+      "Longitude": 144.2991591
+  },
+  {
+      "Name": "Gippsland Physiotherapy Group Cowes, Cowes",
+      "Latitude": -38.4548083,
+      "Longitude": 145.2386631
+  },
+  {
+      "Name": "Gippsland Physiotherapy Group Wonthaggi, Wonthaggi",
+      "Latitude": -38.6060521,
+      "Longitude": 145.5894702
+  },
+  {
+      "Name": "Gippsland Physiotherapy Group Leongatha, Leongatha",
+      "Latitude": -38.478063,
+      "Longitude": 145.9471964
+  },
+  {
+      "Name": "Gippsland Physiotherapy Group Morwell, Morwell",
+      "Latitude": -38.2369904,
+      "Longitude": 146.3953201
+  },
+  {
+      "Name": "Bannockburn Surgery, Bannockburn",
+      "Latitude": -38.045763,
+      "Longitude": 144.1713352
+  },
+  {
+      "Name": "PharmaSave, Port Melbourne",
+      "Latitude": -37.8374633,
+      "Longitude": 144.9435435
+  },
+  {
+      "Name": "Chemist Warehouse, North Melbourne",
+      "Latitude": -37.8045008,
+      "Longitude": 144.9491555
+  },
+  {
+      "Name": "Errol Dental Studio, North Melbourne",
+      "Latitude": -37.8037003,
+      "Longitude": 144.9492896
+  },
+  {
+      "Name": "PhysioChoice Moonee Ponds, Moonee Ponds",
+      "Latitude": -37.7680617,
+      "Longitude": 144.9255333
+  },
+  {
+      "Name": "PhysioChoice Point Cook, Point Cook",
+      "Latitude": -37.8969754,
+      "Longitude": 144.7526059
+  },
+  {
+      "Name": "Chemist Warehouse, Moonee Ponds",
+      "Latitude": -37.7666655,
+      "Longitude": 144.9217414
+  },
+  {
+      "Name": "Newton & Leung Pharmacy, Collingwood",
+      "Latitude": -37.8011431,
+      "Longitude": 144.9840159
+  },
+  {
+      "Name": "Schneier Pharmacy, Carlton",
+      "Latitude": -37.797739,
+      "Longitude": 144.970921
+  },
+  {
+      "Name": "Pharmacy 4 Less, Coburg",
+      "Latitude": -37.7444515,
+      "Longitude": 144.964038
+  },
+  {
+      "Name": "TerryWhite Chemmart, Montmorency",
+      "Latitude": -37.7160721,
+      "Longitude": 145.1210656
+  },
+  {
+      "Name": "Priceline Pharmacy, Melbourne",
+      "Latitude": -37.8165161,
+      "Longitude": 144.9583808
+  },
+  {
+      "Name": "Temple Hills Medical Centre, Doncaster East",
+      "Latitude": -37.7662356,
+      "Longitude": 145.1725003
+  },
+  {
+      "Name": "Harding Street Medical Centre, Coburg",
+      "Latitude": -37.7453742,
+      "Longitude": 144.9674761
+  },
+  {
+      "Name": "Muscle Joint Bone Balwyn North, Balwyn North",
+      "Latitude": -37.7918781,
+      "Longitude": 145.0940822
+  },
+  {
+      "Name": "Kerrie Road Family Medical Centre, Glen Waverley",
+      "Latitude": -37.875745,
+      "Longitude": 145.1775352
+  },
+  {
+      "Name": "Fairfield Pharmacy, Fairfield",
+      "Latitude": -37.7781112,
+      "Longitude": 145.0180408
+  },
+  {
+      "Name": "Dr Johannes Kern, Melbourne",
+      "Latitude": -37.8136974,
+      "Longitude": 144.9732265
+  },
+  {
+      "Name": "Peter MacCallum Cancer Centre, Melbourne",
+      "Latitude": -37.8003879,
+      "Longitude": 144.9567852
+  },
+  {
+      "Name": "Stradbroke Dental, Kew",
+      "Latitude": -37.8011887,
+      "Longitude": 145.0622616
+  },
+  {
+      "Name": "Qualitas Medical Practice, Clayton",
+      "Latitude": -37.9208114,
+      "Longitude": 145.1201871
+  },
+  {
+      "Name": "First Choice Health, Vermont South",
+      "Latitude": -37.854356,
+      "Longitude": 145.1844103
+  },
+  {
+      "Name": "Dennison Psychology, South Yarra",
+      "Latitude": -37.8384521,
+      "Longitude": 144.9892295
+  },
+  {
+      "Name": "PhysioChoice Beaconsfield, Beaconsfield",
+      "Latitude": -38.0478697,
+      "Longitude": 145.3694334
+  },
+  {
+      "Name": "PhysioChoice Dingley, Dingley Village",
+      "Latitude": -37.984449,
+      "Longitude": 145.133393
+  },
+  {
+      "Name": "PhysioChoice Dandenong, Dandenong",
+      "Latitude": -37.9778303,
+      "Longitude": 145.2218334
+  },
+  {
+      "Name": "Bodywise Health, Hampton",
+      "Latitude": -37.9401983,
+      "Longitude": 145.0023242
+  },
+  {
+      "Name": "PhysioChoice Officer, Officer",
+      "Latitude": -38.0648891,
+      "Longitude": 145.4364979
+  },
+  {
+      "Name": "Mt Eliza Optical, Mount Eliza",
+      "Latitude": -38.1831228,
+      "Longitude": 145.0897046
+  },
+  {
+      "Name": "TerryWhite Chemmart, Mount Eliza",
+      "Latitude": -38.1848137,
+      "Longitude": 145.0894819
+  },
+  {
+      "Name": "Mt Eliza Optical, Mount Eliza",
+      "Latitude": -38.1847381,
+      "Longitude": 145.0897542
+  },
+  {
+      "Name": "Inner North Medical Clinic, Brunswick East",
+      "Latitude": -37.7703554,
+      "Longitude": 144.9720546
+  },
+  {
+      "Name": "Belleview Dental, Brunswick",
+      "Latitude": -37.7634364,
+      "Longitude": 144.9626082
+  },
+  {
+      "Name": "HCF Dental Centre, Melbourne",
+      "Latitude": -37.8170331,
+      "Longitude": 144.9606615
+  },
+  {
+      "Name": "EyeCare Clinic, Carlton",
+      "Latitude": -37.8009466,
+      "Longitude": 144.9588077
+  },
+  {
+      "Name": "Dorevitch Pathology, Mount Eliza",
+      "Latitude": -38.1841054,
+      "Longitude": 145.0894155
+  },
+  {
+      "Name": "Dr Siu Leung And Associates, Carlton",
+      "Latitude": -37.8049156,
+      "Longitude": 144.9614952
+  },
+  {
+      "Name": "Lymph And Floor Physio, Balwyn",
+      "Latitude": -37.8049533,
+      "Longitude": 145.0754405
+  },
+  {
+      "Name": "Melbourne Dental Clinic, Carlton",
+      "Latitude": -37.8008711,
+      "Longitude": 144.9636037
+  },
+  {
+      "Name": "Brunswick Life Dental Clinic, Brunswick",
+      "Latitude": -37.7640716,
+      "Longitude": 144.9627876
+  },
+  {
+      "Name": "Mr John Cunningham, Richmond",
+      "Latitude": -37.8174212,
+      "Longitude": 144.9925678
+  },
+  {
+      "Name": "PhysioChoice Pakenham, Pakenham",
+      "Latitude": -38.0766883,
+      "Longitude": 145.4829099
+  },
+  {
+      "Name": "Gippsland Physiotherapy Group Warragul, Warragul",
+      "Latitude": -38.1607248,
+      "Longitude": 145.9332173
+  },
+  {
+      "Name": "Chemist Warehouse, Pakenham",
+      "Latitude": -38.0787138,
+      "Longitude": 145.4831111
+  },
+  {
+      "Name": "Gippsland Physiotherapy Group Moe, Moe",
+      "Latitude": -38.1774164,
+      "Longitude": 146.2634081
+  },
+  {
+      "Name": "Gippsland Physiotherapy Group Traralgon, Traralgon",
+      "Latitude": -38.1973939,
+      "Longitude": 146.5332846
+  },
+  {
+      "Name": "Gippsland Physiotherapy Group Sale, Sale",
+      "Latitude": -38.1098086,
+      "Longitude": 147.06587
+  },
+  {
+      "Name": "Gippsland Physiotherapy Group Bairnsdale, Bairnsdale",
+      "Latitude": -37.8255098,
+      "Longitude": 147.6282068
+  },
+  {
+      "Name": "Ballarat Family Dental, Lucas",
+      "Latitude": -37.54413,
+      "Longitude": 143.784819
+  }
+]
