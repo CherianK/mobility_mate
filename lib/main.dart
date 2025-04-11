@@ -89,8 +89,8 @@ IconData _getToiletIcon(String key, dynamic value) {
   if (tagKey == 'male' && tagValue == 'yes') return Icons.male;
   if (tagKey == 'menstrual products' && tagValue == 'no') return Icons.block;
 
-  if (tagKey == 'parkingaccessible' && tagValue == 'no') return Icons.block;
-  if (tagKey == 'parkingaccessible' && tagValue == 'yes') return Icons.local_parking;
+  if (tagKey == 'parking_accessible' && tagValue == 'no') return Icons.block;
+  if (tagKey == 'parking_accessible' && tagValue == 'yes') return Icons.local_parking;
 
   if (tagKey == 'portable' && tagValue == 'no') return Icons.block;
   if (tagKey == 'portable' && tagValue == 'yes') return Icons.wc;
@@ -148,7 +148,7 @@ IconData _getTrainIcon(String key, dynamic value) {
 
   if (tagKey == 'shelter_type' && tagValue == 'public_transport') return Icons.commute;
 
-  if (tagKey == 'toilets:wheelchair' && tagValue == 'no') return Icons.wc;
+  if (tagKey == 'disabled_toilets' && tagValue == 'no') return Icons.wc;
 
   if (tagKey == 'departures_board' && tagValue == 'realtime') return Icons.update;
   if (tagKey == 'departures_board' && tagValue == 'timetable') return Icons.schedule;
@@ -190,7 +190,7 @@ IconData _getTramIcon(String key, dynamic value) {
 
   if (tagKey == 'shelter_type' && tagValue == 'public_transport') return Icons.commute;
 
-  if (tagKey == 'toilets:wheelchair' && tagValue == 'no') return Icons.wc;
+  if (tagKey == 'disabled_toilets' && tagValue == 'no') return Icons.wc;
 
   if (tagKey == 'departures_board' && tagValue == 'realtime') return Icons.update;
   if (tagKey == 'departures_board' && tagValue == 'timetable') return Icons.schedule;
@@ -595,7 +595,7 @@ class _MapHomePageState extends State<MapHomePage> {
             _isBottomSheetVisible = false;
           });
           _popupController.hideAllPopups();
-          _mapController.moveAndRotate(LatLng(-37.8136, 144.9631), 14.5, 0.0);
+          _mapController.moveAndRotate(LatLng(-37.8136, 144.9631), 15.5, 0.0);
         },
       ),
     );
@@ -625,7 +625,7 @@ class _MapHomePageState extends State<MapHomePage> {
       mapController: _mapController,
       options: MapOptions(
         initialCenter: LatLng(-37.8136, 144.9631),
-        initialZoom: 14.5,
+        initialZoom: 15.5,
         onTap: (_, __) {
           _popupController.hideAllPopups();
           setState(() {
@@ -639,32 +639,39 @@ class _MapHomePageState extends State<MapHomePage> {
           subdomains: ['a', 'b', 'c'],
           userAgentPackageName: 'cher0022@student.monash.edu',
         ),
-        MarkerClusterLayerWidget(
-          options: MarkerClusterLayerOptions(
-            disableClusteringAtZoom: 16,
-            maxClusterRadius: 60,
-            size: const Size(30, 30),
-            markers: _markers,
-            polygonOptions: const PolygonOptions(
-              borderColor: Colors.blueAccent,
-              color: Colors.black12,
-              borderStrokeWidth: 3,
+        if (_currentZoom > 11 && _currentZoom < 16)
+          MarkerClusterLayerWidget(
+            options: MarkerClusterLayerOptions(
+              disableClusteringAtZoom: 16,
+              maxClusterRadius: 150,
+              size: const Size(30, 30),
+              markers: _markers,
+              polygonOptions: const PolygonOptions(
+                borderColor: Colors.blueAccent,
+                color: Colors.black12,
+                borderStrokeWidth: 3,
+              ),
+              builder: (context, markers) {
+                return Container(
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    markers.length.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                );
+              },
             ),
-            builder: (context, markers) {
-              return Container(
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  markers.length.toString(),
-                  style: const TextStyle(color: Colors.white),
-                ),
-              );
-            },
           ),
-        ),
+
+        // Show individual markers only for zoom >= 16
+        if (_currentZoom >= 16)
+          MarkerLayer(
+            markers: _markers,
+          )
       ],
     );
   }
@@ -683,15 +690,15 @@ class _MapHomePageState extends State<MapHomePage> {
           orderedTags.add(entry);
         }
       }
-      // Then add the toilets:wheelchair tag (if it exists)
+      // Then add the disabled_toilets tag (if it exists)
       for (var entry in allTags) {
-        if (entry.key.toLowerCase() == 'toilets:wheelchair') {
+        if (entry.key.toLowerCase() == 'disabled_toilets') {
           orderedTags.add(entry);
         }
       }
       // Then add the rest (sorted by key, for example)
       final remaining = allTags.where((entry) => entry.key.toLowerCase() != 'wheelchair'
-          && entry.key.toLowerCase() != 'toilets:wheelchair').toList();
+          && entry.key.toLowerCase() != 'disabled_toilets').toList();
       remaining.sort((a, b) => a.key.compareTo(b.key));
       orderedTags.addAll(remaining);
 
@@ -744,16 +751,24 @@ class _MapHomePageState extends State<MapHomePage> {
                 final icon = _getTrainIcon(key, value);
 
                 return Card(
+                  // color: const Color.fromRGBO(32, 33, 36, 1), // Dark background, comment out if not necessary
                   elevation: 2,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(icon, size: 36),
+                      Icon(
+                        icon, 
+                        size: 36,
+                        // color: const Color(0xFFE8EAED)          // Light text/icon color
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         formatTag(key, value),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12),
+                        style: const TextStyle(
+                            fontSize: 12,
+                            // color: Color(0xFFE8EAED)            // Light text/icon color,
+                        ),
                       ),
                     ],
                   ),
@@ -829,16 +844,16 @@ class _MapHomePageState extends State<MapHomePage> {
         }
       }
 
-      // Then add the toilets:wheelchair tag (if it exists)
+      // Then add the disabled_toilets tag (if it exists)
       for (var entry in allTags) {
-        if (entry.key.toLowerCase() == 'toilets:wheelchair') {
+        if (entry.key.toLowerCase() == 'disabled_toilets') {
           orderedTags.add(entry);
         }
       }
 
       // Then add the rest (sorted by key, for example)
       final remaining = allTags.where((entry) => entry.key.toLowerCase() != 'wheelchair'
-          && entry.key.toLowerCase() != 'toilets:wheelchair').toList();
+          && entry.key.toLowerCase() != 'disabled_toilets').toList();
       remaining.sort((a, b) => a.key.compareTo(b.key));
       orderedTags.addAll(remaining);
 
@@ -932,9 +947,9 @@ class _MapHomePageState extends State<MapHomePage> {
         }
       }
 
-      // Next, add the parkingaccessible tag
+      // Next, add the parking_accessible tag
       for (var entry in allTags) {
-        if (entry.key.toLowerCase() == 'parkingaccessible') {
+        if (entry.key.toLowerCase() == 'parking_accessible') {
           orderedTags.add(entry);
         }
       }
@@ -942,7 +957,7 @@ class _MapHomePageState extends State<MapHomePage> {
       // Then add the remaining tags
       final remaining = allTags.where((entry) => entry.key.toLowerCase() != 'wheelchair'
           && entry.key.toLowerCase() != 'access'
-          && entry.key.toLowerCase() != 'parkingaccessible').toList();
+          && entry.key.toLowerCase() != 'parking_accessible').toList();
       remaining.sort((a, b) => a.key.compareTo(b.key));
       orderedTags.addAll(remaining);
 
