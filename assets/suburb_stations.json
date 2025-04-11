@@ -17573,5 +17573,3510 @@
       "Name": "Ballarat Family Dental, Lucas",
       "Latitude": -37.54413,
       "Longitude": 143.784819
-  }
+  },
+  {
+    "Name": "Route 58 - Stop 117: York Street",
+    "Latitude": -37.8296243,
+    "Longitude": 144.9640597
+  },
+  {
+    "Name": "Route 70 - Stop 54: Through Road",
+    "Latitude": -37.8353404,
+    "Longitude": 145.0932349
+  },
+  {
+    "Name": "Route 67 - Stop 57: Clarke Avenue",
+    "Latitude": -37.8884708,
+    "Longitude": 145.0350485
+  },
+  {
+    "Name": "Route 6 - Stop 47: Dixon Street",
+    "Latitude": -37.8576842,
+    "Longitude": 145.0380064
+  },
+  {
+    "Name": "Route 109 - Stop 48: Balwyn Shopping Centre",
+    "Latitude": -37.8130425,
+    "Longitude": 145.0836343
+  },
+  {
+    "Name": "Route 64 - Stop 44: Bailey Avenue",
+    "Latitude": -37.8646417,
+    "Longitude": 145.0237301
+  },
+  {
+    "Name": "Route 86 - Stop 18: Hodgson Street",
+    "Latitude": -37.8014277,
+    "Longitude": 144.9839089
+  },
+  {
+    "Name": "Route 70 - Stop 48: Cooloongatta Road",
+    "Latitude": -37.8336392,
+    "Longitude": 145.0770743
+  },
+  {
+    "Name": "Route 57 - Stop 49: Central Park Avenue",
+    "Latitude": -37.7688539,
+    "Longitude": 144.8780138
+  },
+  {
+    "Name": "Route 82 - Stop 35: Moore Street",
+    "Latitude": -37.7722385,
+    "Longitude": 144.9214739
+  },
+  {
+    "Name": "Route 58 - Stop 32: Foden Street",
+    "Latitude": -37.7697778,
+    "Longitude": 144.9472928
+  },
+  {
+    "Name": "Route 70 - Stop 11: East Richmond Station, Church Street",
+    "Latitude": -37.8255934,
+    "Longitude": 144.9977569
+  },
+  {
+    "Name": "Route 11 - Stop 47: Regent Street",
+    "Latitude": -37.7292335,
+    "Longitude": 144.9915681
+  },
+  {
+    "Name": "Route 57 - Stop 35: Munro Street",
+    "Latitude": -37.7760606,
+    "Longitude": 144.9154215
+  },
+  {
+    "Name": "Route 11 - Stop 43: Murray Road",
+    "Latitude": -37.7364919,
+    "Longitude": 144.9904032
+  },
+  {
+    "Name": "Route 59 - Stop 27: Essendon Tram Depot",
+    "Latitude": -37.7794352,
+    "Longitude": 144.9312017
+  },
+  {
+    "Name": "Route 16 - Stop 55: Edsall Street",
+    "Latitude": -37.8610578,
+    "Longitude": 145.0286209
+  },
+  {
+    "Name": "Route 75 - Stop 46: Christowel Street",
+    "Latitude": -37.8393722,
+    "Longitude": 145.066045
+  },
+  {
+    "Name": "Route 57;82 - Stop 38: Ferguson Street",
+    "Latitude": -37.771404,
+    "Longitude": 144.9127482
+  },
+  {
+    "Name": "Route 16 - Stop 70: Riversdale Road",
+    "Latitude": -37.8286274,
+    "Longitude": 145.0343184
+  },
+  {
+    "Name": "Route 48;75 - Stop 22: Westbank Terrace",
+    "Latitude": -37.8201507,
+    "Longitude": 145.0133704
+  },
+  {
+    "Name": "Route 48;75 - Stop 21: Burnley Street",
+    "Latitude": -37.8194812,
+    "Longitude": 145.0077188
+  },
+  {
+    "Name": "Route 59 - Stop 39: Hoddle Street",
+    "Latitude": -37.7554647,
+    "Longitude": 144.9227353
+  },
+  {
+    "Name": "Route 72 - Stop 52: MacDonald Street",
+    "Latitude": -37.8493088,
+    "Longitude": 145.0533376
+  },
+  {
+    "Name": "Route 48 - Stop 49: Buchanan Avenue",
+    "Latitude": -37.7939157,
+    "Longitude": 145.0775803
+  },
+  {
+    "Name": "Route 86 - Stop 20: Keele Street",
+    "Latitude": -37.7967175,
+    "Longitude": 144.9847555
+  },
+  {
+    "Name": "Route 16 - Stop 62: Mayfield Avenue",
+    "Latitude": -37.845509,
+    "Longitude": 145.0312971
+  },
+  {
+    "Name": "Route 57;82;468 - Stop 45: Randall Street",
+    "Latitude": -37.7687371,
+    "Longitude": 144.8895254
+  },
+  {
+    "Name": "Route 58;59 - Stop 14: Royal Melbourne Hospital",
+    "Latitude": -37.8000815,
+    "Longitude": 144.9555945
+  },
+  {
+    "Name": "Route 16 - Stop 69: South Street",
+    "Latitude": -37.8310878,
+    "Longitude": 145.0338746
+  },
+  {
+    "Name": "Route 109 - Stop 51: Grovedale Road",
+    "Latitude": -37.8145641,
+    "Longitude": 145.0951106
+  },
+  {
+    "Name": "Route 19 - Stop 32: Munro Street",
+    "Latitude": -37.7450952,
+    "Longitude": 144.9658275
+  },
+  {
+    "Name": "Route 48 - Stop 42: Woodlands Avenue",
+    "Latitude": -37.7963311,
+    "Longitude": 145.0576762
+  },
+  {
+    "Name": "Route 75 - Stop 58: Warrigal Road",
+    "Latitude": -37.8503068,
+    "Longitude": 145.0954757
+  },
+  {
+    "Name": "Route 72 - Stop 46: Shaftesbury Avenue",
+    "Latitude": -37.8528651,
+    "Longitude": 145.0388373
+  },
+  {
+    "Name": "Route 1 - Stop 129: Moreland Road",
+    "Latitude": -37.7565339,
+    "Longitude": 144.9750096
+  },
+  {
+    "Name": "Route 109 - Stop 35: Charles Street",
+    "Latitude": -37.8073036,
+    "Longitude": 145.0352967
+  },
+  {
+    "Name": "Route 75 - Stop 53: Highfield Road",
+    "Latitude": -37.848743,
+    "Longitude": 145.0818465
+  },
+  {
+    "Name": "Route 86 - Stop 51: Wood Street",
+    "Latitude": -37.7343144,
+    "Longitude": 145.0138104
+  },
+  {
+    "Name": "Route 3a;16 - Stop 131: St Kilda Road",
+    "Latitude": -37.8568046,
+    "Longitude": 144.9823757
+  },
+  {
+    "Name": "Route 70;75 - Stop 36: Auburn Road",
+    "Latitude": -37.8297647,
+    "Longitude": 145.0435092
+  },
+  {
+    "Name": "Route 78 - Stop 55: Adelaide Street",
+    "Latitude": -37.8289431,
+    "Longitude": 144.9972547
+  },
+  {
+    "Name": "Route 58 - Stop 37: Albion Street",
+    "Latitude": -37.7585986,
+    "Longitude": 144.9449526
+  },
+  {
+    "Name": "Route 82 - Stop 58: Ballarat Road",
+    "Latitude": -37.7904488,
+    "Longitude": 144.8895611
+  },
+  {
+    "Name": "Route 1;8 - Stop 118: Pigdon Street",
+    "Latitude": -37.7815318,
+    "Longitude": 144.9702299
+  },
+  {
+    "Name": "Route 78 - Stop 49: Arthur Street",
+    "Latitude": -37.8420155,
+    "Longitude": 144.9950218
+  },
+  {
+    "Name": "Route 11 - Stop 37: Miller Street",
+    "Latitude": -37.7505802,
+    "Longitude": 144.9881483
+  },
+  {
+    "Name": "Route 12 - Stop 130: Albert Road",
+    "Latitude": -37.8389337,
+    "Longitude": 144.96335
+  },
+  {
+    "Name": "Route 64 - Stop 65: Davey Avenue",
+    "Latitude": -37.9065785,
+    "Longitude": 145.018113
+  },
+  {
+    "Name": "Route 3a;16 - Stop 35: Brighton Road",
+    "Latitude": -37.8678306,
+    "Longitude": 144.9865432
+  },
+  {
+    "Name": "Route 75 - Stop 60: Roslyn Street",
+    "Latitude": -37.8504399,
+    "Longitude": 145.1020728
+  },
+  {
+    "Name": "Route 19 - Stop 36: Rogers Street",
+    "Latitude": -37.7355273,
+    "Longitude": 144.9660886
+  },
+  {
+    "Name": "Route 19 - Stop 14: Cemetery Road West",
+    "Latitude": -37.7897186,
+    "Longitude": 144.9588732
+  },
+  {
+    "Name": "Route 58 - Stop 136: Irving Road",
+    "Latitude": -37.8422801,
+    "Longitude": 145.0199927
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 37: Chapel Street",
+    "Latitude": -37.8682706,
+    "Longitude": 144.9901008
+  },
+  {
+    "Name": "Route 5 - Stop 46: Soudan Street",
+    "Latitude": -37.8628224,
+    "Longitude": 145.0313351
+  },
+  {
+    "Name": "Route 48 - Stop 46: Wattle Avenue",
+    "Latitude": -37.7928492,
+    "Longitude": 145.0674427
+  },
+  {
+    "Name": "Route 19 - Stop 19: Brunswick Road",
+    "Latitude": -37.7772258,
+    "Longitude": 144.9603631
+  },
+  {
+    "Name": "Route 78 - Stop 62: Highett Street",
+    "Latitude": -37.8157083,
+    "Longitude": 144.9997846
+  },
+  {
+    "Name": "Route 58 - Stop 29: Brunswick Road",
+    "Latitude": -37.7755745,
+    "Longitude": 144.948894
+  },
+  {
+    "Name": "Route 109 - Stop 53: Union Road",
+    "Latitude": -37.814926,
+    "Longitude": 145.0992573
+  },
+  {
+    "Name": "Route 82 - Stop 56: Edgewater Boulevard",
+    "Latitude": -37.7843967,
+    "Longitude": 144.8908878
+  },
+  {
+    "Name": "Route 72 - Stop 43: Glenferrie Road",
+    "Latitude": -37.8515293,
+    "Longitude": 145.0297672
+  },
+  {
+    "Name": "Route 70;75 - Stop 33: Berkeley Street",
+    "Latitude": -37.8289655,
+    "Longitude": 145.0368364
+  },
+  {
+    "Name": "Route 6 - Stop 33: The Avenue",
+    "Latitude": -37.8526408,
+    "Longitude": 144.9986057
+  },
+  {
+    "Name": "Route 82 - Stop 34: Ascot Vale Road",
+    "Latitude": -37.7724839,
+    "Longitude": 144.9237238
+  },
+  {
+    "Name": "Route 72 - Stop 68: Mont Albert Road",
+    "Latitude": -37.8156284,
+    "Longitude": 145.0597703
+  },
+  {
+    "Name": "Route 70;75 - Stop 38: Hastings Road",
+    "Latitude": -37.8306624,
+    "Longitude": 145.0512185
+  },
+  {
+    "Name": "Route 72 - Stop 45: Elizabeth Street",
+    "Latitude": -37.8522572,
+    "Longitude": 145.0353209
+  },
+  {
+    "Name": "Route 75 - Stop 49: Wilson Grove",
+    "Latitude": -37.8444263,
+    "Longitude": 145.0715157
+  },
+  {
+    "Name": "Route 19 - Stop 21: Dawson Street",
+    "Latitude": -37.7716497,
+    "Longitude": 144.9612495
+  },
+  {
+    "Name": "Route 57 - Stop 35: Bloomfield Road",
+    "Latitude": -37.7759026,
+    "Longitude": 144.915563
+  },
+  {
+    "Name": "Route 48 - Stop 41: Station Street",
+    "Latitude": -37.7979853,
+    "Longitude": 145.053893
+  },
+  {
+    "Name": "Route 48;75 - Stop 9: Lansdowne Street",
+    "Latitude": -37.8154439,
+    "Longitude": 144.9771896
+  },
+  {
+    "Name": "Route 48 - Stop 50: Hill Road",
+    "Latitude": -37.7942585,
+    "Longitude": 145.0811702
+  },
+  {
+    "Name": "Route 48 - Stop 50: Dight Avenue",
+    "Latitude": -37.794375,
+    "Longitude": 145.0809323
+  },
+  {
+    "Name": "Route 75 - Stop 53: Lithgow Street",
+    "Latitude": -37.8489435,
+    "Longitude": 145.0822943
+  },
+  {
+    "Name": "Route 16;64 - Stop 50: Inkerman Road",
+    "Latitude": -37.8694913,
+    "Longitude": 145.0253813
+  },
+  {
+    "Name": "Route 6 - Stop 35: Williams Road",
+    "Latitude": -37.8529612,
+    "Longitude": 145.0023219
+  },
+  {
+    "Name": "Route 58 - Stop 133: Grange Road",
+    "Latitude": -37.8412188,
+    "Longitude": 145.0106053
+  },
+  {
+    "Name": "Route 12 - Stop 142: Mary Street",
+    "Latitude": -37.8594613,
+    "Longitude": 144.973042
+  },
+  {
+    "Name": "Route 64 - Stop 57: Glenhuntly Road",
+    "Latitude": -37.8865914,
+    "Longitude": 145.0221084
+  },
+  {
+    "Name": "Route 57 - Stop 29: Ascot Vale Road",
+    "Latitude": -37.7874476,
+    "Longitude": 144.921902
+  },
+  {
+    "Name": "Route 11 - Stop 21: Alfred Crescent",
+    "Latitude": -37.785398,
+    "Longitude": 144.9821526
+  },
+  {
+    "Name": "Route 67 - Stop 38: Wimbeldon Avenue",
+    "Latitude": -37.8729019,
+    "Longitude": 144.9900823
+  },
+  {
+    "Name": "Route 64 - Stop 54: Glen Eira Road",
+    "Latitude": -37.879902,
+    "Longitude": 145.023411
+  },
+  {
+    "Name": "Route 11 - Stop 25: Miller Street",
+    "Latitude": -37.7779483,
+    "Longitude": 144.9885626
+  },
+  {
+    "Name": "Route 72 - Stop 58: Leura Grove",
+    "Latitude": -37.8381672,
+    "Longitude": 145.0553131
+  },
+  {
+    "Name": "Route 70 - Stop 43: Trafalgar Road",
+    "Latitude": -37.8320585,
+    "Longitude": 145.063528
+  },
+  {
+    "Name": "Route 78 - Stop 59: St Ignatius Church",
+    "Latitude": -37.8216625,
+    "Longitude": 144.9987445
+  },
+  {
+    "Name": "Route 58 - Stop 137: Kooyong Road",
+    "Latitude": -37.8426545,
+    "Longitude": 145.0228205
+  },
+  {
+    "Name": "Route 19 - Stop 34: Bell Street",
+    "Latitude": -37.7411538,
+    "Longitude": 144.9666728
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 44: Otira Road",
+    "Latitude": -37.8711937,
+    "Longitude": 145.0123633
+  },
+  {
+    "Name": "Route 57;82 - Stop 38: Hotham Street",
+    "Latitude": -37.771228,
+    "Longitude": 144.9122947
+  },
+  {
+    "Name": "Route 30;35 - Stop 8: Exhibition Street",
+    "Latitude": -37.8086141,
+    "Longitude": 144.9673235
+  },
+  {
+    "Name": "Route 11 - Stop 15: Bell Street",
+    "Latitude": -37.8004345,
+    "Longitude": 144.9780129
+  },
+  {
+    "Name": "Route 16 - Stop 57: High Street",
+    "Latitude": -37.8565168,
+    "Longitude": 145.0294411
+  },
+  {
+    "Name": "Route 57 - Stop 28: Smithfield Road",
+    "Latitude": -37.787638,
+    "Longitude": 144.9248876
+  },
+  {
+    "Name": "Route 67 - Stop 38: Brunning Street",
+    "Latitude": -37.8727712,
+    "Longitude": 144.9901122
+  },
+  {
+    "Name": "Route 1 - Stop 23: Moray Street",
+    "Latitude": -37.8344713,
+    "Longitude": 144.9638427
+  },
+  {
+    "Name": "Route 86 - Stop 15: Gertrude Street",
+    "Latitude": -37.8062213,
+    "Longitude": 144.9831277
+  },
+  {
+    "Name": "Route 67 - Stop 66: Truganini Road",
+    "Latitude": -37.8910675,
+    "Longitude": 145.0540665
+  },
+  {
+    "Name": "Route 48 - Stop 34: Pakington Street",
+    "Latitude": -37.8055666,
+    "Longitude": 145.0339649
+  },
+  {
+    "Name": "Route 59 - Stop 45: Leake Street",
+    "Latitude": -37.746436,
+    "Longitude": 144.9114665
+  },
+  {
+    "Name": "Route 86 - Stop 43: Raglan Street",
+    "Latitude": -37.7488919,
+    "Longitude": 145.0040746
+  },
+  {
+    "Name": "Route 64 - Stop 52: Powderham Road",
+    "Latitude": -37.8752139,
+    "Longitude": 145.024143
+  },
+  {
+    "Name": "Route 67 - Stop 52: Jasmine Street",
+    "Latitude": -37.8871034,
+    "Longitude": 145.0241087
+  },
+  {
+    "Name": "Route 3;3a - Stop 55: Normanby Road",
+    "Latitude": -37.8741822,
+    "Longitude": 145.0377037
+  },
+  {
+    "Name": "Route 30;35 - Stop 3: Flagstaff Station",
+    "Latitude": -37.8116612,
+    "Longitude": 144.9567052
+  },
+  {
+    "Name": "Route 82 - Stop 63: Footscray Market",
+    "Latitude": -37.8001014,
+    "Longitude": 144.9010575
+  },
+  {
+    "Name": "Route 78 - Stop 54: Cotter Street",
+    "Latitude": -37.8303338,
+    "Longitude": 144.9971954
+  },
+  {
+    "Name": "Route 72 - Stop 61: Riversdale Road",
+    "Latitude": -37.8311046,
+    "Longitude": 145.0568522
+  },
+  {
+    "Name": "Route 70;75 - Stop 39: Camberwell Tram Depot",
+    "Latitude": -37.8310146,
+    "Longitude": 145.0542648
+  },
+  {
+    "Name": "Route 11 - Stop 34: Miller Street",
+    "Latitude": -37.7520608,
+    "Longitude": 144.9949037
+  },
+  {
+    "Name": "Route 96 - Stop 16: Freeman Street",
+    "Latitude": -37.7885307,
+    "Longitude": 144.9765545
+  },
+  {
+    "Name": "Route 75 - Stop 43: Camberwell Civic Centre",
+    "Latitude": -37.8345784,
+    "Longitude": 145.0606575
+  },
+  {
+    "Name": "Route 30;35 - Stop 6: Melbourne Central Station, Swanston Street",
+    "Latitude": -37.8093559,
+    "Longitude": 144.9647853
+  },
+  {
+    "Name": "Route 3;3a;5;6;16;64;67 - Stop 26: Moubray Street",
+    "Latitude": -37.8475761,
+    "Longitude": 144.979734
+  },
+  {
+    "Name": "Route 64 - Stop 67: Howell Street",
+    "Latitude": -37.9110779,
+    "Longitude": 145.0173516
+  },
+  {
+    "Name": "Route 5 - Stop 51: Erica Avenue",
+    "Latitude": -37.8645964,
+    "Longitude": 145.0465972
+  },
+  {
+    "Name": "Route 67 - Stop 57: Laura Street",
+    "Latitude": -37.8886837,
+    "Longitude": 145.0355534
+  },
+  {
+    "Name": "Route 86 - Stop 34: Bent Street",
+    "Latitude": -37.7676049,
+    "Longitude": 144.9991163
+  },
+  {
+    "Name": "Route 19 - Stop 38: Renown Street",
+    "Latitude": -37.731647,
+    "Longitude": 144.9642566
+  },
+  {
+    "Name": "Route 86 - Stop 52: Tyler Street",
+    "Latitude": -37.7310134,
+    "Longitude": 145.0147532
+  },
+  {
+    "Name": "Route 75 - Stop 41: Riversdale Road",
+    "Latitude": -37.8320634,
+    "Longitude": 145.057697
+  },
+  {
+    "Name": "Route 11 - Stop 22: Scotchmer Street",
+    "Latitude": -37.7831978,
+    "Longitude": 144.9840152
+  },
+  {
+    "Name": "Route 16 - Stop 78: Fitzwilliam Street",
+    "Latitude": -37.8120321,
+    "Longitude": 145.0374175
+  },
+  {
+    "Name": "Route 1;8 - Stop 113: Lytton Street",
+    "Latitude": -37.7941052,
+    "Longitude": 144.9681148
+  },
+  {
+    "Name": "Route 48;109 - Stop 32: Kew Junction",
+    "Latitude": -37.8074294,
+    "Longitude": 145.0291463
+  },
+  {
+    "Name": "Route 59 - Stop 38: Pascoe Vale Road",
+    "Latitude": -37.7558145,
+    "Longitude": 144.9258563
+  },
+  {
+    "Name": "Route 67 - Stop 50: Royal Parade",
+    "Latitude": -37.8863886,
+    "Longitude": 145.0183008
+  },
+  {
+    "Name": "Route 16 - Stop 80: Cotham Road",
+    "Latitude": -37.8082478,
+    "Longitude": 145.0380397
+  },
+  {
+    "Name": "Route 82 - Stop 59: Droop Street",
+    "Latitude": -37.7925751,
+    "Longitude": 144.8935878
+  },
+  {
+    "Name": "Route 12;109 - Stop 23: Flockhart Street",
+    "Latitude": -37.8111115,
+    "Longitude": 145.0068936
+  },
+  {
+    "Name": "Route 16 - Stop 73: Burwood Road",
+    "Latitude": -37.8224703,
+    "Longitude": 145.0354795
+  },
+  {
+    "Name": "Route 3;3a - Stop 59: Dandenong Road",
+    "Latitude": -37.8757531,
+    "Longitude": 145.0450203
+  },
+  {
+    "Name": "Route 70;75 - Stop 40: Camberwell Junction",
+    "Latitude": -37.8312667,
+    "Longitude": 145.056449
+  },
+  {
+    "Name": "Route 59 - Stop 48: Service Street",
+    "Latitude": -37.7426838,
+    "Longitude": 144.9057527
+  },
+  {
+    "Name": "Route 3;3a - Stop 57: Caulfield Station",
+    "Latitude": -37.8763531,
+    "Longitude": 145.0416389
+  },
+  {
+    "Name": "Route 1;8 - Stop 125: Blyth Street",
+    "Latitude": -37.7664439,
+    "Longitude": 144.9726851
+  },
+  {
+    "Name": "Route 67 - Stop 48: Parkside Street",
+    "Latitude": -37.8857771,
+    "Longitude": 145.0122484
+  },
+  {
+    "Name": "Route 67 - Stop 56: Kean Street",
+    "Latitude": -37.8884221,
+    "Longitude": 145.0334854
+  },
+  {
+    "Name": "Route 48 - Stop 38: Victoria Park",
+    "Latitude": -37.8012396,
+    "Longitude": 145.0459923
+  },
+  {
+    "Name": "Route 59 - Stop 29: Warrick Street",
+    "Latitude": -37.7755512,
+    "Longitude": 144.9285141
+  },
+  {
+    "Name": "Route 64 - Stop 43: Egerton Road",
+    "Latitude": -37.8637842,
+    "Longitude": 145.022006
+  },
+  {
+    "Name": "Route 16;64 - Stop 49: Wanda Road",
+    "Latitude": -37.8679708,
+    "Longitude": 145.025525
+  },
+  {
+    "Name": "Route 72 - Stop 53: Faircroft Avenue",
+    "Latitude": -37.8481619,
+    "Longitude": 145.0533845
+  },
+  {
+    "Name": "Route 72 - Stop 66: Canterbury Road",
+    "Latitude": -37.8212553,
+    "Longitude": 145.0587145
+  },
+  {
+    "Name": "Route 78 - Stop 40: Alma Road",
+    "Latitude": -37.8613333,
+    "Longitude": 144.9917212
+  },
+  {
+    "Name": "Route 75 - Stop 55: Through Road",
+    "Latitude": -37.8493135,
+    "Longitude": 145.0866771
+  },
+  {
+    "Name": "Route 8 - Stop 131: De Carle Street",
+    "Latitude": -37.7556396,
+    "Longitude": 144.9663999
+  },
+  {
+    "Name": "Route 82 - Stop 48: Raleigh Road",
+    "Latitude": -37.7696107,
+    "Longitude": 144.8828438
+  },
+  {
+    "Name": "Route 11 - Stop 45: Jacka Street",
+    "Latitude": -37.7327509,
+    "Longitude": 144.9910444
+  },
+  {
+    "Name": "Route 19 - Stop 35: Champ Street",
+    "Latitude": -37.7375306,
+    "Longitude": 144.9669541
+  },
+  {
+    "Name": "Route 6 - Stop 33: Prahran RSL",
+    "Latitude": -37.8524093,
+    "Longitude": 144.9980612
+  },
+  {
+    "Name": "Route 5 - Stop 51: Nott Street",
+    "Latitude": -37.8647943,
+    "Longitude": 145.0470577
+  },
+  {
+    "Name": "Route 57 - Stop 25: Wellington Street",
+    "Latitude": -37.7882812,
+    "Longitude": 144.9312635
+  },
+  {
+    "Name": "Route 72 - Stop 38: Clendon Road",
+    "Latitude": -37.8496045,
+    "Longitude": 145.0153536
+  },
+  {
+    "Name": "Route 16 - Stop 59: Malvern Road",
+    "Latitude": -37.8515368,
+    "Longitude": 145.0301494
+  },
+  {
+    "Name": "Route 75 - Stop 57: Queens Parade",
+    "Latitude": -37.8501545,
+    "Longitude": 145.0927385
+  },
+  {
+    "Name": "Route 70 - Stop 58: Wattle Park",
+    "Latitude": -37.8365458,
+    "Longitude": 145.1022074
+  },
+  {
+    "Name": "Route 48 - Stop 47: North Balwyn Shopping Centre",
+    "Latitude": -37.7926913,
+    "Longitude": 145.0714053
+  },
+  {
+    "Name": "Route 12 - Stop 133: Canterbury Road",
+    "Latitude": -37.8441289,
+    "Longitude": 144.9601058
+  },
+  {
+    "Name": "Route 72 - Stop 50: Glenarm Road",
+    "Latitude": -37.8543367,
+    "Longitude": 145.051556
+  },
+  {
+    "Name": "Route 48 - Stop 41: Clyde Street",
+    "Latitude": -37.7974449,
+    "Longitude": 145.0547486
+  },
+  {
+    "Name": "Route 58 - Stop 138: Moonga Road",
+    "Latitude": -37.8431338,
+    "Longitude": 145.0266895
+  },
+  {
+    "Name": "Route 109 - Stop 42: Burke Road",
+    "Latitude": -37.8102621,
+    "Longitude": 145.0605161
+  },
+  {
+    "Name": "Route 82 - Stop 60: Tiernan Street",
+    "Latitude": -37.7946363,
+    "Longitude": 144.8955082
+  },
+  {
+    "Name": "Route 11 - Stop 46: McNamara Street",
+    "Latitude": -37.7300412,
+    "Longitude": 144.9913513
+  },
+  {
+    "Name": "Route 57 - Stop 11: Victoria Street",
+    "Latitude": -37.8049752,
+    "Longitude": 144.949326
+  },
+  {
+    "Name": "Route 75 - Stop 54: Grandview Avenue",
+    "Latitude": -37.8492126,
+    "Longitude": 145.0846447
+  },
+  {
+    "Name": "Route 48 - Stop 49: Cityview Road",
+    "Latitude": -37.793744,
+    "Longitude": 145.077485
+  },
+  {
+    "Name": "Route 58 - Stop 131: Williams Road",
+    "Latitude": -37.8404827,
+    "Longitude": 145.0045803
+  },
+  {
+    "Name": "Route 70 - Stop 13: Edinburgh Street",
+    "Latitude": -37.8263843,
+    "Longitude": 145.0050453
+  },
+  {
+    "Name": "Route 78 - Stop 44: Duke Street",
+    "Latitude": -37.8539796,
+    "Longitude": 144.9930471
+  },
+  {
+    "Name": "Route 5 - Stop 42: Kooyong Road",
+    "Latitude": -37.8611657,
+    "Longitude": 145.0195617
+  },
+  {
+    "Name": "Route 11 - Stop 20: Fitzroy Bowls Club",
+    "Latitude": -37.7881671,
+    "Longitude": 144.980303
+  },
+  {
+    "Name": "Route 86 - Stop 33: Separation Street",
+    "Latitude": -37.7692141,
+    "Longitude": 144.9991512
+  },
+  {
+    "Name": "Route 57 - Stop 48: Wests Road",
+    "Latitude": -37.7693276,
+    "Longitude": 144.8823905
+  },
+  {
+    "Name": "Route 70 - Stop 52: Lockhart Street",
+    "Latitude": -37.8347505,
+    "Longitude": 145.0881594
+  },
+  {
+    "Name": "Route 59 - Stop 35: Queens Park",
+    "Latitude": -37.7624863,
+    "Longitude": 144.9257902
+  },
+  {
+    "Name": "Route 19 - Stop 17: Ievers Street",
+    "Latitude": -37.7817064,
+    "Longitude": 144.9598717
+  },
+  {
+    "Name": "Route 3;3a - Stop 62: The Avenue",
+    "Latitude": -37.8768896,
+    "Longitude": 145.0550009
+  },
+  {
+    "Name": "Route 57 - Stop 30: Flemington Drive",
+    "Latitude": -37.7860662,
+    "Longitude": 144.9200407
+  },
+  {
+    "Name": "Route 48 - Stop 48: Sunburst Avenue",
+    "Latitude": -37.7932139,
+    "Longitude": 145.0743027
+  },
+  {
+    "Name": "Route 86 - Stop 41: Blythe Street",
+    "Latitude": -37.754367,
+    "Longitude": 145.0012165
+  },
+  {
+    "Name": "Route 57 - Stop 26: Newmarket Station",
+    "Latitude": -37.7879748,
+    "Longitude": 144.928131
+  },
+  {
+    "Name": "Route 5 - Stop 50: Vincent Street",
+    "Latitude": -37.8643957,
+    "Longitude": 145.0437349
+  },
+  {
+    "Name": "Route 67 - Stop 65: Mimosa Road",
+    "Latitude": -37.8905088,
+    "Longitude": 145.0517505
+  },
+  {
+    "Name": "Route 57 - Stop 34: Burrowes Street",
+    "Latitude": -37.7785198,
+    "Longitude": 144.9152311
+  },
+  {
+    "Name": "Route 30;35 - Stop 9: La Trobe Street",
+    "Latitude": -37.807632,
+    "Longitude": 144.971013
+  },
+  {
+    "Name": "Route 67 - Stop 43: Brighton Road",
+    "Latitude": -37.8838076,
+    "Longitude": 144.9978358
+  },
+  {
+    "Name": "Route 8 - Stop 133: Moreland Station",
+    "Latitude": -37.7553082,
+    "Longitude": 144.9620856
+  },
+  {
+    "Name": "Route 11 - Stop 17: Leicester Street",
+    "Latitude": -37.7953247,
+    "Longitude": 144.9790798
+  },
+  {
+    "Name": "Route 1;8 - Stop 129: Moreland Road",
+    "Latitude": -37.7568613,
+    "Longitude": 144.9747579
+  },
+  {
+    "Name": "Route 64 - Stop 51: Balaclava Road",
+    "Latitude": -37.8728989,
+    "Longitude": 145.0245929
+  },
+  {
+    "Name": "Route 64 - Stop 53: Crotonhurst Avenue",
+    "Latitude": -37.877468,
+    "Longitude": 145.0237042
+  },
+  {
+    "Name": "Route 1 - Stop 130: The Avenue",
+    "Latitude": -37.7533996,
+    "Longitude": 144.9761762
+  },
+  {
+    "Name": "Route 1 - Stop 24: Clarendon Street",
+    "Latitude": -37.8351992,
+    "Longitude": 144.9613092
+  },
+  {
+    "Name": "Route 6 - Stop 41: Kooyong Road",
+    "Latitude": -37.8553985,
+    "Longitude": 145.0205724
+  },
+  {
+    "Name": "Route 11 - Stop 18: Alexandra Parade",
+    "Latitude": -37.7929945,
+    "Longitude": 144.9794687
+  },
+  {
+    "Name": "Route 78 - Stop 50: Toorak Road",
+    "Latitude": -37.8393603,
+    "Longitude": 144.9957413
+  },
+  {
+    "Name": "Route 19 - Stop 32: Harding Street",
+    "Latitude": -37.7448898,
+    "Longitude": 144.9660664
+  },
+  {
+    "Name": "Route 16 - Stop 79: Wellington Street",
+    "Latitude": -37.8098618,
+    "Longitude": 145.0378603
+  },
+  {
+    "Name": "Route 109 - Stop 46: Balwyn Cinema",
+    "Latitude": -37.8120795,
+    "Longitude": 145.0757708
+  },
+  {
+    "Name": "Route 6 - Stop 52: Boyanda Road",
+    "Latitude": -37.8595998,
+    "Longitude": 145.053801
+  },
+  {
+    "Name": "Route 11 - Stop 40: Bell Street",
+    "Latitude": -37.7436063,
+    "Longitude": 144.9893386
+  },
+  {
+    "Name": "Route 57 - Stop 36: St Leonards Road",
+    "Latitude": -37.7735567,
+    "Longitude": 144.9159439
+  },
+  {
+    "Name": "Route 70;75 - Stop 31: Fordholm Road",
+    "Latitude": -37.8283379,
+    "Longitude": 145.0314272
+  },
+  {
+    "Name": "Route 16 - Stop 56: Malvern Tram Depot",
+    "Latitude": -37.8588747,
+    "Longitude": 145.0289871
+  },
+  {
+    "Name": "Route 1 - Stop 27: Montague Street",
+    "Latitude": -37.8373144,
+    "Longitude": 144.9544613
+  },
+  {
+    "Name": "Route 86 - Stop 15: Smith Street",
+    "Latitude": -37.8062714,
+    "Longitude": 144.9827545
+  },
+  {
+    "Name": "Route 70 - Stop 16: Park Grove",
+    "Latitude": -37.8271796,
+    "Longitude": 145.0123201
+  },
+  {
+    "Name": "Route 75 - Stop 44: Trafalgar Road",
+    "Latitude": -37.8358608,
+    "Longitude": 145.0621125
+  },
+  {
+    "Name": "Route 78 - Stop 46: Chatham Street",
+    "Latitude": -37.8489396,
+    "Longitude": 144.993919
+  },
+  {
+    "Name": "Route 59 - Stop 50: Cooper Street",
+    "Latitude": -37.7400256,
+    "Longitude": 144.8993851
+  },
+  {
+    "Name": "Route 1;6 - Stop 112: Lygon Street",
+    "Latitude": -37.797058,
+    "Longitude": 144.9663644
+  },
+  {
+    "Name": "Route 6 - Stop 43: Mercer Road",
+    "Latitude": -37.856119,
+    "Longitude": 145.02595
+  },
+  {
+    "Name": "Route 58 - Stop 12: Flemington Road",
+    "Latitude": -37.801568,
+    "Longitude": 144.9567638
+  },
+  {
+    "Name": "Route 72 - Stop 33: Hobson Street",
+    "Latitude": -37.8479022,
+    "Longitude": 145.0011515
+  },
+  {
+    "Name": "Route 58 - Stop 128: Chapel Street",
+    "Latitude": -37.839295,
+    "Longitude": 144.9946906
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 41: Empress Road",
+    "Latitude": -37.8696745,
+    "Longitude": 145.0015143
+  },
+  {
+    "Name": "Route 16 - Stop 58: Bell Street",
+    "Latitude": -37.854043,
+    "Longitude": 145.0295933
+  },
+  {
+    "Name": "Route 16 - Stop 67: Gardiner Road",
+    "Latitude": -37.8354271,
+    "Longitude": 145.0331306
+  },
+  {
+    "Name": "Route 78 - Stop 63: Tweedie Place",
+    "Latitude": -37.8143332,
+    "Longitude": 144.9998529
+  },
+  {
+    "Name": "Route 1;8 - Stop 119: Park Street",
+    "Latitude": -37.7798413,
+    "Longitude": 144.9705003
+  },
+  {
+    "Name": "Route 1 - Stop 26: Ferrars Street",
+    "Latitude": -37.8366269,
+    "Longitude": 144.9564121
+  },
+  {
+    "Name": "Route 6 - Stop 29: Perth Street",
+    "Latitude": -37.8510377,
+    "Longitude": 144.987784
+  },
+  {
+    "Name": "Route 64 - Stop 60: Dover Street",
+    "Latitude": -37.8948764,
+    "Longitude": 145.0205642
+  },
+  {
+    "Name": "Route 67 - Stop 60: Glenhuntly Shops",
+    "Latitude": -37.8891622,
+    "Longitude": 145.040466
+  },
+  {
+    "Name": "Route 3;3a - Stop 54: Kambrook Road",
+    "Latitude": -37.8739492,
+    "Longitude": 145.0358362
+  },
+  {
+    "Name": "Route 75 - Stop 27: Burwood Road",
+    "Latitude": -37.8217973,
+    "Longitude": 145.0262545
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 41: Vadlure Avenue",
+    "Latitude": -37.869981,
+    "Longitude": 145.0025917
+  },
+  {
+    "Name": "Route 1 - Stop 132: Crozier Street",
+    "Latitude": -37.7493751,
+    "Longitude": 144.9770064
+  },
+  {
+    "Name": "Route 86 - Stop 19: Johnston Street",
+    "Latitude": -37.7988311,
+    "Longitude": 144.9843805
+  },
+  {
+    "Name": "Route 59 - Stop 49: Essendon North Primary School",
+    "Latitude": -37.7414616,
+    "Longitude": 144.902864
+  },
+  {
+    "Name": "Route 78 - Stop 48: Cliff Street",
+    "Latitude": -37.8438094,
+    "Longitude": 144.9946594
+  },
+  {
+    "Name": "Route 58 - Stop 22: Royal Park",
+    "Latitude": -37.7913941,
+    "Longitude": 144.9494132
+  },
+  {
+    "Name": "Route 3;3a - Stop 63: Hughes Street",
+    "Latitude": -37.8771135,
+    "Longitude": 145.0568947
+  },
+  {
+    "Name": "Route 12 - Stop 129: Park Street",
+    "Latitude": -37.8350114,
+    "Longitude": 144.9616094
+  },
+  {
+    "Name": "Route 64 - Stop 61: Stone Street",
+    "Latitude": -37.8965545,
+    "Longitude": 145.0202479
+  },
+  {
+    "Name": "Route 64 - Stop 56: Lockhart Street",
+    "Latitude": -37.8845394,
+    "Longitude": 145.0223393
+  },
+  {
+    "Name": "Route 3;3a - Stop 64: Darling Road",
+    "Latitude": -37.8772774,
+    "Longitude": 145.0587759
+  },
+  {
+    "Name": "Route 72 - Stop 60: Campbell Road",
+    "Latitude": -37.8337188,
+    "Longitude": 145.056154
+  },
+  {
+    "Name": "Route 72 - Stop 69: Sackville Street",
+    "Latitude": -37.8141592,
+    "Longitude": 145.0598891
+  },
+  {
+    "Name": "Route 96 - Stop 21: Glenlyon Road",
+    "Latitude": -37.7732686,
+    "Longitude": 144.979323
+  },
+  {
+    "Name": "Route 72 - Stop 47: Tooronga Road",
+    "Latitude": -37.8531266,
+    "Longitude": 145.0419774
+  },
+  {
+    "Name": "Route 67 - Stop 51: Hawthorn Road",
+    "Latitude": -37.8868111,
+    "Longitude": 145.0218047
+  },
+  {
+    "Name": "Route 11 - Stop 36: Devon Street",
+    "Latitude": -37.7512536,
+    "Longitude": 144.9909025
+  },
+  {
+    "Name": "Route 86 - Stop 17: Charles Street",
+    "Latitude": -37.8034816,
+    "Longitude": 144.9835867
+  },
+  {
+    "Name": "Route 57 - Stop 24: Victoria Street",
+    "Latitude": -37.7884598,
+    "Longitude": 144.933476
+  },
+  {
+    "Name": "Route 16 - Stop 72: Oxley Road",
+    "Latitude": -37.8240091,
+    "Longitude": 145.0351695
+  },
+  {
+    "Name": "Route 16 - Stop 75: Chrystobel Crescent",
+    "Latitude": -37.8188877,
+    "Longitude": 145.0359628
+  },
+  {
+    "Name": "Route 70 - Stop 55: Union Road",
+    "Latitude": -37.8355815,
+    "Longitude": 145.0953803
+  },
+  {
+    "Name": "Route 58 - Stop 29: Heller Street",
+    "Latitude": -37.774932,
+    "Longitude": 144.948857
+  },
+  {
+    "Name": "Route 86 - Stop 44: Osborne Grove",
+    "Latitude": -37.7469776,
+    "Longitude": 145.0053411
+  },
+  {
+    "Name": "Route 72 - Stop 63: Prospect Hill Road",
+    "Latitude": -37.8282335,
+    "Longitude": 145.0572155
+  },
+  {
+    "Name": "Route 5 - Stop 49: Tooronga Road",
+    "Latitude": -37.8638138,
+    "Longitude": 145.0399582
+  },
+  {
+    "Name": "Route 67 - Stop 44: Elsternwick Station",
+    "Latitude": -37.8841368,
+    "Longitude": 145.000397
+  },
+  {
+    "Name": "Route 67 - Stop 47: Shoobra Road",
+    "Latitude": -37.8852751,
+    "Longitude": 145.0091301
+  },
+  {
+    "Name": "Route 75 - Stop 40: Camberwell Junction",
+    "Latitude": -37.8315977,
+    "Longitude": 145.0569211
+  },
+  {
+    "Name": "Route 109 - Stop 39: Thomas Street",
+    "Latitude": -37.8089173,
+    "Longitude": 145.0492158
+  },
+  {
+    "Name": "Route 6 - Stop 40: Armadale Station",
+    "Latitude": -37.855104,
+    "Longitude": 145.0182685
+  },
+  {
+    "Name": "Route 48;75 - Stop 18: Church Street",
+    "Latitude": -37.818482,
+    "Longitude": 144.99894
+  },
+  {
+    "Name": "Route 16 - Stop 66: Kooyong Tennis Centre",
+    "Latitude": -37.8385225,
+    "Longitude": 145.0323921
+  },
+  {
+    "Name": "Route 1;8 - Stop 126: Stewart Street",
+    "Latitude": -37.764274,
+    "Longitude": 144.9730839
+  },
+  {
+    "Name": "Route 72 - Stop 60: Reserve Road",
+    "Latitude": -37.833902,
+    "Longitude": 145.0563015
+  },
+  {
+    "Name": "Route 78 - Stop 65: Victoria Street",
+    "Latitude": -37.8108529,
+    "Longitude": 145.0005848
+  },
+  {
+    "Name": "Route 5 - Stop 41: Armadale Street",
+    "Latitude": -37.8609275,
+    "Longitude": 145.0177723
+  },
+  {
+    "Name": "Route 57 - Stop 33: Melbourne Showgrounds",
+    "Latitude": -37.7803992,
+    "Longitude": 144.9147943
+  },
+  {
+    "Name": "Route 57 - Stop 32: Sandown Road",
+    "Latitude": -37.7825482,
+    "Longitude": 144.9165392
+  },
+  {
+    "Name": "Route 48;109 - Stop 29: Barkers Road",
+    "Latitude": -37.8130199,
+    "Longitude": 145.0237417
+  },
+  {
+    "Name": "Route 86 - Stop 39: Ballantyne Street",
+    "Latitude": -37.7583296,
+    "Longitude": 145.0005454
+  },
+  {
+    "Name": "Route 78 - Stop 64: Elizabeth Street",
+    "Latitude": -37.812583,
+    "Longitude": 145.0001835
+  },
+  {
+    "Name": "Route 48 - Stop 33: Cotham Road",
+    "Latitude": -37.8066628,
+    "Longitude": 145.0313467
+  },
+  {
+    "Name": "Route 6 - Stop 45: De La Salle College",
+    "Latitude": -37.8569496,
+    "Longitude": 145.032392
+  },
+  {
+    "Name": "Route 59 - Stop 25: Mount Alexander College",
+    "Latitude": -37.7824481,
+    "Longitude": 144.9339711
+  },
+  {
+    "Name": "Route 3a;16 - Stop 33: Barkly Street",
+    "Latitude": -37.8670673,
+    "Longitude": 144.9810869
+  },
+  {
+    "Name": "Route 78 - Stop 36: Brighton Road",
+    "Latitude": -37.8715923,
+    "Longitude": 144.9898376
+  },
+  {
+    "Name": "Route 72 - Stop 59: Pleasant Road",
+    "Latitude": -37.835423,
+    "Longitude": 145.0558281
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 36: St Kilda Town Hall",
+    "Latitude": -37.8680777,
+    "Longitude": 144.9886443
+  },
+  {
+    "Name": "Route 1 - Stop 30: Richardson Street",
+    "Latitude": -37.8437889,
+    "Longitude": 144.951654
+  },
+  {
+    "Name": "Route 16 - Stop 77: Barkers Road",
+    "Latitude": -37.8145727,
+    "Longitude": 145.0369519
+  },
+  {
+    "Name": "Route 6 - Stop 42: Huntingtower Road",
+    "Latitude": -37.8558197,
+    "Longitude": 145.0236955
+  },
+  {
+    "Name": "Route 48 - Stop 24: Grattan Street",
+    "Latitude": -37.8178898,
+    "Longitude": 145.018632
+  },
+  {
+    "Name": "Route 72 - Stop 35: Lorne Road",
+    "Latitude": -37.848598,
+    "Longitude": 145.0065565
+  },
+  {
+    "Name": "Route 96 - Stop 14: Rose Street",
+    "Latitude": -37.7948705,
+    "Longitude": 144.975408
+  },
+  {
+    "Name": "Route 1 - Stop 22: Dorcas Street",
+    "Latitude": -37.8321699,
+    "Longitude": 144.965206
+  },
+  {
+    "Name": "Route 16 - Stop 68: Callantina Road",
+    "Latitude": -37.8332064,
+    "Longitude": 145.0335098
+  },
+  {
+    "Name": "Route 11 - Stop 24: Holden Street",
+    "Latitude": -37.7798708,
+    "Longitude": 144.9868942
+  },
+  {
+    "Name": "Route 58 - Stop 39: McGregor Avenue",
+    "Latitude": -37.7548319,
+    "Longitude": 144.9455494
+  },
+  {
+    "Name": "Route 86 - Stop 20: Rose Street",
+    "Latitude": -37.7968332,
+    "Longitude": 144.9845493
+  },
+  {
+    "Name": "Route 86 - Stop 42: Miller Street",
+    "Latitude": -37.7524446,
+    "Longitude": 145.0015437
+  },
+  {
+    "Name": "Route 86 - Stop 14: Napier Street",
+    "Latitude": -37.8059004,
+    "Longitude": 144.9792814
+  },
+  {
+    "Name": "Route 70;75 - Stop 34: Kooyongkoot Road",
+    "Latitude": -37.8291546,
+    "Longitude": 145.0384626
+  },
+  {
+    "Name": "Route 5 - Stop 48: Dixon Street",
+    "Latitude": -37.8633838,
+    "Longitude": 145.0366398
+  },
+  {
+    "Name": "Route 16 - Stop 75: Liddiard Street",
+    "Latitude": -37.8185309,
+    "Longitude": 145.036204
+  },
+  {
+    "Name": "Route 75 - Stop 42: Camberwell Primary School",
+    "Latitude": -37.8330614,
+    "Longitude": 145.0588627
+  },
+  {
+    "Name": "Route 70 - Stop 42: Fermanagh Road",
+    "Latitude": -37.8316699,
+    "Longitude": 145.060178
+  },
+  {
+    "Name": "Route 72 - Stop 30: Prahran Market",
+    "Latitude": -37.84654,
+    "Longitude": 144.9923132
+  },
+  {
+    "Name": "Route 67 - Stop 55: Fallon Street",
+    "Latitude": -37.8879382,
+    "Longitude": 145.0306858
+  },
+  {
+    "Name": "Route 12;109 - Stop 23: Leslie Street",
+    "Latitude": -37.81131,
+    "Longitude": 145.00758
+  },
+  {
+    "Name": "Route 70 - Stop 47: Willow Grove",
+    "Latitude": -37.8330933,
+    "Longitude": 145.0724106
+  },
+  {
+    "Name": "Route 5 - Stop 43: Egerton Road",
+    "Latitude": -37.8615699,
+    "Longitude": 145.0226639
+  },
+  {
+    "Name": "Route 75 - Stop 48: Orrong Crescent",
+    "Latitude": -37.8421184,
+    "Longitude": 145.0691347
+  },
+  {
+    "Name": "Route 12 - Stop 132: Canterbury Road",
+    "Latitude": -37.8422581,
+    "Longitude": 144.9595327
+  },
+  {
+    "Name": "Route 109 - Stop 50: Wharton Street",
+    "Latitude": -37.8140096,
+    "Longitude": 145.0916493
+  },
+  {
+    "Name": "Route 11 - Stop 14: King William Street",
+    "Latitude": -37.8027182,
+    "Longitude": 144.9778197
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 45: Lumeah Road",
+    "Latitude": -37.8715319,
+    "Longitude": 145.0150777
+  },
+  {
+    "Name": "Route 86 - Stop 47: David Street",
+    "Latitude": -37.7429069,
+    "Longitude": 145.0084344
+  },
+  {
+    "Name": "Route 30;35 - Stop 9: Victoria Street",
+    "Latitude": -37.8076479,
+    "Longitude": 144.9703707
+  },
+  {
+    "Name": "Route 58 - Stop 4: Collins Street",
+    "Latitude": -37.8174759,
+    "Longitude": 144.9591027
+  },
+  {
+    "Name": "Route 78 - Stop 56: East Richmond Station, Lesney Street",
+    "Latitude": -37.8266395,
+    "Longitude": 144.9978315
+  },
+  {
+    "Name": "Route 11 - Stop 13: Gertrude Street",
+    "Latitude": -37.8055741,
+    "Longitude": 144.9773229
+  },
+  {
+    "Name": "Route 67 - Stop 39: Glen Eira Road",
+    "Latitude": -37.875972,
+    "Longitude": 144.9920211
+  },
+  {
+    "Name": "Route 70 - Stop 56: Warrigal Road",
+    "Latitude": -37.8358806,
+    "Longitude": 145.0980297
+  },
+  {
+    "Name": "Route 86 - Stop 34: McCutcheon Street",
+    "Latitude": -37.7675858,
+    "Longitude": 144.9992799
+  },
+  {
+    "Name": "Route 11 - Stop 41: Bruce Street",
+    "Latitude": -37.7409778,
+    "Longitude": 144.9897073
+  },
+  {
+    "Name": "Route 86 - Stop 49: Murray Road",
+    "Latitude": -37.7386963,
+    "Longitude": 145.0116923
+  },
+  {
+    "Name": "Route 72 - Stop 54: Toorak Road",
+    "Latitude": -37.8455928,
+    "Longitude": 145.0540886
+  },
+  {
+    "Name": "Route 1;8 - Stop 127: Albion Street",
+    "Latitude": -37.7619112,
+    "Longitude": 144.9740695
+  },
+  {
+    "Name": "Route 109 - Stop 37: Belmont Avenue",
+    "Latitude": -37.8081031,
+    "Longitude": 145.0422888
+  },
+  {
+    "Name": "Route 58 - Stop 125: Punt Road",
+    "Latitude": -37.8382005,
+    "Longitude": 144.9863801
+  },
+  {
+    "Name": "Route 96 - Stop 18: Scotchmer Street",
+    "Latitude": -37.7828024,
+    "Longitude": 144.9776164
+  },
+  {
+    "Name": "Route 72 - Stop 27: Punt Road",
+    "Latitude": -37.84562,
+    "Longitude": 144.9848637
+  },
+  {
+    "Name": "Route 72 - Stop 49: Belmont Avenue",
+    "Latitude": -37.8540349,
+    "Longitude": 145.0484168
+  },
+  {
+    "Name": "Route 57;82 - Stop 44: Warrs Road",
+    "Latitude": -37.7690448,
+    "Longitude": 144.892195
+  },
+  {
+    "Name": "Route 72 - Stop 55: Middle Road",
+    "Latitude": -37.8436452,
+    "Longitude": 145.0544588
+  },
+  {
+    "Name": "Route 75 - Stop 45: Bowen Street",
+    "Latitude": -37.8376315,
+    "Longitude": 145.0641229
+  },
+  {
+    "Name": "Route 75 - Stop 51: Toorak Road",
+    "Latitude": -37.8478453,
+    "Longitude": 145.0756144
+  },
+  {
+    "Name": "Route 58 - Stop 35: Victoria Street",
+    "Latitude": -37.7647125,
+    "Longitude": 144.9438732
+  },
+  {
+    "Name": "Route 72 - Stop 32: Surrey Road",
+    "Latitude": -37.8472806,
+    "Longitude": 144.9978242
+  },
+  {
+    "Name": "Route 86 - Stop 119: La Trobe Street",
+    "Latitude": -37.8133533,
+    "Longitude": 144.9514947
+  },
+  {
+    "Name": "Route 8 - Stop 132: Sydney Road",
+    "Latitude": -37.7553275,
+    "Longitude": 144.963838
+  },
+  {
+    "Name": "Route 19 - Stop 16: Walker Street",
+    "Latitude": -37.7845589,
+    "Longitude": 144.9595169
+  },
+  {
+    "Name": "Route 86 - Stop 40: Mansfield Street",
+    "Latitude": -37.7566492,
+    "Longitude": 145.0010128
+  },
+  {
+    "Name": "Route 59 - Stop 38: Fletcher Street",
+    "Latitude": -37.756222,
+    "Longitude": 144.9260615
+  },
+  {
+    "Name": "Route 48 - Stop 39: Harp Road",
+    "Latitude": -37.7994345,
+    "Longitude": 145.0503833
+  },
+  {
+    "Name": "Route 3a;16 - Stop 132: Princes Street",
+    "Latitude": -37.8579248,
+    "Longitude": 144.980579
+  },
+  {
+    "Name": "Route 75 - Stop 54: Oberwyl Road",
+    "Latitude": -37.8490259,
+    "Longitude": 145.0842828
+  },
+  {
+    "Name": "Route 59 - Stop 36: Salisbury Street",
+    "Latitude": -37.7597089,
+    "Longitude": 144.9262643
+  },
+  {
+    "Name": "Route 67 - Stop 40: Scott Street",
+    "Latitude": -37.878945,
+    "Longitude": 144.9938892
+  },
+  {
+    "Name": "Route 72 - Stop 62: Camberwell Shopping Centre",
+    "Latitude": -37.8301735,
+    "Longitude": 145.0568428
+  },
+  {
+    "Name": "Route 19 - Stop 20: Barkly Square Shopping Centre",
+    "Latitude": -37.7746141,
+    "Longitude": 144.9609366
+  },
+  {
+    "Name": "Route 86 - Stop 38: Normanby Avenue",
+    "Latitude": -37.7596563,
+    "Longitude": 145.0003193
+  },
+  {
+    "Name": "Route 3a;16;96 - Stop 133: Canterbury Road",
+    "Latitude": -37.8599096,
+    "Longitude": 144.9770452
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 47: Elmhurst Road",
+    "Latitude": -37.872137,
+    "Longitude": 145.0210456
+  },
+  {
+    "Name": "Route 67 - Stop 63: Maroona Road",
+    "Latitude": -37.8899538,
+    "Longitude": 145.0471822
+  },
+  {
+    "Name": "Route 19 - Stop 39: Mercy College",
+    "Latitude": -37.729899,
+    "Longitude": 144.9638623
+  },
+  {
+    "Name": "Route 58 - Stop 31: Dawson Street",
+    "Latitude": -37.770345,
+    "Longitude": 144.949741
+  },
+  {
+    "Name": "Route 70 - Stop 15: Stawell Street",
+    "Latitude": -37.8268744,
+    "Longitude": 145.0096264
+  },
+  {
+    "Name": "Route 72 - Stop 28: Braille Library, Tyrone Street",
+    "Latitude": -37.8458972,
+    "Longitude": 144.987381
+  },
+  {
+    "Name": "Route 3;3a - Stop 61: Tennyson Street",
+    "Latitude": -37.8762309,
+    "Longitude": 145.0509241
+  },
+  {
+    "Name": "Route 12;109 - Stop 21: Church Street",
+    "Latitude": -37.8104819,
+    "Longitude": 145.0005056
+  },
+  {
+    "Name": "Route 57 - Stop 10: Chetwynd Street",
+    "Latitude": -37.8054045,
+    "Longitude": 144.9520045
+  },
+  {
+    "Name": "Route 78 - Stop 39: Argyle Street",
+    "Latitude": -37.8633739,
+    "Longitude": 144.9913489
+  },
+  {
+    "Name": "Route 96 - Stop 22: Albert Street",
+    "Latitude": -37.7704898,
+    "Longitude": 144.9797915
+  },
+  {
+    "Name": "Route 75 - Stop 28: Wattle Road",
+    "Latitude": -37.8248178,
+    "Longitude": 145.0259082
+  },
+  {
+    "Name": "Route 57 - Stop 11: Errol Street",
+    "Latitude": -37.805192,
+    "Longitude": 144.9494696
+  },
+  {
+    "Name": "Route 19 - Stop 33: Victoria Street",
+    "Latitude": -37.7430552,
+    "Longitude": 144.9663976
+  },
+  {
+    "Name": "Route 57;82 - Stop 37: Union Road",
+    "Latitude": -37.7716528,
+    "Longitude": 144.9159524
+  },
+  {
+    "Name": "Route 86 - Stop 16: Peel Street",
+    "Latitude": -37.8048722,
+    "Longitude": 144.9833397
+  },
+  {
+    "Name": "Route 70 - Stop 50: Wattle Valley Road",
+    "Latitude": -37.834112,
+    "Longitude": 145.0812342
+  },
+  {
+    "Name": "Route 64 - Stop 63: North Road",
+    "Latitude": -37.9011954,
+    "Longitude": 145.0193392
+  },
+  {
+    "Name": "Route 109 - Stop 27: Findon Street",
+    "Latitude": -37.8128685,
+    "Longitude": 145.0207529
+  },
+  {
+    "Name": "Route 1;8 - Stop 114: Princes Street",
+    "Latitude": -37.7921349,
+    "Longitude": 144.9684517
+  },
+  {
+    "Name": "Route 82 - Stop 36: Bayview Terrace",
+    "Latitude": -37.771903,
+    "Longitude": 144.9182712
+  },
+  {
+    "Name": "Route 16 - Stop 55: Llaneast Street",
+    "Latitude": -37.8611876,
+    "Longitude": 145.0284713
+  },
+  {
+    "Name": "Route 72 - Stop 58: Currajong Avenue",
+    "Latitude": -37.8380921,
+    "Longitude": 145.0555057
+  },
+  {
+    "Name": "Route 59 - Stop 30: Ormond Road",
+    "Latitude": -37.7724027,
+    "Longitude": 144.9269138
+  },
+  {
+    "Name": "Route 48 - Stop 42: Irymple Avenue",
+    "Latitude": -37.7963959,
+    "Longitude": 145.0571621
+  },
+  {
+    "Name": "Route 67 - Stop 58: Booran Road",
+    "Latitude": -37.8887867,
+    "Longitude": 145.0375258
+  },
+  {
+    "Name": "Route 16 - Stop 54: Wattletree Road",
+    "Latitude": -37.8621714,
+    "Longitude": 145.0284629
+  },
+  {
+    "Name": "Route 48;109 - Stop 33: Kew Shopping Centre",
+    "Latitude": -37.8068536,
+    "Longitude": 145.0304375
+  },
+  {
+    "Name": "Route 5;64 - Stop 31: Queens Way",
+    "Latitude": -37.8561506,
+    "Longitude": 144.9874215
+  },
+  {
+    "Name": "Route 11 - Stop 14: Hanover Street",
+    "Latitude": -37.8028367,
+    "Longitude": 144.9776128
+  },
+  {
+    "Name": "Route 72 - Stop 57: Pine Avenue",
+    "Latitude": -37.8400533,
+    "Longitude": 145.055136
+  },
+  {
+    "Name": "Route 57 - Stop 8: Peel Street",
+    "Latitude": -37.8058246,
+    "Longitude": 144.9557212
+  },
+  {
+    "Name": "Route 58 - Stop 127: South Yarra Station",
+    "Latitude": -37.8389723,
+    "Longitude": 144.99208
+  },
+  {
+    "Name": "Route 78 - Stop 60: Abinger Street",
+    "Latitude": -37.8203165,
+    "Longitude": 144.9987834
+  },
+  {
+    "Name": "Route 1 - Stop 133: Harding Street",
+    "Latitude": -37.7460506,
+    "Longitude": 144.977544
+  },
+  {
+    "Name": "Route 12 - Stop 128: Dorcas Street",
+    "Latitude": -37.8328018,
+    "Longitude": 144.9605888
+  },
+  {
+    "Name": "Route 86 - Stop 25: Clifton Hill Interchange",
+    "Latitude": -37.7856455,
+    "Longitude": 144.9945221
+  },
+  {
+    "Name": "Route 109 - Stop 45: Hardwicke Street",
+    "Latitude": -37.8115836,
+    "Longitude": 145.071472
+  },
+  {
+    "Name": "Route 75 - Stop 26: Hawthorn Station",
+    "Latitude": -37.8212915,
+    "Longitude": 145.024615
+  },
+  {
+    "Name": "Route 57;82 - Stop 44: Barb Street",
+    "Latitude": -37.7688984,
+    "Longitude": 144.8919869
+  },
+  {
+    "Name": "Route 57;82 - Stop 45: Randall Street",
+    "Latitude": -37.7686083,
+    "Longitude": 144.8889828
+  },
+  {
+    "Name": "Route 11 - Stop 16: Johnston Street",
+    "Latitude": -37.7982285,
+    "Longitude": 144.9785823
+  },
+  {
+    "Name": "Route 72 - Stop 67: Camberwell Girls Grammar",
+    "Latitude": -37.8184446,
+    "Longitude": 145.0592494
+  },
+  {
+    "Name": "Route 86 - Stop 120: Lonsdale Street",
+    "Latitude": -37.8149718,
+    "Longitude": 144.9522967
+  },
+  {
+    "Name": "Route 70;75 - Stop 32: Glenferrie Road",
+    "Latitude": -37.8286284,
+    "Longitude": 145.0339993
+  },
+  {
+    "Name": "Route 72 - Stop 34: Williams Road",
+    "Latitude": -37.8481932,
+    "Longitude": 145.0034042
+  },
+  {
+    "Name": "Route 72 - Stop 69: Peverill Street",
+    "Latitude": -37.8141008,
+    "Longitude": 145.0600601
+  },
+  {
+    "Name": "Route 48;75 - Stop 20: Coppin Street",
+    "Latitude": -37.8189754,
+    "Longitude": 145.0035782
+  },
+  {
+    "Name": "Route 75 - Stop 27: Power Street",
+    "Latitude": -37.8214677,
+    "Longitude": 145.0262091
+  },
+  {
+    "Name": "Route 78 - Stop 49: Palermo Street",
+    "Latitude": -37.8415674,
+    "Longitude": 144.9952923
+  },
+  {
+    "Name": "Route 16;64 - Stop 48A: Dandenong Road",
+    "Latitude": -37.8659806,
+    "Longitude": 145.025886
+  },
+  {
+    "Name": "Route 48;75 - Stop 22: Yarra Boulevard",
+    "Latitude": -37.8200534,
+    "Longitude": 145.0138812
+  },
+  {
+    "Name": "Route 67 - Stop 37: Chapel Street",
+    "Latitude": -37.8717614,
+    "Longitude": 144.9894539
+  },
+  {
+    "Name": "Route 67 - Stop 56: Kambrook Road",
+    "Latitude": -37.888238,
+    "Longitude": 145.0330308
+  },
+  {
+    "Name": "Route 109 - Stop 34: High Street",
+    "Latitude": -37.8068801,
+    "Longitude": 145.0316174
+  },
+  {
+    "Name": "Route 16;64 - Stop 49: Arthur Street",
+    "Latitude": -37.8676667,
+    "Longitude": 145.0257502
+  },
+  {
+    "Name": "Route 82 - Stop 61: Geelong Road",
+    "Latitude": -37.7962138,
+    "Longitude": 144.8968346
+  },
+  {
+    "Name": "Route 6 - Stop 31: Chapel Street",
+    "Latitude": -37.8517541,
+    "Longitude": 144.9932047
+  },
+  {
+    "Name": "Route 78 - Stop 53: Howard Street",
+    "Latitude": -37.8326784,
+    "Longitude": 144.996818
+  },
+  {
+    "Name": "Route 12 - Stop 130A: Raglan Street",
+    "Latitude": -37.837594,
+    "Longitude": 144.9625797
+  },
+  {
+    "Name": "Route 1;8 - Stop 115: Melbourne Cemetery East, Newry Street",
+    "Latitude": -37.7892882,
+    "Longitude": 144.968947
+  },
+  {
+    "Name": "Route 16 - Stop 61: Moorakyne Avenue",
+    "Latitude": -37.8477198,
+    "Longitude": 145.030708
+  },
+  {
+    "Name": "Route 11 - Stop 23: Park Street",
+    "Latitude": -37.7815111,
+    "Longitude": 144.9852562
+  },
+  {
+    "Name": "Route 3;3a - Stop 55: Balaclava Road",
+    "Latitude": -37.874512,
+    "Longitude": 145.038161
+  },
+  {
+    "Name": "Route 12 - Stop 139: Langridge Street",
+    "Latitude": -37.8544799,
+    "Longitude": 144.9653088
+  },
+  {
+    "Name": "Route 6 - Stop 49: Harold Holt Swim Centre",
+    "Latitude": -37.8584516,
+    "Longitude": 145.0441526
+  },
+  {
+    "Name": "Route 3;3a;5;6;16;64;67;72 - Stop 23: Arthur Street",
+    "Latitude": -37.8392884,
+    "Longitude": 144.9766194
+  },
+  {
+    "Name": "Route 78 - Stop 37: Carlisle Street",
+    "Latitude": -37.8682491,
+    "Longitude": 144.9904721
+  },
+  {
+    "Name": "Route 78 - Stop 42: Dandenong Road",
+    "Latitude": -37.8574134,
+    "Longitude": 144.9924067
+  },
+  {
+    "Name": "Route 58 - Stop 132: Toorak Village",
+    "Latitude": -37.8409253,
+    "Longitude": 145.0083775
+  },
+  {
+    "Name": "Route 64 - Stop 56: Briggs Street",
+    "Latitude": -37.8848414,
+    "Longitude": 145.0224591
+  },
+  {
+    "Name": "Route 67 - Stop 41: Coleridge Street",
+    "Latitude": -37.8808061,
+    "Longitude": 144.9951637
+  },
+  {
+    "Name": "Route 78 - Stop 64: Baker Street",
+    "Latitude": -37.8122449,
+    "Longitude": 145.0004159
+  },
+  {
+    "Name": "Route 3;3a - Stop 56: Caulfield Racecourse",
+    "Latitude": -37.8754212,
+    "Longitude": 145.0394085
+  },
+  {
+    "Name": "Route 19 - Stop 21: Glenlyon Road",
+    "Latitude": -37.7714003,
+    "Longitude": 144.9614712
+  },
+  {
+    "Name": "Route 70 - Stop 41: Camberwell Market",
+    "Latitude": -37.8313933,
+    "Longitude": 145.0575292
+  },
+  {
+    "Name": "Route 86 - Stop 50: Sylvester Grove",
+    "Latitude": -37.7368275,
+    "Longitude": 145.0124103
+  },
+  {
+    "Name": "Route 64 - Stop 43: Matlock Court",
+    "Latitude": -37.8638435,
+    "Longitude": 145.0219223
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 45: Kent Grove",
+    "Latitude": -37.8713585,
+    "Longitude": 145.0147333
+  },
+  {
+    "Name": "Route 48 - Stop 36: Gladstone Street",
+    "Latitude": -37.803565,
+    "Longitude": 145.0399677
+  },
+  {
+    "Name": "Route 3;3a - Stop 51: Hawthorn Road",
+    "Latitude": -37.8727472,
+    "Longitude": 145.0249747
+  },
+  {
+    "Name": "Route 72 - Stop 44: Plant Street",
+    "Latitude": -37.8518739,
+    "Longitude": 145.0324215
+  },
+  {
+    "Name": "Route 75 - Stop 47: Maple Crescent",
+    "Latitude": -37.840796,
+    "Longitude": 145.0676461
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 46: Kooyong Road",
+    "Latitude": -37.8717208,
+    "Longitude": 145.0175802
+  },
+  {
+    "Name": "Route 19 - Stop 38: Carr Street",
+    "Latitude": -37.7320918,
+    "Longitude": 144.9646286
+  },
+  {
+    "Name": "Route 19 - Stop 31: Reynard Street",
+    "Latitude": -37.7484895,
+    "Longitude": 144.9654589
+  },
+  {
+    "Name": "Route 75 - Stop 55: Beryl Street",
+    "Latitude": -37.8495252,
+    "Longitude": 145.0872682
+  },
+  {
+    "Name": "Route 86 - Stop 13: Brunswick Street",
+    "Latitude": -37.8056343,
+    "Longitude": 144.977062
+  },
+  {
+    "Name": "Route 64 - Stop 67: Rogers Avenue",
+    "Latitude": -37.9110761,
+    "Longitude": 145.0175208
+  },
+  {
+    "Name": "Route 1 - Stop 17: Sturt Street",
+    "Latitude": -37.8238466,
+    "Longitude": 144.9672439
+  },
+  {
+    "Name": "Route 78 - Stop 51: Malcolm Street",
+    "Latitude": -37.8363799,
+    "Longitude": 144.9963324
+  },
+  {
+    "Name": "Route 59 - Stop 47: Mount Alexander Road",
+    "Latitude": -37.7439362,
+    "Longitude": 144.9089378
+  },
+  {
+    "Name": "Route 86 - Stop 54: McColl Street",
+    "Latitude": -37.7279236,
+    "Longitude": 145.0193505
+  },
+  {
+    "Name": "Route 75 - Stop 50: Smith Road",
+    "Latitude": -37.8459219,
+    "Longitude": 145.0732041
+  },
+  {
+    "Name": "Route 82 - Stop 62: Nicholson Street",
+    "Latitude": -37.7998531,
+    "Longitude": 144.89979
+  },
+  {
+    "Name": "Route 75 - Stop 47: Orange Grove",
+    "Latitude": -37.8411777,
+    "Longitude": 145.0678246
+  },
+  {
+    "Name": "Route 75 - Stop 56: Barkly Street",
+    "Latitude": -37.8496584,
+    "Longitude": 145.0895846
+  },
+  {
+    "Name": "Route 58 - Stop 39: Mattingley Crescent",
+    "Latitude": -37.7549156,
+    "Longitude": 144.9456929
+  },
+  {
+    "Name": "Route 12 - Stop 134: Carter Street",
+    "Latitude": -37.8456196,
+    "Longitude": 144.9588731
+  },
+  {
+    "Name": "Route 16;64 - Stop 51: Balaclava Road",
+    "Latitude": -37.8724537,
+    "Longitude": 145.0248288
+  },
+  {
+    "Name": "Route 72 - Stop 59: Seymour Grove",
+    "Latitude": -37.8351995,
+    "Longitude": 145.0560628
+  },
+  {
+    "Name": "Route 109 - Stop 44: Deepdene Park",
+    "Latitude": -37.8112141,
+    "Longitude": 145.0684047
+  },
+  {
+    "Name": "Route 72 - Stop 39: Irving Road",
+    "Latitude": -37.8500426,
+    "Longitude": 145.018707
+  },
+  {
+    "Name": "Route 16 - Stop 60: Stonnington Place",
+    "Latitude": -37.849666,
+    "Longitude": 145.0305111
+  },
+  {
+    "Name": "Route 11 - Stop 15: St David Street",
+    "Latitude": -37.8005484,
+    "Longitude": 144.9781942
+  },
+  {
+    "Name": "Route 67 - Stop 67: Centre Road",
+    "Latitude": -37.8926454,
+    "Longitude": 145.0545388
+  },
+  {
+    "Name": "Route 78 - Stop 55: Gibbons Street",
+    "Latitude": -37.8288533,
+    "Longitude": 144.9974689
+  },
+  {
+    "Name": "Route 78 - Stop 61: Bridge Road",
+    "Latitude": -37.8184217,
+    "Longitude": 144.9992983
+  },
+  {
+    "Name": "Route 48 - Stop 34: Union Street",
+    "Latitude": -37.8056408,
+    "Longitude": 145.0341738
+  },
+  {
+    "Name": "Route 5 - Stop 44: Duncraig Avenue",
+    "Latitude": -37.8618815,
+    "Longitude": 145.0250927
+  },
+  {
+    "Name": "Route 59 - Stop 46: Lincoln Road",
+    "Latitude": -37.7447906,
+    "Longitude": 144.9103551
+  },
+  {
+    "Name": "Route 96 - Stop 12: Moor Street",
+    "Latitude": -37.8016183,
+    "Longitude": 144.974223
+  },
+  {
+    "Name": "Route 70 - Stop 12: Coppin Street",
+    "Latitude": -37.8260946,
+    "Longitude": 145.0023235
+  },
+  {
+    "Name": "Route 64 - Stop 55: Sylverly Grove",
+    "Latitude": -37.8824833,
+    "Longitude": 145.022902
+  },
+  {
+    "Name": "Route 8 - Stop 130: Barrow Street",
+    "Latitude": -37.7560364,
+    "Longitude": 144.9699004
+  },
+  {
+    "Name": "Route 75 - Stop 25: St James Park",
+    "Latitude": -37.8208723,
+    "Longitude": 145.0210744
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 51: Hawthorn Road",
+    "Latitude": -37.8725522,
+    "Longitude": 145.0244496
+  },
+  {
+    "Name": "Route 48 - Stop 40: Harp Village",
+    "Latitude": -37.7986498,
+    "Longitude": 145.0519913
+  },
+  {
+    "Name": "Route 72 - Stop 48: Edgar Street",
+    "Latitude": -37.8535584,
+    "Longitude": 145.0455898
+  },
+  {
+    "Name": "Route 75 - Stop 57: Fairview Avenue",
+    "Latitude": -37.8499762,
+    "Longitude": 145.092338
+  },
+  {
+    "Name": "Route 19 - Stop 25: Stewart Street",
+    "Latitude": -37.7630803,
+    "Longitude": 144.9629195
+  },
+  {
+    "Name": "Route 58;59 - Stop 16: Harker Street",
+    "Latitude": -37.7967323,
+    "Longitude": 144.9513001
+  },
+  {
+    "Name": "Route 64 - Stop 52: Halstead Street",
+    "Latitude": -37.8749295,
+    "Longitude": 145.0243613
+  },
+  {
+    "Name": "Route 70 - Stop 46: Riversdale Station",
+    "Latitude": -37.8327131,
+    "Longitude": 145.0692498
+  },
+  {
+    "Name": "Route 75 - Stop 50: Fordham Gardens",
+    "Latitude": -37.8457987,
+    "Longitude": 145.0733087
+  },
+  {
+    "Name": "Route 78 - Stop 47: Commercial Road",
+    "Latitude": -37.8469843,
+    "Longitude": 144.9940274
+  },
+  {
+    "Name": "Route 59 - Stop 52: Hoffmans Road",
+    "Latitude": -37.7374891,
+    "Longitude": 144.8925452
+  },
+  {
+    "Name": "Route 48 - Stop 44: Burke Road",
+    "Latitude": -37.793457,
+    "Longitude": 145.0642076
+  },
+  {
+    "Name": "Route 59 - Stop 41: Essendon Station",
+    "Latitude": -37.7548698,
+    "Longitude": 144.9174189
+  },
+  {
+    "Name": "Route 96 - Stop 15: Alexandra Parade",
+    "Latitude": -37.7920487,
+    "Longitude": 144.9759164
+  },
+  {
+    "Name": "Route 59 - Stop 51: Bradshaw Street",
+    "Latitude": -37.7385907,
+    "Longitude": 144.8958205
+  },
+  {
+    "Name": "Route 19 - Stop 24: Blyth Street",
+    "Latitude": -37.7653637,
+    "Longitude": 144.9625129
+  },
+  {
+    "Name": "Route 30;35 - Stop 5: Melbourne Central Station, Elizabeth Street",
+    "Latitude": -37.8105056,
+    "Longitude": 144.9607271
+  },
+  {
+    "Name": "Route 86 - Stop 33: Arthurton Road",
+    "Latitude": -37.7694227,
+    "Longitude": 144.9989031
+  },
+  {
+    "Name": "Route 57;82 - Stop 43: Van Ness Avenue",
+    "Latitude": -37.7693227,
+    "Longitude": 144.89571
+  },
+  {
+    "Name": "Route 70;75 - Stop 30: Through Street",
+    "Latitude": -37.8280736,
+    "Longitude": 145.0291023
+  },
+  {
+    "Name": "Route 11 - Stop 39: Latona Avenue",
+    "Latitude": -37.7456053,
+    "Longitude": 144.9889617
+  },
+  {
+    "Name": "Route 12;109 - Stop 22: McKay Street",
+    "Latitude": -37.8108279,
+    "Longitude": 145.0039742
+  },
+  {
+    "Name": "Route 19 - Stop 37: Gaffney Street",
+    "Latitude": -37.7338121,
+    "Longitude": 144.9653724
+  },
+  {
+    "Name": "Route 19 - Stop 26: Albion Street",
+    "Latitude": -37.7607202,
+    "Longitude": 144.963306
+  },
+  {
+    "Name": "Route 3a;16 - Stop 34: Greeves Street",
+    "Latitude": -37.8674406,
+    "Longitude": 144.983939
+  },
+  {
+    "Name": "Route 86 - Stop 44: Seymour Street",
+    "Latitude": -37.7470645,
+    "Longitude": 145.0051044
+  },
+  {
+    "Name": "Route 109 - Stop 51: Narrak Road",
+    "Latitude": -37.814392,
+    "Longitude": 145.0947654
+  },
+  {
+    "Name": "Route 75 - Stop 48: Glen Iris Road",
+    "Latitude": -37.8423458,
+    "Longitude": 145.0691457
+  },
+  {
+    "Name": "Route 64 - Stop 66: Union Street",
+    "Latitude": -37.9084765,
+    "Longitude": 145.0179661
+  },
+  {
+    "Name": "Route 16 - Stop 72: Manningtree Road",
+    "Latitude": -37.8241724,
+    "Longitude": 145.0349654
+  },
+  {
+    "Name": "Route 72 - Stop 39: Densham Road",
+    "Latitude": -37.8501581,
+    "Longitude": 145.018471
+  },
+  {
+    "Name": "Route 78 - Stop 63: Kent Street",
+    "Latitude": -37.8143713,
+    "Longitude": 145.0000453
+  },
+  {
+    "Name": "Route 19 - Stop 28: Moreland Road",
+    "Latitude": -37.7553018,
+    "Longitude": 144.9642549
+  },
+  {
+    "Name": "Route 86 - Stop 21: Alexandra Parade",
+    "Latitude": -37.7935956,
+    "Longitude": 144.9853164
+  },
+  {
+    "Name": "Route 59 - Stop 49: Gillies Street",
+    "Latitude": -37.7416832,
+    "Longitude": 144.9029498
+  },
+  {
+    "Name": "Route 86 - Stop 35: Dennis Street",
+    "Latitude": -37.7655315,
+    "Longitude": 144.9995173
+  },
+  {
+    "Name": "Route 72 - Stop 56: Anderson Road",
+    "Latitude": -37.8415746,
+    "Longitude": 145.0548499
+  },
+  {
+    "Name": "Route 70 - Stop 57: Glendale Street",
+    "Latitude": -37.8361792,
+    "Longitude": 145.1002179
+  },
+  {
+    "Name": "Route 19 - Stop 27: Brunswick Tram Depot",
+    "Latitude": -37.7573939,
+    "Longitude": 144.9638851
+  },
+  {
+    "Name": "Route 35 - Stop 9: Bourke Street",
+    "Latitude": -37.8115074,
+    "Longitude": 144.9730997
+  },
+  {
+    "Name": "Route 67 - Stop 48: Foster Street",
+    "Latitude": -37.8856445,
+    "Longitude": 145.0122486
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 42: Sidwell Avenue",
+    "Latitude": -37.8703489,
+    "Longitude": 145.0056301
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 40: Hotham Street",
+    "Latitude": -37.8694104,
+    "Longitude": 144.9992995
+  },
+  {
+    "Name": "Route 109 - Stop 43: Deepdene Shopping Centre",
+    "Latitude": -37.8107621,
+    "Longitude": 145.0646735
+  },
+  {
+    "Name": "Route 78 - Stop 43: Windsor Station",
+    "Latitude": -37.8561554,
+    "Longitude": 144.9926513
+  },
+  {
+    "Name": "Route 8 - Stop 129: Holmes Street",
+    "Latitude": -37.7565551,
+    "Longitude": 144.9745554
+  },
+  {
+    "Name": "Route 57 - Stop 13: Curzon Street",
+    "Latitude": -37.8028334,
+    "Longitude": 144.9479479
+  },
+  {
+    "Name": "Route 48 - Stop 26: Barkers Road",
+    "Latitude": -37.8132577,
+    "Longitude": 145.0232823
+  },
+  {
+    "Name": "Route 58 - Stop 34: Smith Street",
+    "Latitude": -37.7673555,
+    "Longitude": 144.943314
+  },
+  {
+    "Name": "Route 11 - Stop 26: Clarke Street",
+    "Latitude": -37.7758537,
+    "Longitude": 144.9898416
+  },
+  {
+    "Name": "Route 16 - Stop 64: Mernda Road",
+    "Latitude": -37.8418306,
+    "Longitude": 145.032004
+  },
+  {
+    "Name": "Route 57;59 - Stop 20: Melrose Street",
+    "Latitude": -37.7904235,
+    "Longitude": 144.9435235
+  },
+  {
+    "Name": "Route 6 - Stop 28: Punt Road",
+    "Latitude": -37.8505486,
+    "Longitude": 144.9840262
+  },
+  {
+    "Name": "Route 86 - Stop 48: Gower Street",
+    "Latitude": -37.7408196,
+    "Longitude": 145.010096
+  },
+  {
+    "Name": "Route 59 - Stop 52: Treadwell Road",
+    "Latitude": -37.737229,
+    "Longitude": 144.8923206
+  },
+  {
+    "Name": "Route 59 - Stop 37: Buckley Street",
+    "Latitude": -37.7579161,
+    "Longitude": 144.9264682
+  },
+  {
+    "Name": "Route 30;35 - Stop 10: Nicholson Street",
+    "Latitude": -37.8078324,
+    "Longitude": 144.9729005
+  },
+  {
+    "Name": "Route 3;3a - Stop 58: Dandenong Road",
+    "Latitude": -37.8756882,
+    "Longitude": 145.0418943
+  },
+  {
+    "Name": "Route 6 - Stop 50: Belmont Avenue",
+    "Latitude": -37.8589318,
+    "Longitude": 145.0482396
+  },
+  {
+    "Name": "Route 109 - Stop 29: High Street",
+    "Latitude": -37.8130102,
+    "Longitude": 145.0231363
+  },
+  {
+    "Name": "Route 58 - Stop 38: Jacobs Reserve",
+    "Latitude": -37.7566105,
+    "Longitude": 144.9453542
+  },
+  {
+    "Name": "Route 78 - Stop 47: Malvern Road",
+    "Latitude": -37.8467215,
+    "Longitude": 144.9942381
+  },
+  {
+    "Name": "Route 86 - Stop 36: Darebin Road",
+    "Latitude": -37.7633378,
+    "Longitude": 144.9997081
+  },
+  {
+    "Name": "Route 48;75 - Stop 14: Punt Road",
+    "Latitude": -37.8173593,
+    "Longitude": 144.9895917
+  },
+  {
+    "Name": "Route 59 - Stop 36: Murray Street",
+    "Latitude": -37.7598764,
+    "Longitude": 144.9260692
+  },
+  {
+    "Name": "Route 48 - Stop 36: Parkhill Road",
+    "Latitude": -37.8034622,
+    "Longitude": 145.0397772
+  },
+  {
+    "Name": "Route 48 - Stop 35: Cobden Street",
+    "Latitude": -37.8049931,
+    "Longitude": 145.035544
+  },
+  {
+    "Name": "Route 86 - Stop 39: Gooch Street",
+    "Latitude": -37.7583203,
+    "Longitude": 145.0007511
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 38: Balaclava Station",
+    "Latitude": -37.868771,
+    "Longitude": 144.9939658
+  },
+  {
+    "Name": "Route 5 - Stop 47: Cabrini Hospital",
+    "Latitude": -37.8629613,
+    "Longitude": 145.0334295
+  },
+  {
+    "Name": "Route 6 - Stop 37: Airlie Avenue",
+    "Latitude": -37.8538266,
+    "Longitude": 145.0086494
+  },
+  {
+    "Name": "Route 70;75 - Stop 35: Robinson Road",
+    "Latitude": -37.8295276,
+    "Longitude": 145.0415414
+  },
+  {
+    "Name": "Route 64 - Stop 41: Cantala Avenue",
+    "Latitude": -37.8618899,
+    "Longitude": 145.0176811
+  },
+  {
+    "Name": "Route 70 - Stop 14: Burnley Station",
+    "Latitude": -37.8265877,
+    "Longitude": 145.0068745
+  },
+  {
+    "Name": "Route 70;75 - Stop 37: Tooronga Road",
+    "Latitude": -37.8302304,
+    "Longitude": 145.0476225
+  },
+  {
+    "Name": "Route 70 - Stop 40: Camberwell Junction",
+    "Latitude": -37.8314822,
+    "Longitude": 145.057151
+  },
+  {
+    "Name": "Route 57 - Stop 9: Howard Street",
+    "Latitude": -37.8056918,
+    "Longitude": 144.9539647
+  },
+  {
+    "Name": "Route 48;75 - Stop 19: Richmond Town Hall",
+    "Latitude": -37.818745,
+    "Longitude": 145.0013613
+  },
+  {
+    "Name": "Route 82 - Stop 37: Union Road",
+    "Latitude": -37.7718004,
+    "Longitude": 144.9163477
+  },
+  {
+    "Name": "Route 57 - Stop 31: Racing Victoria",
+    "Latitude": -37.7839365,
+    "Longitude": 144.9180564
+  },
+  {
+    "Name": "Route 58 - Stop 43: Princes Terrace",
+    "Latitude": -37.743994,
+    "Longitude": 144.9449928
+  },
+  {
+    "Name": "Route 58 - Stop 44: Brearley Parade",
+    "Latitude": -37.7416662,
+    "Longitude": 144.9453911
+  },
+  {
+    "Name": "Route 58 - Stop 134: Orrong Road",
+    "Latitude": -37.8415786,
+    "Longitude": 145.013693
+  },
+  {
+    "Name": "Route 72 - Stop 37: Toorak Station",
+    "Latitude": -37.8491734,
+    "Longitude": 145.0120513
+  },
+  {
+    "Name": "Route 57;82 - Stop 46: Rosamond Road",
+    "Latitude": -37.7688812,
+    "Longitude": 144.8867034
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 35: Brighton Road",
+    "Latitude": -37.8681071,
+    "Longitude": 144.9877087
+  },
+  {
+    "Name": "Route 59 - Stop 28: Middle Street",
+    "Latitude": -37.7774563,
+    "Longitude": 144.9298037
+  },
+  {
+    "Name": "Route 58 - Stop 135: Woorigoleen Road",
+    "Latitude": -37.8420274,
+    "Longitude": 145.0175034
+  },
+  {
+    "Name": "Route 96 - Stop 19: Brunswick Road",
+    "Latitude": -37.7793616,
+    "Longitude": 144.9782353
+  },
+  {
+    "Name": "Route 72 - Stop 70: Cotham Road",
+    "Latitude": -37.8109254,
+    "Longitude": 145.0605635
+  },
+  {
+    "Name": "Route 19 - Stop 30: The Avenue",
+    "Latitude": -37.7518619,
+    "Longitude": 144.9648542
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 43: Orrong Road",
+    "Latitude": -37.8705619,
+    "Longitude": 145.0084595
+  },
+  {
+    "Name": "Route 109 - Stop 38: Marshall Avenue",
+    "Latitude": -37.8085192,
+    "Longitude": 145.0458606
+  },
+  {
+    "Name": "Route 3;3a;5;16;64;67 - Stop 30: St Kilda Junction",
+    "Latitude": -37.8550724,
+    "Longitude": 144.9823294
+  },
+  {
+    "Name": "Route 12 - Stop 132: Kerferd Road",
+    "Latitude": -37.8424533,
+    "Longitude": 144.9593465
+  },
+  {
+    "Name": "Route 78 - Stop 45: High Street",
+    "Latitude": -37.8517408,
+    "Longitude": 144.9934592
+  },
+  {
+    "Name": "Route 78 - Stop 58: Gipps Street",
+    "Latitude": -37.8237582,
+    "Longitude": 144.9983448
+  },
+  {
+    "Name": "Route 64 - Stop 64: Taylor Street",
+    "Latitude": -37.9038041,
+    "Longitude": 145.0187904
+  },
+  {
+    "Name": "Route 72 - Stop 53: Howitt Street",
+    "Latitude": -37.847859,
+    "Longitude": 145.0536362
+  },
+  {
+    "Name": "Route 75 - Stop 66: Middleborough Road",
+    "Latitude": -37.8519873,
+    "Longitude": 145.1317942
+  },
+  {
+    "Name": "Route 57 - Stop 19: Abbotsford Street Interchange",
+    "Latitude": -37.7937326,
+    "Longitude": 144.9471605
+  },
+  {
+    "Name": "Route 64 - Stop 62: Gardenvale Road",
+    "Latitude": -37.8989602,
+    "Longitude": 145.0197664
+  },
+  {
+    "Name": "Route 6 - Stop 30: Prahran Station",
+    "Latitude": -37.8512985,
+    "Longitude": 144.989677
+  },
+  {
+    "Name": "Route 70 - Stop 9: Lennox Street",
+    "Latitude": -37.825063,
+    "Longitude": 144.9932309
+  },
+  {
+    "Name": "Route 16 - Stop 65: Kooyong Station",
+    "Latitude": -37.839334,
+    "Longitude": 145.0324193
+  },
+  {
+    "Name": "Route 59 - Stop 45: Glass Street",
+    "Latitude": -37.746465,
+    "Longitude": 144.91165
+  },
+  {
+    "Name": "Route 1 - Stop 131: Rennie Street",
+    "Latitude": -37.751251,
+    "Longitude": 144.9766935
+  },
+  {
+    "Name": "Route 57;82 - Stop 41: Maribyrnong Park",
+    "Latitude": -37.7700985,
+    "Longitude": 144.9020887
+  },
+  {
+    "Name": "Route 11 - Stop 44: Cooper Street",
+    "Latitude": -37.7345451,
+    "Longitude": 144.9905754
+  },
+  {
+    "Name": "Route 86 - Stop 38: Clarendon Street",
+    "Latitude": -37.7594551,
+    "Longitude": 145.0005747
+  },
+  {
+    "Name": "Route 58 - Stop 124: Walsh Street",
+    "Latitude": -37.8379895,
+    "Longitude": 144.9845469
+  },
+  {
+    "Name": "Route 70 - Stop 59: Alandale Street",
+    "Latitude": -37.8368365,
+    "Longitude": 145.1046165
+  },
+  {
+    "Name": "Route 72 - Stop 65: Victoria Road",
+    "Latitude": -37.8233897,
+    "Longitude": 145.0583137
+  },
+  {
+    "Name": "Route 19 - Stop 29: Moore Street",
+    "Latitude": -37.7535071,
+    "Longitude": 144.9645479
+  },
+  {
+    "Name": "Route 5 - Stop 46: Nicholls Street",
+    "Latitude": -37.8626411,
+    "Longitude": 145.0310187
+  },
+  {
+    "Name": "Route 19 - Stop 15: Leonard Street",
+    "Latitude": -37.787667,
+    "Longitude": 144.9591454
+  },
+  {
+    "Name": "Route 109 - Stop 27: Findon Crescent",
+    "Latitude": -37.8127056,
+    "Longitude": 145.0206085
+  },
+  {
+    "Name": "Route 59 - Stop 40: Nicholson Street",
+    "Latitude": -37.7551814,
+    "Longitude": 144.9201982
+  },
+  {
+    "Name": "Route 57;82 - Stop 40: Epsom Road",
+    "Latitude": -37.770443,
+    "Longitude": 144.9051153
+  },
+  {
+    "Name": "Route 3;3a - Stop 52: Caulfield Park Bowling Club",
+    "Latitude": -37.8730471,
+    "Longitude": 145.0284975
+  },
+  {
+    "Name": "Route 3;3a - Stop 60: Burke Road",
+    "Latitude": -37.8758838,
+    "Longitude": 145.0479845
+  },
+  {
+    "Name": "Route 57;82 - Stop 39: Bowen Street",
+    "Latitude": -37.7708676,
+    "Longitude": 144.9089929
+  },
+  {
+    "Name": "Route 6 - Stop 51: Burke Road",
+    "Latitude": -37.8592861,
+    "Longitude": 145.0511661
+  },
+  {
+    "Name": "Route 67 - Stop 64: Mernda Avenue",
+    "Latitude": -37.8902135,
+    "Longitude": 145.049486
+  },
+  {
+    "Name": "Route 57 - Stop 30: Flemington Racecourse",
+    "Latitude": -37.7859234,
+    "Longitude": 144.9197606
+  },
+  {
+    "Name": "Route 86 - Stop 42: Dundas Street",
+    "Latitude": -37.7520414,
+    "Longitude": 145.0019675
+  },
+  {
+    "Name": "Route 58 - Stop 41: Woodlands Avenue",
+    "Latitude": -37.7489029,
+    "Longitude": 144.9462885
+  },
+  {
+    "Name": "Route 48 - Stop 35: Charles Street",
+    "Latitude": -37.8049737,
+    "Longitude": 145.0360181
+  },
+  {
+    "Name": "Route 109 - Stop 49: Northcote Avenue",
+    "Latitude": -37.8134646,
+    "Longitude": 145.0871818
+  },
+  {
+    "Name": "Route 75 - Stop 60: Millicent Street",
+    "Latitude": -37.8505042,
+    "Longitude": 145.1021542
+  },
+  {
+    "Name": "Route 67 - Stop 42: Hotham Street",
+    "Latitude": -37.8828544,
+    "Longitude": 144.9963573
+  },
+  {
+    "Name": "Route 70 - Stop 44: Derby Street",
+    "Latitude": -37.8323484,
+    "Longitude": 145.0660658
+  },
+  {
+    "Name": "Route 67 - Stop 45: Elsternwick Shopping Centre",
+    "Latitude": -37.8846236,
+    "Longitude": 145.0038254
+  },
+  {
+    "Name": "Route 6 - Stop 38: Orrong Road",
+    "Latitude": -37.8542026,
+    "Longitude": 145.011418
+  },
+  {
+    "Name": "Route 75 - Stop 49: Tyrone Street",
+    "Latitude": -37.844117,
+    "Longitude": 145.0714114
+  },
+  {
+    "Name": "Route 82 - Stop 50: Williamson Road",
+    "Latitude": -37.7753031,
+    "Longitude": 144.8828777
+  },
+  {
+    "Name": "Route 78 - Stop 57: Swan Street",
+    "Latitude": -37.8255604,
+    "Longitude": 144.9980297
+  },
+  {
+    "Name": "Route 70 - Stop 60: Ferndale Street",
+    "Latitude": -37.8370645,
+    "Longitude": 145.1065618
+  },
+  {
+    "Name": "Route 64 - Stop 53: Northcote Avenue",
+    "Latitude": -37.8771878,
+    "Longitude": 145.0239376
+  },
+  {
+    "Name": "Route 30;35 - Stop 6: Melbourne Central and State Library Stations",
+    "Latitude": -37.8094271,
+    "Longitude": 144.9642585
+  },
+  {
+    "Name": "Route 11 - Stop 38: Oakover Road",
+    "Latitude": -37.7482122,
+    "Longitude": 144.9885364
+  },
+  {
+    "Name": "Route 64 - Stop 59: Princes Park",
+    "Latitude": -37.8929942,
+    "Longitude": 145.0209186
+  },
+  {
+    "Name": "Route 1;8 - Stop 128: Mitchell Street",
+    "Latitude": -37.7592624,
+    "Longitude": 144.9745196
+  },
+  {
+    "Name": "Route 59 - Stop 26: Wellington Street",
+    "Latitude": -37.7810952,
+    "Longitude": 144.9326076
+  },
+  {
+    "Name": "Route 67 - Stop 54: Bambra Road",
+    "Latitude": -37.8876651,
+    "Longitude": 145.0286655
+  },
+  {
+    "Name": "Route 70 - Stop 49: Glyndon Road",
+    "Latitude": -37.8338985,
+    "Longitude": 145.0793195
+  },
+  {
+    "Name": "Route 57;82 - Stop 42: Clyde Street",
+    "Latitude": -37.769681,
+    "Longitude": 144.8988145
+  },
+  {
+    "Name": "Route 6 - Stop 36: Chatsworth Road",
+    "Latitude": -37.8534899,
+    "Longitude": 145.0062925
+  },
+  {
+    "Name": "Route 72 - Stop 49: Kenilworth Grove",
+    "Latitude": -37.8538742,
+    "Longitude": 145.0483008
+  },
+  {
+    "Name": "Route 1;8 - Stop 117: Richardson Street",
+    "Latitude": -37.7840059,
+    "Longitude": 144.969749
+  },
+  {
+    "Name": "Route 19 - Stop 13: Gatehouse Street",
+    "Latitude": -37.7924155,
+    "Longitude": 144.9585463
+  },
+  {
+    "Name": "Route 48 - Stop 43: Kew High School",
+    "Latitude": -37.7946781,
+    "Longitude": 145.0610412
+  },
+  {
+    "Name": "Route 70 - Stop 51: Highfield Road",
+    "Latitude": -37.8343599,
+    "Longitude": 145.0848344
+  },
+  {
+    "Name": "Route 58 - Stop 30: Union Square Shopping Centre",
+    "Latitude": -37.7724421,
+    "Longitude": 144.9494942
+  },
+  {
+    "Name": "Route 86 - Stop 37: Woolton Avenue",
+    "Latitude": -37.761263,
+    "Longitude": 145.0002505
+  },
+  {
+    "Name": "Route 72 - Stop 46: Meredith Street",
+    "Latitude": -37.852792,
+    "Longitude": 145.0392303
+  },
+  {
+    "Name": "Route 72 - Stop 36: Canterbury Road",
+    "Latitude": -37.8489757,
+    "Longitude": 145.0093259
+  },
+  {
+    "Name": "Route 48;75 - Stop 13: Simpson Street",
+    "Latitude": -37.8166126,
+    "Longitude": 144.986993
+  },
+  {
+    "Name": "Route 12 - Stop 127: York Street",
+    "Latitude": -37.8306136,
+    "Longitude": 144.9595851
+  },
+  {
+    "Name": "Route 82 - Stop 55: Lyric Street",
+    "Latitude": -37.7821009,
+    "Longitude": 144.8913304
+  },
+  {
+    "Name": "Route 58;59 - Stop 16: Gatehouse Street",
+    "Latitude": -37.796426,
+    "Longitude": 144.9510346
+  },
+  {
+    "Name": "Route 78 - Stop 54: Balmain Street",
+    "Latitude": -37.8305063,
+    "Longitude": 144.9969782
+  },
+  {
+    "Name": "Route 1;8 - Stop 123: Albert Street",
+    "Latitude": -37.7696523,
+    "Longitude": 144.9721256
+  },
+  {
+    "Name": "Route 75 - Stop 56: Alfred Road",
+    "Latitude": -37.8498459,
+    "Longitude": 145.0900158
+  },
+  {
+    "Name": "Route 19 - Stop 14: Macarthur Road",
+    "Latitude": -37.7900387,
+    "Longitude": 144.9586418
+  },
+  {
+    "Name": "Route 72 - Stop 40: Kooyong Road",
+    "Latitude": -37.8503868,
+    "Longitude": 145.0213154
+  },
+  {
+    "Name": "Route 59 - Stop 30: Maribyrnong Road",
+    "Latitude": -37.7729937,
+    "Longitude": 144.926931
+  },
+  {
+    "Name": "Route 3a;16 - Stop 32: Havelock Street",
+    "Latitude": -37.8670303,
+    "Longitude": 144.9785964
+  },
+  {
+    "Name": "Route 72 - Stop 29: Porter Street",
+    "Latitude": -37.8463235,
+    "Longitude": 144.9906037
+  },
+  {
+    "Name": "Route 58 - Stop 33: Daly Street",
+    "Latitude": -37.7695737,
+    "Longitude": 144.9444271
+  },
+  {
+    "Name": "Route 57 - Stop 22: Boundary Road",
+    "Latitude": -37.7891265,
+    "Longitude": 144.9398601
+  },
+  {
+    "Name": "Route 58 - Stop 42: Reynard Street",
+    "Latitude": -37.7464341,
+    "Longitude": 144.9445576
+  },
+  {
+    "Name": "Route 11 - Stop 42: Cramer Street",
+    "Latitude": -37.738896,
+    "Longitude": 144.9900373
+  },
+  {
+    "Name": "Route 57 - Stop 24: Collett Street",
+    "Latitude": -37.7885191,
+    "Longitude": 144.9335113
+  },
+  {
+    "Name": "Route 1 - Stop 31: Graham Street",
+    "Latitude": -37.8456875,
+    "Longitude": 144.9498563
+  },
+  {
+    "Name": "Route 16 - Stop 76: Johnson Street",
+    "Latitude": -37.816732,
+    "Longitude": 145.0365415
+  },
+  {
+    "Name": "Route 6 - Stop 34: Lewisham Road",
+    "Latitude": -37.8526335,
+    "Longitude": 144.9996453
+  },
+  {
+    "Name": "Route 67 - Stop 62: Grange Road",
+    "Latitude": -37.8896456,
+    "Longitude": 145.0445575
+  },
+  {
+    "Name": "Route 75 - Stop 52: Summerhill Road",
+    "Latitude": -37.8482055,
+    "Longitude": 145.0770795
+  },
+  {
+    "Name": "Route 58 - Stop 130: Hawksburn Road",
+    "Latitude": -37.8401804,
+    "Longitude": 145.0019779
+  },
+  {
+    "Name": "Route 67 - Stop 49: Kooyong Road",
+    "Latitude": -37.8859531,
+    "Longitude": 145.0148213
+  },
+  {
+    "Name": "Route 1 - Stop 28: Bridport Street",
+    "Latitude": -37.8404371,
+    "Longitude": 144.9557188
+  },
+  {
+    "Name": "Route 48;109 - Stop 31: Stevenson Street",
+    "Latitude": -37.8100404,
+    "Longitude": 145.0265355
+  },
+  {
+    "Name": "Route 11 - Stop 36: Bracken Avenue",
+    "Latitude": -37.7514403,
+    "Longitude": 144.9912877
+  },
+  {
+    "Name": "Route 72 - Stop 66: Rathmines Road",
+    "Latitude": -37.8215021,
+    "Longitude": 145.0584906
+  },
+  {
+    "Name": "Route 57;82 - Stop 48: Wests Road",
+    "Latitude": -37.7693785,
+    "Longitude": 144.8833306
+  },
+  {
+    "Name": "Route 3;3a - Stop 63: Oak Grove",
+    "Latitude": -37.8768951,
+    "Longitude": 145.056546
+  },
+  {
+    "Name": "Route 1;8 - Stop 124: Victoria Street",
+    "Latitude": -37.7680456,
+    "Longitude": 144.9723982
+  },
+  {
+    "Name": "Route 1;8 - Stop 116: Fenwick Street",
+    "Latitude": -37.7871978,
+    "Longitude": 144.9693104
+  },
+  {
+    "Name": "Route 48 - Stop 24: Hill Street",
+    "Latitude": -37.8179929,
+    "Longitude": 145.0187444
+  },
+  {
+    "Name": "Route 72 - Stop 31: Chapel Street",
+    "Latitude": -37.8467855,
+    "Longitude": 144.993988
+  },
+  {
+    "Name": "Route 67 - Stop 46: Orrong Road",
+    "Latitude": -37.8848462,
+    "Longitude": 145.0056937
+  },
+  {
+    "Name": "Route 57 - Stop 37: Maribyrnong Road",
+    "Latitude": -37.7718977,
+    "Longitude": 144.9160805
+  },
+  {
+    "Name": "Route 1;3;3a;5;6;16;64;67;72 - Stop 1: Melbourne University",
+    "Latitude": -37.7992065,
+    "Longitude": 144.9642398
+  },
+  {
+    "Name": "Route 70 - Stop 10: Swan Street Shopping Centre",
+    "Latitude": -37.8253845,
+    "Longitude": 144.9958909
+  },
+  {
+    "Name": "Route 48 - Stop 37: Kew Cemetery",
+    "Latitude": -37.8024731,
+    "Longitude": 145.0425614
+  },
+  {
+    "Name": "Route 75 - Stop 46: Acheron Avenue",
+    "Latitude": -37.8398234,
+    "Longitude": 145.0662881
+  },
+  {
+    "Name": "Route 86 - Stop 53: Ethel Grove",
+    "Latitude": -37.7291435,
+    "Longitude": 145.0171846
+  },
+  {
+    "Name": "Route 3;3a;5;6;16;64;67;72 - Stop 24: Leopold Street",
+    "Latitude": -37.8411922,
+    "Longitude": 144.9774113
+  },
+  {
+    "Name": "Route 6 - Stop 39: Auburn Grove",
+    "Latitude": -37.8546492,
+    "Longitude": 145.014995
+  },
+  {
+    "Name": "Route 78 - Stop 38: Inkerman Street",
+    "Latitude": -37.865209,
+    "Longitude": 144.9910351
+  },
+  {
+    "Name": "Route 19 - Stop 23: Victoria Street",
+    "Latitude": -37.766956,
+    "Longitude": 144.9622403
+  },
+  {
+    "Name": "Route 82 - Stop 57: Titch Street",
+    "Latitude": -37.7885859,
+    "Longitude": 144.8899222
+  },
+  {
+    "Name": "Route 96 - Stop 17: Reid Street",
+    "Latitude": -37.7855382,
+    "Longitude": 144.977141
+  },
+  {
+    "Name": "Route 72 - Stop 32: Bendigo Street",
+    "Latitude": -37.8474564,
+    "Longitude": 144.9980455
+  },
+  {
+    "Name": "Route 72 - Stop 35: Mathoura Road",
+    "Latitude": -37.8484627,
+    "Longitude": 145.0066732
+  },
+  {
+    "Name": "Route 16 - Stop 63: Toorak Road",
+    "Latitude": -37.843682,
+    "Longitude": 145.0316495
+  },
+  {
+    "Name": "Route 70 - Stop 53: Essex Road",
+    "Latitude": -37.8350846,
+    "Longitude": 145.0909422
+  },
+  {
+    "Name": "Route 6 - Stop 32: Hornby Street",
+    "Latitude": -37.8521734,
+    "Longitude": 144.9963868
+  },
+  {
+    "Name": "Route 109 - Stop 41: Kew Traffic School",
+    "Latitude": -37.8099243,
+    "Longitude": 145.057665
+  },
+  {
+    "Name": "Route 64 - Stop 61: Raynes Street",
+    "Latitude": -37.8966789,
+    "Longitude": 145.0200424
+  },
+  {
+    "Name": "Route 12 - Stop 135: Richardson Street",
+    "Latitude": -37.8472276,
+    "Longitude": 144.9577964
+  },
+  {
+    "Name": "Route 11 - Stop 35: St Georges Road",
+    "Latitude": -37.7516581,
+    "Longitude": 144.994836
+  },
+  {
+    "Name": "Route 6 - Stop 48: Tooronga Road",
+    "Latitude": -37.858087,
+    "Longitude": 145.0410783
+  },
+  {
+    "Name": "Route 96 - Stop 20: Miller Street",
+    "Latitude": -37.7769277,
+    "Longitude": 144.9787029
+  },
+  {
+    "Name": "Route 86 - Stop 45: Bell Street",
+    "Latitude": -37.7452788,
+    "Longitude": 145.0065412
+  },
+  {
+    "Name": "Route 5 - Stop 45: Glenferrie Road",
+    "Latitude": -37.86227,
+    "Longitude": 145.0281942
+  },
+  {
+    "Name": "Route 57 - Stop 12: North Melbourne Town Hall",
+    "Latitude": -37.8032209,
+    "Longitude": 144.9495327
+  },
+  {
+    "Name": "Route 12 - Stop 138: Armstrong Street",
+    "Latitude": -37.8527295,
+    "Longitude": 144.962174
+  },
+  {
+    "Name": "Route 86 - Stop 41: Collins Street",
+    "Latitude": -37.7545695,
+    "Longitude": 145.0013533
+  },
+  {
+    "Name": "Route 58 - Stop 1: Flinders Street",
+    "Latitude": -37.8197208,
+    "Longitude": 144.961347
+  },
+  {
+    "Name": "Route 48 - Stop 25: Brook Street",
+    "Latitude": -37.8158283,
+    "Longitude": 145.0209197
+  },
+  {
+    "Name": "Route 1 - Stop 134: Merribell Avenue",
+    "Latitude": -37.7443601,
+    "Longitude": 144.9777287
+  },
+  {
+    "Name": "Route 58 - Stop 129: Tivoli Road",
+    "Latitude": -37.8397708,
+    "Longitude": 144.9985021
+  },
+  {
+    "Name": "Route 3;3a - Stop 53: Caulfield Park",
+    "Latitude": -37.8733972,
+    "Longitude": 145.0313144
+  },
+  {
+    "Name": "Route 78 - Stop 48: Wilson Street",
+    "Latitude": -37.843621,
+    "Longitude": 144.9948692
+  },
+  {
+    "Name": "Route 6 - Stop 44: Glenferrie Road",
+    "Latitude": -37.8565177,
+    "Longitude": 145.0290295
+  },
+  {
+    "Name": "Route 6 - Stop 46: Fraser Street",
+    "Latitude": -37.8573514,
+    "Longitude": 145.0355933
+  },
+  {
+    "Name": "Route 48;75 - Stop 10: Jolimont Road",
+    "Latitude": -37.8157496,
+    "Longitude": 144.9797873
+  },
+  {
+    "Name": "Route 58 - Stop 28: Park Street",
+    "Latitude": -37.7769981,
+    "Longitude": 144.9497396
+  },
+  {
+    "Name": "Route 3;3a;16 - Stop 44: Ontario Street",
+    "Latitude": -37.8710425,
+    "Longitude": 145.0123787
+  },
+  {
+    "Name": "Route 19 - Stop 12: Morrah Street",
+    "Latitude": -37.7955469,
+    "Longitude": 144.9581695
+  },
+  {
+    "Name": "Route 109 - Stop 36: Glenferrie Road",
+    "Latitude": -37.8076071,
+    "Longitude": 145.0379422
+  },
+  {
+    "Name": "Route 16 - Stop 71: Urquhart Street",
+    "Latitude": -37.8259402,
+    "Longitude": 145.0348629
+  },
+  {
+    "Name": "Route 48 - Stop 48: Osburn Avenue",
+    "Latitude": -37.7934202,
+    "Longitude": 145.0746107
+  },
+  {
+    "Name": "Route 19 - Stop 22: Albert Street",
+    "Latitude": -37.7687606,
+    "Longitude": 144.9619362
+  },
+  {
+    "Name": "Route 58 - Stop 118: Sturt Street",
+    "Latitude": -37.8305953,
+    "Longitude": 144.9650182
+  },
+  {
+    "Name": "Route 67 - Stop 36: St Kilda Primary School",
+    "Latitude": -37.8701713,
+    "Longitude": 144.9883747
+  },
+  {
+    "Name": "Route 12 - Stop 126: City Road",
+    "Latitude": -37.8272443,
+    "Longitude": 144.9578742
+  }  
 ]
