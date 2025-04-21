@@ -1,15 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:http/http.dart' as http;
+import 'dart:async';
 import 'dart:convert';
-
-import '../utils/icon_utils.dart';
-import '../utils/tag_formatter.dart';
-import '../widgets/location_bottom_sheet.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import '../models/marker_type.dart';
 import '../widgets/search_bar.dart';
-import 'search_page.dart';
+import '../widgets/location_bottom_sheet.dart';
 
 class MapHomePage extends StatefulWidget {
   const MapHomePage({super.key});
@@ -19,193 +15,165 @@ class MapHomePage extends StatefulWidget {
 }
 
 class _MapHomePageState extends State<MapHomePage> {
-  final MapController _mapController = MapController();
-  final PopupController _popupController = PopupController();
+  late MapboxMap _mapboxMap;
 
-  List<Marker> _markers = [];
-  double _currentZoom = 15.0;
+  final Map<MarkerType, PointAnnotationManager> _annotationManagers = {};
+  final Map<MarkerType, List<PointAnnotationOptions>> _markerOptions = {};
+  final Map<MarkerType, List<Map<String, dynamic>>> _markerPayloads = {};
+  final Map<MarkerType, List<PointAnnotation>> _activeMarkers = {};
+  final Map<String, Map<String, dynamic>> _markerData = {};
 
-  Map<String, dynamic>? _selectedToilet;
-  Map<String, dynamic>? _selectedTrain;
-  Map<String, dynamic>? _selectedTram;
-  Map<String, dynamic>? _selectedHospital;
+  Timer? _zoomTimer;
+  bool _mapReady = false;
 
-  bool _isBottomSheetVisible = false;
+  static const _baseUrl = 'https://mobility-mate.onrender.com';
 
   @override
-  void initState() {
-    super.initState();
-    fetchAllLocations();
-
-    _mapController.mapEventStream.listen((event) {
-      if (event is MapEventMoveEnd) {
-        setState(() {
-          _currentZoom = _mapController.camera.zoom;
-        });
-      }
-    });
-  }
-
-  Future<void> fetchAllLocations() async {
-    try {
-      final responses = await Future.wait([
-        http.get(Uri.parse('https://mobility-mate.onrender.com/toilet-location-points')),
-        http.get(Uri.parse('https://mobility-mate.onrender.com/train-location-points')),
-        http.get(Uri.parse('https://mobility-mate.onrender.com/tram-location-points')),
-        http.get(Uri.parse('https://mobility-mate.onrender.com/medical-location-points')),
-      ]);
-
-      if (responses.every((res) => res.statusCode == 200)) {
-        final toiletData = json.decode(responses[0].body);
-        final trainData = json.decode(responses[1].body);
-        final tramData = json.decode(responses[2].body);
-        final medicalData = json.decode(responses[3].body);
-
-        final toiletMarkers = _generateMarkers(toiletData, Icons.wc, 'toilet');
-        final trainMarkers = _generateMarkers(trainData, Icons.train, 'train');
-        final tramMarkers = _generateMarkers(tramData, Icons.tram, 'tram');
-        final medicalMarkers = _generateMarkers(medicalData, Icons.local_hospital, 'hospital');
-
-        setState(() {
-          _markers = [
-            ...toiletMarkers,
-            ...trainMarkers,
-            ...tramMarkers,
-            ...medicalMarkers,
-          ];
-        });
-      }
-    } catch (e) {
-      debugPrint('Error fetching data: $e');
-    }
-  }
-
-  List<Marker> _generateMarkers(List<dynamic> data, IconData icon, String type) {
-    return data.map<Marker>((doc) {
-      final lat = (doc['Location_Lat'] as num).toDouble();
-      final lon = (doc['Location_Lon'] as num).toDouble();
-
-      return Marker(
-        point: LatLng(lat, lon),
-        width: 40,
-        height: 40,
-        child: GestureDetector(
-          onTap: () {
-            _mapController.moveAndRotate(LatLng(lat, lon), _currentZoom, 0.0);
-            _popupController.hideAllPopups();
-            setState(() {
-              _selectedToilet = null;
-              _selectedTrain = null;
-              _selectedTram = null;
-              _selectedHospital = null;
-
-              switch (type) {
-                case 'toilet':
-                  _selectedToilet = {'Tags': doc['Tags'] ?? {}};
-                  break;
-                case 'train':
-                  _selectedTrain = {'Tags': doc['Tags'] ?? {}};
-                  break;
-                case 'tram':
-                  _selectedTram = {'Tags': doc['Tags'] ?? {}};
-                  break;
-                case 'hospital':
-                  _selectedHospital = {'Tags': doc['Tags'] ?? {}};
-                  break;
-              }
-
-              _isBottomSheetVisible = true;
-            });
-          },
-          child: Icon(
-            icon,
-            size: 42,
-            color: type == 'toilet'
-                ? const Color.fromRGBO(255, 0, 0, 1)
-                : type == 'train'
-                    ? const Color.fromRGBO(25, 0, 255, 1)
-                    : type == 'tram'
-                        ? const Color.fromRGBO(255, 94, 0, 1)
-                        : const Color.fromRGBO(128, 0, 128, 1),
-          ),
-        ),
-      );
-    }).toList();
+  void dispose() {
+    _zoomTimer?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          _buildMap(),
-          SearchBarWidget(mapController: _mapController),
-          if (_isBottomSheetVisible)
-            LocationBottomSheet(
-              toilet: _selectedToilet,
-              train: _selectedTrain,
-              tram: _selectedTram,
-              hospital: _selectedHospital,
-              onClose: () => setState(() => _isBottomSheetVisible = false),
-            ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Center the map on Melbourne',
-        child: const Icon(Icons.location_city),
-        onPressed: () {
-          setState(() => _isBottomSheetVisible = false);
-          _popupController.hideAllPopups();
-          _mapController.moveAndRotate(LatLng(-37.8136, 144.9631), 14.5, 0.0);
-        },
-      ),
+      body: Stack(children: [
+        MapWidget(
+          key: const ValueKey('map'),
+          styleUri: MapboxStyles.MAPBOX_STREETS,
+          cameraOptions: CameraOptions(
+            center: Point(coordinates: Position(144.9631, -37.8136)),
+            zoom: 13.0,
+          ),
+          onMapCreated: (map) async {
+            _mapboxMap = map;
+            await _initAllTypes();
+            _startZoomListener();
+            setState(() => _mapReady = true);
+          },
+        ),
+        if (_mapReady) SearchBarWidget(mapboxMap: _mapboxMap),
+      ]),
     );
   }
 
-  Widget _buildMap() {
-    return FlutterMap(
-      mapController: _mapController,
-      options: MapOptions(
-        initialCenter: LatLng(-37.8136, 144.9631),
-        initialZoom: 14.5,
-        onTap: (_, __) {
-          _popupController.hideAllPopups();
-          setState(() => _isBottomSheetVisible = false);
+  Future<void> _initAllTypes() async {
+    for (var type in MarkerType.values) {
+      final mgr = await _mapboxMap.annotations.createPointAnnotationManager();
+      _annotationManagers[type] = mgr;
+      _activeMarkers[type] = [];
+
+      await _fetchType(type);
+
+      mgr.addOnPointAnnotationClickListener(
+        PointAnnotationClickListener(onClicked: (annotation) {
+          final data = _markerData[annotation.id];
+          if (data != null) {
+            _showBottomSheet(annotation.id, type);
+          }
+        }),
+      );
+    }
+
+    final z = await _mapboxMap.getCameraState().then((s) => s.zoom);
+    await _updateVisibility(z);
+  }
+
+  Future<void> _fetchType(MarkerType type) async {
+    try {
+      final resp = await http.get(Uri.parse('$_baseUrl/${type.endpoint}'));
+      if (resp.statusCode != 200) {
+        debugPrint('❌ ${type.name} API error ${resp.statusCode}');
+        return;
+      }
+
+      final List<dynamic> list = json.decode(resp.body);
+      debugPrint('✅ ${list.length} ${type.name}s fetched');
+
+      _markerPayloads[type] = list.cast<Map<String, dynamic>>();
+
+      _markerOptions[type] = [
+        for (var item in list)
+          PointAnnotationOptions(
+            geometry: Point(coordinates: Position(
+              (item['Location_Lon'] as num).toDouble(),
+              (item['Location_Lat'] as num).toDouble(),
+            )),
+            iconImage: type.iconName,
+            iconSize: type.size,
+            iconColor: type.color.value,
+          )
+      ];
+    } catch (e) {
+      debugPrint('❌ Error fetching ${type.name}: $e');
+    }
+  }
+
+  void _startZoomListener() {
+    _zoomTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
+      final z = await _mapboxMap.getCameraState().then((s) => s.zoom);
+      await _updateVisibility(z);
+    });
+  }
+
+  Future<void> _updateVisibility(double zoom) async {
+    for (var type in MarkerType.values) {
+      final mgr = _annotationManagers[type]!;
+      final opts = _markerOptions[type]!;
+      final payloads = _markerPayloads[type]!;
+
+      if (type.isVisibleAtZoom(zoom)) {
+        if (_activeMarkers[type]!.isEmpty) {
+          final created = await mgr.createMulti(opts);
+          final List<PointAnnotation> nonNull = <PointAnnotation>[];
+          for (var i = 0; i < created.length; i++) {
+            final ann = created[i];
+            if (ann != null) {
+              nonNull.add(ann);
+              _markerData[ann.id] = payloads[i];
+            }
+          }
+          _activeMarkers[type] = nonNull;
+          debugPrint('🟢 Show ${type.name} at zoom $zoom');
+        }
+      } else {
+        if (_activeMarkers[type]!.isNotEmpty) {
+          await mgr.deleteAll();
+          _activeMarkers[type] = [];
+          debugPrint('🔴 Hide ${type.name} at zoom $zoom');
+        }
+      }
+    }
+  }
+
+  void _showBottomSheet(String id, MarkerType type) {
+    final data = _markerData[id]!;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => LocationBottomSheet(
+        data: data,
+        title: type.displayName,
+        iconGetter: type.iconGetter,
+        onClose: () {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          }
         },
       ),
-      children: [
-        TileLayer(
-          urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-          subdomains: ['a', 'b', 'c'],
-          userAgentPackageName: 'cher0022@student.monash.edu',
-        ),
-        MarkerClusterLayerWidget(
-          options: MarkerClusterLayerOptions(
-            disableClusteringAtZoom: 16,
-            maxClusterRadius: 60,
-            size: const Size(30, 30),
-            markers: _markers,
-            polygonOptions: const PolygonOptions(
-              borderColor: Colors.blueAccent,
-              color: Colors.black12,
-              borderStrokeWidth: 3,
-            ),
-            builder: (context, markers) {
-              return Container(
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  markers.length.toString(),
-                  style: const TextStyle(color: Colors.white),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
+}
+
+/// Pigeon listener adapter
+class PointAnnotationClickListener extends OnPointAnnotationClickListener {
+  final bool Function(PointAnnotation) _onClick;
+  PointAnnotationClickListener({required Function(PointAnnotation) onClicked})
+      : _onClick = ((annotation) {
+          onClicked(annotation);
+          return true;
+        });
+  @override
+  bool onPointAnnotationClick(PointAnnotation annotation) => _onClick(annotation);
 }
