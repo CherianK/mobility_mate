@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
-
 import '../utils/tag_formatter.dart';
 import '../utils/icon_utils.dart';
 
 class LocationBottomSheet extends StatelessWidget {
-  final Map<String, dynamic>? toilet;
-  final Map<String, dynamic>? train;
-  final Map<String, dynamic>? tram;
-  final Map<String, dynamic>? hospital;
+  final Map<String, dynamic> data;
+  final String title;
+  final IconData Function(String, dynamic) iconGetter;
   final VoidCallback onClose;
 
   const LocationBottomSheet({
     super.key,
-    this.toilet,
-    this.train,
-    this.tram,
-    this.hospital,
+    required this.data,
+    required this.title,
+    required this.iconGetter,
     required this.onClose,
   });
 
@@ -61,7 +58,7 @@ class LocationBottomSheet extends StatelessWidget {
                 Expanded(
                   child: SingleChildScrollView(
                     controller: scrollController,
-                    child: _buildContent(context),
+                    child: _buildIconGrid(context),
                   ),
                 ),
               ],
@@ -72,24 +69,9 @@ class LocationBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    if (train != null) return _buildIconGrid(context, train!, getTrainIcon, "Train Information");
-    if (tram != null) return _buildIconGrid(context, tram!, getTramIcon, "Tram Information");
-    if (toilet != null) return _buildIconGrid(context, toilet!, getToiletIcon, "Accessibility Features");
-    if (hospital != null) return _buildHospitalInfo(context, hospital!);
-    return const Center(child: Text("No marker selected"));
-  }
-
-  Widget _buildIconGrid(
-    BuildContext context,
-    Map<String, dynamic> data,
-    IconData Function(String, dynamic) iconGetter,
-    String title,
-  ) {
+  Widget _buildIconGrid(BuildContext context) {
     final Map<String, dynamic> tags = data['Tags'] ?? {};
     final List<MapEntry<String, dynamic>> allTags = tags.entries.toList();
-    final List<MapEntry<String, dynamic>> orderedTags = [];
-
     final prioritizedKeys = [
       'wheelchair',
       'access',
@@ -97,17 +79,15 @@ class LocationBottomSheet extends StatelessWidget {
       'toilets:wheelchair',
     ];
 
-    for (final key in prioritizedKeys) {
-      orderedTags.addAll(
-        allTags.where((entry) => entry.key.toLowerCase() == key),
-      );
-    }
-
-    final remaining = allTags.where((entry) =>
-        !prioritizedKeys.contains(entry.key.toLowerCase())).toList()
-      ..sort((a, b) => a.key.compareTo(b.key));
-
-    orderedTags.addAll(remaining);
+    final List<MapEntry<String, dynamic>> orderedTags = [
+      ...prioritizedKeys
+          .map((key) => allTags.where((entry) => entry.key.toLowerCase() == key))
+          .expand((e) => e),
+      ...allTags
+          .where((entry) => !prioritizedKeys.contains(entry.key.toLowerCase()))
+          .toList()
+        ..sort((a, b) => a.key.compareTo(b.key)),
+    ];
 
     if (orderedTags.isEmpty) {
       return const Padding(
@@ -116,22 +96,13 @@ class LocationBottomSheet extends StatelessWidget {
       );
     }
 
-    String displayTitle = title;
-    final nameKey = tags.keys.firstWhere(
-      (key) => key.toLowerCase() == 'name',
-      orElse: () => '',
-    );
-    if (nameKey.isNotEmpty && tags[nameKey].toString().trim().isNotEmpty) {
-      displayTitle = tags[nameKey].toString();
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
-            displayTitle,
+            title,
             style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
@@ -168,67 +139,6 @@ class LocationBottomSheet extends StatelessWidget {
           },
         ),
       ],
-    );
-  }
-
-  Widget _buildHospitalInfo(BuildContext context, Map<String, dynamic> data) {
-    final tags = data['Tags'] ?? {};
-    final fixedKeys = [
-      'wheelchair',
-      'healthcare',
-      'name',
-      'amenity',
-      'opening_hours',
-      'phone',
-      'website'
-    ];
-
-    List<Widget> rows = [];
-
-    for (String key in fixedKeys) {
-      if (tags.containsKey(key)) {
-        rows.add(_hospitalRow(key, tags[key]));
-      }
-    }
-
-    final remainingKeys = tags.keys
-        .where((k) => !fixedKeys.contains(k))
-        .toList()
-      ..sort();
-    for (String key in remainingKeys) {
-      rows.add(_hospitalRow(key, tags[key]));
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            'Hospital Information',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-        ),
-        ...rows,
-      ],
-    );
-  }
-
-  Widget _hospitalRow(String key, dynamic value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        children: [
-          Icon(getHospitalIcon(key, value), size: 36),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              formatTag(key, value),
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

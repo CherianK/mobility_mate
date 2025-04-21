@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:flutter_map/flutter_map.dart';
-
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../screens/search_page.dart';
 
 class SearchBarWidget extends StatelessWidget {
-  final MapController mapController;
+  final MapboxMap mapboxMap;
 
-  const SearchBarWidget({super.key, required this.mapController});
+  const SearchBarWidget({super.key, required this.mapboxMap});
 
   @override
   Widget build(BuildContext context) {
@@ -21,16 +19,43 @@ class SearchBarWidget extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (_) => const SearchPage()),
           );
+
           if (result != null && result is Map<String, dynamic>) {
             final lat = result['lat'] as double;
             final lon = result['lon'] as double;
-            mapController.moveAndRotate(LatLng(lat, lon), 15.0, 0.0);
+            debugPrint('Moving to location: lat=$lat, lon=$lon');
+
+            try {
+              // First update camera position
+              await mapboxMap.setCamera(
+                CameraOptions(
+                  center: Point(coordinates: Position(lon, lat)),
+                  zoom: 15.0,
+                ),
+              );
+              
+              // Then add a temporary marker at the selected location
+              final annotationManager = await mapboxMap.annotations.createPointAnnotationManager();
+              await annotationManager.create(
+                PointAnnotationOptions(
+                  geometry: Point(coordinates: Position(lon, lat)),
+                  iconImage: 'marker',
+                  iconSize: 1.5,
+                ),
+              );
+
+              // Remove the marker after a few seconds
+              await Future.delayed(const Duration(seconds: 3));
+              await annotationManager.deleteAll();
+            } catch (e) {
+              debugPrint('Error handling location selection: $e');
+            }
           }
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color.fromRGBO(255, 255, 255, 1),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(30),
             boxShadow: const [
               BoxShadow(
