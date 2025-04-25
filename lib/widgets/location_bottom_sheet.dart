@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import '../utils/tag_formatter.dart';
 import '../utils/icon_utils.dart';
+import '../screens/report_issue_screen.dart'; // Adjust this import if needed
 
 class LocationBottomSheet extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -96,16 +99,60 @@ class LocationBottomSheet extends StatelessWidget {
       );
     }
 
+    final lat = data['Location_Lat']?.toString() ?? '';
+    final lon = data['Location_Lon']?.toString() ?? '';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Title
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
+
+        // Buttons
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lon');
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+                icon: const Icon(Icons.directions),
+                label: const Text('Get Directions'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => ReportIssueScreen()),
+                  );
+                },
+                icon: const Icon(Icons.report_problem_outlined),
+                label: const Text('Report'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Share.share("Check this location: https://maps.google.com/?q=$lat,$lon");
+                },
+                icon: const Icon(Icons.share),
+                label: const Text('Share'),
+              ),
+            ],
+          ),
+        ),
+
+        // Icon Grid
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
