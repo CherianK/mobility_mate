@@ -1,4 +1,5 @@
 flask
 flask-cors
-pymongo
+flask-admin
+flask-pymongo
 python-dotenv
