@@ -6,7 +6,7 @@ from flask_admin.contrib.pymongo import ModelView
 from wtforms import Form
 from dotenv import load_dotenv
 import os
-
+from routes.report_routes import report_bp
 from routes.location_routes import location_bp
 
 # Load environment variables
@@ -23,6 +23,7 @@ mongo = PyMongo(app)
 
 # Register API routes
 app.register_blueprint(location_bp)
+app.register_blueprint(report_bp)
 
 # Home route
 @app.route('/')
