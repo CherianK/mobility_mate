@@ -24,6 +24,7 @@ dependencies:
   
   url_launcher: ^6.2.5
   share_plus: ^7.2.1
+  geolocator: ^10.1.0
 
 dev_dependencies:
   flutter_test:
