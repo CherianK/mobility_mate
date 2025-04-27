@@ -3,6 +3,7 @@ import 'map_home_page.dart';
 import 'find_toilet_page.dart';
 import 'upload_page.dart';
 import 'share_page.dart';
+import 'vote_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -19,6 +20,7 @@ class _MainScreenState extends State<MainScreen> {
     const FindToiletPage(),
     const UploadPage(),
     const SharePage(),
+    const VotePage(),
   ];
 
   @override
@@ -49,6 +51,10 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.share),
             label: 'Share',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.thumbs_up_down),
+            label: 'Vote',
           ),
         ],
       ),
