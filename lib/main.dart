@@ -7,6 +7,7 @@ import 'screens/find_toilet_page.dart';
 import 'screens/upload_page.dart';
 import 'screens/share_page.dart';
 import 'screens/splash_screen.dart';
+import 'screens/vote_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,10 +43,12 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   static const List<Widget> _pages = <Widget>[
+
     const MapHomePage(),
     const FindToiletPage(),
     const UploadPage(),
     const SharePage(),
+    const VotePage(),
   ];
 
   void _onItemTapped(int index) {
@@ -84,6 +87,11 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.share_outlined),
             selectedIcon: Icon(Icons.share),
             label: 'Share',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.thumbs_up_down_outlined),
+            selectedIcon: Icon(Icons.thumbs_up_down),
+            label: 'Vote',
           ),
         ],
       ),
