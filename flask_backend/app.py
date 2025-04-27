@@ -40,8 +40,8 @@ admin = Admin(app, name="MobilityMate Admin", template_mode="bootstrap4")
 
 class ReadOnlyModelView(ModelView):
     column_list = ('Location_Lat', 'Location_Lon', 'Accessibility_Type_Name', 'Metadata', 'Tags')
-    can_create = False
-    can_edit = False
+    can_create = True
+    can_edit = True
     can_delete = False
 
     def scaffold_form(self):
