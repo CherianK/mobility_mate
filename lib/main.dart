@@ -44,11 +44,11 @@ class _MainScreenState extends State<MainScreen> {
 
   static const List<Widget> _pages = <Widget>[
 
-    const MapHomePage(),
-    const FindToiletPage(),
-    const UploadPage(),
-    const SharePage(),
-    const VotePage(),
+    MapHomePage(),
+    FindToiletPage(),
+    UploadPage(venueData: {}),
+    SharePage(),
+    VotePage(),
   ];
 
   void _onItemTapped(int index) {

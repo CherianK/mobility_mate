@@ -37,7 +37,7 @@ class SearchBarWidget extends StatelessWidget {
                 geometry: Point(coordinates: Position(lon, lat)),
                 iconImage: 'marker', 
                 iconSize: 5.0, 
-                iconColor: Colors.red.value,
+                iconColor: Colors.red.toARGB32(),
               ),
             );
 

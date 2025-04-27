@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 class ReportIssueScreen extends StatefulWidget {
+  const ReportIssueScreen({super.key});
+
   @override
-  _ReportIssueScreenState createState() => _ReportIssueScreenState();
+  ReportIssueScreenState createState() => ReportIssueScreenState();
 }
 
-class _ReportIssueScreenState extends State<ReportIssueScreen> {
+class ReportIssueScreenState extends State<ReportIssueScreen> {
   // Toggle options
   Map<String, bool> issueToggles = {
     'No wheelchair access': false,
@@ -85,7 +87,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('🚩 What\'s wrong?',
+            Text('What\'s wrong?',
                 style: Theme.of(context)
                     .textTheme
                     .titleMedium
@@ -106,7 +108,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
             }),
 
             SizedBox(height: 16),
-            Text('❓ Issue type',
+            Text('Issue type',
                 style: Theme.of(context)
                     .textTheme
                     .titleMedium
@@ -133,7 +135,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
             }),
 
             SizedBox(height: 16),
-            Text('🧠 How do you know?',
+            Text('How do you know?',
                 style: Theme.of(context)
                     .textTheme
                     .titleMedium

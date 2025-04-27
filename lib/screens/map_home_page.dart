@@ -7,7 +7,7 @@ import 'package:geolocator/geolocator.dart' as geo;
 import '../models/marker_type.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/location_bottom_sheet.dart';
-import '../utils/location_helper.dart'; // 👈 Don't forget this!
+import '../utils/location_helper.dart'; // 
 
 class MapHomePage extends StatefulWidget {
   const MapHomePage({super.key});
@@ -34,7 +34,7 @@ final Map<String, Map<String, dynamic>> _markerData = {};
   static const _baseUrl = 'https://mobility-mate.onrender.com';
 
   // Default Melbourne center (will update later if user location fetched)
-  Point _initialCameraCenter = Point(coordinates: Position(144.9631, -37.8136));
+  final Point _initialCameraCenter = Point(coordinates: Position(144.9631, -37.8136));
 
   @override
   void initState() {
@@ -56,9 +56,9 @@ final Map<String, Map<String, dynamic>> _markerData = {};
         ),
         MapAnimationOptions(duration: 1000),
       );
-      debugPrint('✅ Initial centering on user location: ${position.latitude}, ${position.longitude}');
+      debugPrint(' Initial centering on user location: ${position.latitude}, ${position.longitude}');
     } else {
-      debugPrint('⚠️ Using Melbourne center for initial load');
+      debugPrint(' Using Melbourne center for initial load');
     }
     
     setState(() {
@@ -72,6 +72,7 @@ final Map<String, Map<String, dynamic>> _markerData = {};
     try {
       bool serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
@@ -96,6 +97,7 @@ final Map<String, Map<String, dynamic>> _markerData = {};
       if (permission == geo.LocationPermission.denied) {
         permission = await geo.Geolocator.requestPermission();
         if (permission == geo.LocationPermission.denied) {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Text(
@@ -118,6 +120,7 @@ final Map<String, Map<String, dynamic>> _markerData = {};
       }
 
       if (permission == geo.LocationPermission.deniedForever) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
@@ -146,9 +149,10 @@ final Map<String, Map<String, dynamic>> _markerData = {};
         ),
         MapAnimationOptions(duration: 1000),
       );
-      debugPrint('✅ Centered on user location: ${position.latitude}, ${position.longitude}');
+      debugPrint(' Centered on user location: ${position.latitude}, ${position.longitude}');
     } catch (e) {
-      debugPrint('❌ Error getting location: $e');
+      debugPrint(' Error getting location: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -283,12 +287,12 @@ final Map<String, Map<String, dynamic>> _markerData = {};
     try {
       final resp = await http.get(Uri.parse('$_baseUrl/${type.endpoint}'));
       if (resp.statusCode != 200) {
-        debugPrint('❌ ${type.name} API error ${resp.statusCode}');
+        debugPrint(' ${type.name} API error ${resp.statusCode}');
         return;
       }
 
       final List<dynamic> list = json.decode(resp.body);
-      debugPrint('✅ ${list.length} ${type.name}s fetched');
+      debugPrint(' ${list.length} ${type.name}s fetched');
 
       _markerPayloads[type] = list.cast<Map<String, dynamic>>();
 
@@ -301,11 +305,11 @@ final Map<String, Map<String, dynamic>> _markerData = {};
             )),
             iconImage: type.iconName,
             iconSize: type.size,
-            iconColor: type.color.value,
+            iconColor: type.color.toARGB32(),
           )
       ];
     } catch (e) {
-      debugPrint('❌ Error fetching ${type.name}: $e');
+      debugPrint(' Error fetching ${type.name}: $e');
     }
   }
 
@@ -338,13 +342,13 @@ final Map<String, Map<String, dynamic>> _markerData = {};
             }
           }
           _activeMarkers[type] = nonNull;
-          debugPrint('🟢 Show ${type.name} markers at zoom $zoom');
+          debugPrint(' Show ${type.name} markers at zoom $zoom');
         }
       } else {
         if (_activeMarkers[type]!.isNotEmpty) {
           await mgr.deleteAll();
           _activeMarkers[type] = [];
-          debugPrint('🔴 Hide ${type.name} markers at zoom $zoom');
+          debugPrint(' Hide ${type.name} markers at zoom $zoom');
         }
       }
     }
@@ -356,6 +360,8 @@ final Map<String, Map<String, dynamic>> _markerData = {};
       Navigator.of(context).pop();
       await _activeSheet;
     }
+
+    if (!mounted) return;
 
     final data = _markerData[id]!;
     final markerType = data['marker_type'] as MarkerType;

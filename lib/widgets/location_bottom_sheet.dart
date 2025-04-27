@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import '../utils/tag_formatter.dart';
 import '../screens/report_issue_screen.dart'; // Adjust this import if needed
+import '../screens/upload_page.dart';
 
 class LocationBottomSheet extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -146,6 +147,20 @@ class LocationBottomSheet extends StatelessWidget {
                 },
                 icon: const Icon(Icons.share),
                 label: const Text('Share'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => UploadPage(
+                        venueData: data, // or pass only the fields you need
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.upload),
+                label: const Text('Upload'),
               ),
             ],
           ),

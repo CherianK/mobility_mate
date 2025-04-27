@@ -18,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const MapHomePage(),
     const FindToiletPage(),
-    const UploadPage(),
+    const UploadPage(venueData: {}),
     const SharePage(),
     const VotePage(),
   ];
