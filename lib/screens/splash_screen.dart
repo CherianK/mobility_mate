@@ -13,8 +13,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     // Delay for 2.5 seconds before navigating to the map
-    Timer(const Duration(seconds: 5), () {
-      Navigator.pushReplacementNamed(context, '/map');
+    Timer(const Duration(seconds: 3), () {
+      Navigator.pushReplacementNamed(context, '/main');
     });
   }
 
