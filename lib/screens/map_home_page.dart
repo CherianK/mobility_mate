@@ -7,7 +7,6 @@ import 'package:geolocator/geolocator.dart' as geo;
 import '../models/marker_type.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/location_bottom_sheet.dart';
-import '../config/theme.dart';
 import '../utils/location_helper.dart'; // 👈 Don't forget this!
 
 class MapHomePage extends StatefulWidget {
@@ -28,7 +27,9 @@ class _MapHomePageState extends State<MapHomePage> {
   final Map<MarkerType, List<PointAnnotationOptions>> _markerOptions = {};
   final Map<MarkerType, List<Map<String, dynamic>>> _markerPayloads = {};
   final Map<MarkerType, List<PointAnnotation>> _activeMarkers = {};
-  final Map<String, Map<String, dynamic>> _markerData = {};
+final Map<String, Map<String, dynamic>> _markerData = {};
+  /// Keeps track of the bottom‑sheet that is currently displayed
+  Future<void>? _activeSheet;
 
   static const _baseUrl = 'https://mobility-mate.onrender.com';
 
@@ -245,7 +246,11 @@ class _MapHomePageState extends State<MapHomePage> {
   }
 
   Future<void> _initAllTypes() async {
+    // Create a single click listener that will handle all marker types
+    bool isProcessingClick = false;
+
     for (var type in MarkerType.values) {
+      final currentType = type; // capture value for callbacks
       final mgr = await _mapboxMap.annotations.createPointAnnotationManager();
       _annotationManagers[type] = mgr;
       _activeMarkers[type] = [];
@@ -254,9 +259,17 @@ class _MapHomePageState extends State<MapHomePage> {
 
       mgr.addOnPointAnnotationClickListener(
         PointAnnotationClickListener(onClicked: (annotation) {
+          // If we're already processing a click, ignore this one
+          if (isProcessingClick) {
+            return;
+          }
+          
           final data = _markerData[annotation.id];
           if (data != null) {
-            _showBottomSheet(annotation.id, type);
+            isProcessingClick = true;
+            _showBottomSheet(annotation.id, currentType).then((_) {
+              isProcessingClick = false;
+            });
           }
         }),
       );
@@ -317,7 +330,11 @@ class _MapHomePageState extends State<MapHomePage> {
             final ann = created[i];
             if (ann != null) {
               nonNull.add(ann);
-              _markerData[ann.id] = payloads[i];
+              // Store both the payload data and the marker type
+              _markerData[ann.id] = {
+                ...payloads[i],
+                'marker_type': type,
+              };
             }
           }
           _activeMarkers[type] = nonNull;
@@ -333,23 +350,30 @@ class _MapHomePageState extends State<MapHomePage> {
     }
   }
 
-  void _showBottomSheet(String id, MarkerType type) {
+  Future<void> _showBottomSheet(String id, MarkerType type) async {
+    // If a sheet is already open, dismiss it and wait until it is gone
+    if (_activeSheet != null) {
+      Navigator.of(context).pop();
+      await _activeSheet;
+    }
+
     final data = _markerData[id]!;
-    showModalBottomSheet(
+    final markerType = data['marker_type'] as MarkerType;
+    final sheetFuture = showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => LocationBottomSheet(
+      builder: (sheetCtx) => LocationBottomSheet(
         data: data,
-        title: type.displayName,
-        iconGetter: type.iconGetter,
-        onClose: () {
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop();
-          }
-        },
+        title: markerType.displayName,
+        iconGetter: markerType.iconGetter,
+        onClose: () => Navigator.of(sheetCtx).maybePop(),
       ),
     );
+    
+    _activeSheet = sheetFuture;
+    await sheetFuture;
+    _activeSheet = null;
   }
 }
 
