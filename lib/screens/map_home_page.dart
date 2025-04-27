@@ -3,10 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 import '../models/marker_type.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/location_bottom_sheet.dart';
-import '../config/theme.dart';
+import '../utils/location_helper.dart'; // 👈 Don't forget this!
 
 class MapHomePage extends StatefulWidget {
   const MapHomePage({super.key});
@@ -19,44 +20,154 @@ class _MapHomePageState extends State<MapHomePage> {
   late MapboxMap _mapboxMap;
   bool _isLoading = true;
   bool _isLocating = false;
+  Timer? _zoomTimer;
+  bool _mapReady = false;
 
   final Map<MarkerType, PointAnnotationManager> _annotationManagers = {};
   final Map<MarkerType, List<PointAnnotationOptions>> _markerOptions = {};
   final Map<MarkerType, List<Map<String, dynamic>>> _markerPayloads = {};
   final Map<MarkerType, List<PointAnnotation>> _activeMarkers = {};
-  final Map<String, Map<String, dynamic>> _markerData = {};
-
-  Timer? _zoomTimer;
-  bool _mapReady = false;
+final Map<String, Map<String, dynamic>> _markerData = {};
+  /// Keeps track of the bottom‑sheet that is currently displayed
+  Future<void>? _activeSheet;
 
   static const _baseUrl = 'https://mobility-mate.onrender.com';
 
+  // Default Melbourne center (will update later if user location fetched)
+  Point _initialCameraCenter = Point(coordinates: Position(144.9631, -37.8136));
+
   @override
-  void dispose() {
-    _zoomTimer?.cancel();
-    super.dispose();
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> _onMapInitialized(MapboxMap map) async {
+    _mapboxMap = map;
+    await _initAllTypes();
+    _startZoomListener();
+    
+    // Quietly try to get user location, fallback to Melbourne if not available
+    final position = await LocationHelper.getCurrentLocation();
+    if (position != null) {
+      await _mapboxMap.flyTo(
+        CameraOptions(
+          center: Point(coordinates: Position(position.longitude, position.latitude)),
+          zoom: 15.0,
+        ),
+        MapAnimationOptions(duration: 1000),
+      );
+      debugPrint('✅ Initial centering on user location: ${position.latitude}, ${position.longitude}');
+    } else {
+      debugPrint('⚠️ Using Melbourne center for initial load');
+    }
+    
+    setState(() {
+      _mapReady = true;
+      _isLoading = false;
+    });
   }
 
   Future<void> _goToCurrentLocation() async {
     setState(() => _isLocating = true);
     try {
-      // Get the current camera state
-      final cameraState = await _mapboxMap.getCameraState();
-      final currentCenter = cameraState.center;
-      
-      // Fly to the current location with animation
+      bool serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Location services are disabled. Please enable location services in your device settings.',
+              style: TextStyle(color: Colors.white),
+            ),
+            action: SnackBarAction(
+              label: 'Settings',
+              textColor: Colors.white,
+              onPressed: () async {
+                await geo.Geolocator.openLocationSettings();
+              },
+            ),
+            duration: const Duration(seconds: 5),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      geo.LocationPermission permission = await geo.Geolocator.checkPermission();
+      if (permission == geo.LocationPermission.denied) {
+        permission = await geo.Geolocator.requestPermission();
+        if (permission == geo.LocationPermission.denied) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Location permission denied. Please enable location permissions to use this feature.',
+                style: TextStyle(color: Colors.white),
+              ),
+              action: SnackBarAction(
+                label: 'Settings',
+                textColor: Colors.white,
+                onPressed: () async {
+                  await geo.Geolocator.openAppSettings();
+                },
+              ),
+              duration: const Duration(seconds: 5),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
+
+      if (permission == geo.LocationPermission.deniedForever) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Location permissions are permanently denied. Please enable them in app settings.',
+              style: TextStyle(color: Colors.white),
+            ),
+            action: SnackBarAction(
+              label: 'Settings',
+              textColor: Colors.white,
+              onPressed: () async {
+                await geo.Geolocator.openAppSettings();
+              },
+            ),
+            duration: const Duration(seconds: 5),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final position = await geo.Geolocator.getCurrentPosition();
       await _mapboxMap.flyTo(
         CameraOptions(
-          center: currentCenter,
+          center: Point(coordinates: Position(position.longitude, position.latitude)),
           zoom: 15.0,
         ),
         MapAnimationOptions(duration: 1000),
       );
+      debugPrint('✅ Centered on user location: ${position.latitude}, ${position.longitude}');
     } catch (e) {
-      debugPrint('Error getting location: $e');
+      debugPrint('❌ Error getting location: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Unable to get your location. Please try again.',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
     } finally {
       setState(() => _isLocating = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _zoomTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -68,23 +179,13 @@ class _MapHomePageState extends State<MapHomePage> {
             key: const ValueKey('map'),
             styleUri: MapboxStyles.MAPBOX_STREETS,
             cameraOptions: CameraOptions(
-              center: Point(coordinates: Position(144.9631, -37.8136)),
+              center: _initialCameraCenter,
               zoom: 13.0,
             ),
-            onMapCreated: (map) async {
-              _mapboxMap = map;
-              await _initAllTypes();
-              _startZoomListener();
-              setState(() {
-                _mapReady = true;
-                _isLoading = false;
-              });
-            },
+            onMapCreated: _onMapInitialized,
           ),
           if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
+            const Center(child: CircularProgressIndicator()),
           if (_mapReady) ...[
             Positioned(
               top: MediaQuery.of(context).padding.top + 16,
@@ -115,9 +216,9 @@ class _MapHomePageState extends State<MapHomePage> {
                   FloatingActionButton(
                     heroTag: 'zoom_in',
                     onPressed: () async {
-                      final currentZoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
+                      final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
                       await _mapboxMap.flyTo(
-                        CameraOptions(zoom: currentZoom + 1),
+                        CameraOptions(zoom: zoom + 1),
                         MapAnimationOptions(duration: 300),
                       );
                     },
@@ -127,9 +228,9 @@ class _MapHomePageState extends State<MapHomePage> {
                   FloatingActionButton(
                     heroTag: 'zoom_out',
                     onPressed: () async {
-                      final currentZoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
+                      final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
                       await _mapboxMap.flyTo(
-                        CameraOptions(zoom: currentZoom - 1),
+                        CameraOptions(zoom: zoom - 1),
                         MapAnimationOptions(duration: 300),
                       );
                     },
@@ -145,7 +246,11 @@ class _MapHomePageState extends State<MapHomePage> {
   }
 
   Future<void> _initAllTypes() async {
+    // Create a single click listener that will handle all marker types
+    bool isProcessingClick = false;
+
     for (var type in MarkerType.values) {
+      final currentType = type; // capture value for callbacks
       final mgr = await _mapboxMap.annotations.createPointAnnotationManager();
       _annotationManagers[type] = mgr;
       _activeMarkers[type] = [];
@@ -154,9 +259,17 @@ class _MapHomePageState extends State<MapHomePage> {
 
       mgr.addOnPointAnnotationClickListener(
         PointAnnotationClickListener(onClicked: (annotation) {
+          // If we're already processing a click, ignore this one
+          if (isProcessingClick) {
+            return;
+          }
+          
           final data = _markerData[annotation.id];
           if (data != null) {
-            _showBottomSheet(annotation.id, type);
+            isProcessingClick = true;
+            _showBottomSheet(annotation.id, currentType).then((_) {
+              isProcessingClick = false;
+            });
           }
         }),
       );
@@ -217,43 +330,54 @@ class _MapHomePageState extends State<MapHomePage> {
             final ann = created[i];
             if (ann != null) {
               nonNull.add(ann);
-              _markerData[ann.id] = payloads[i];
+              // Store both the payload data and the marker type
+              _markerData[ann.id] = {
+                ...payloads[i],
+                'marker_type': type,
+              };
             }
           }
           _activeMarkers[type] = nonNull;
-          debugPrint('🟢 Show ${type.name} at zoom $zoom');
+          debugPrint('🟢 Show ${type.name} markers at zoom $zoom');
         }
       } else {
         if (_activeMarkers[type]!.isNotEmpty) {
           await mgr.deleteAll();
           _activeMarkers[type] = [];
-          debugPrint('🔴 Hide ${type.name} at zoom $zoom');
+          debugPrint('🔴 Hide ${type.name} markers at zoom $zoom');
         }
       }
     }
   }
 
-  void _showBottomSheet(String id, MarkerType type) {
+  Future<void> _showBottomSheet(String id, MarkerType type) async {
+    // If a sheet is already open, dismiss it and wait until it is gone
+    if (_activeSheet != null) {
+      Navigator.of(context).pop();
+      await _activeSheet;
+    }
+
     final data = _markerData[id]!;
-    showModalBottomSheet(
+    final markerType = data['marker_type'] as MarkerType;
+    final sheetFuture = showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => LocationBottomSheet(
+      builder: (sheetCtx) => LocationBottomSheet(
         data: data,
-        title: type.displayName,
-        iconGetter: type.iconGetter,
-        onClose: () {
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop();
-          }
-        },
+        title: markerType.displayName,
+        iconGetter: markerType.iconGetter,
+        onClose: () => Navigator.of(sheetCtx).maybePop(),
       ),
     );
+    
+    _activeSheet = sheetFuture;
+    await sheetFuture;
+    _activeSheet = null;
   }
 }
 
-/// Pigeon listener adapter
+/// Helper class for marker click
 class PointAnnotationClickListener extends OnPointAnnotationClickListener {
   final bool Function(PointAnnotation) _onClick;
   PointAnnotationClickListener({required Function(PointAnnotation) onClicked})

@@ -48,9 +48,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    // Delay for 3 seconds before navigating to the map
+    // ✅ Navigate to '/main'
     Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/map');
+      Navigator.pushReplacementNamed(context, '/main');
     });
   }
 
@@ -120,7 +120,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     ),
                   ),
                   const SizedBox(height: 24),
-                  // Call to action with slide animation
+                  // Tagline with slide animation
                   SlideTransition(
                     position: _slideAnimation,
                     child: Container(
@@ -161,7 +161,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     ),
                   ),
                   const SizedBox(height: 40),
-                  // Loading indicator with custom color
+                  // Loading spinner
                   SizedBox(
                     width: 40,
                     height: 40,
