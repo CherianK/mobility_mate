@@ -6,6 +6,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../models/marker_type.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/location_bottom_sheet.dart';
+import '../config/theme.dart';
 
 class MapHomePage extends StatefulWidget {
   const MapHomePage({super.key});
@@ -16,6 +17,8 @@ class MapHomePage extends StatefulWidget {
 
 class _MapHomePageState extends State<MapHomePage> {
   late MapboxMap _mapboxMap;
+  bool _isLoading = true;
+  bool _isLocating = false;
 
   final Map<MarkerType, PointAnnotationManager> _annotationManagers = {};
   final Map<MarkerType, List<PointAnnotationOptions>> _markerOptions = {};
@@ -34,26 +37,110 @@ class _MapHomePageState extends State<MapHomePage> {
     super.dispose();
   }
 
+  Future<void> _goToCurrentLocation() async {
+    setState(() => _isLocating = true);
+    try {
+      // Get the current camera state
+      final cameraState = await _mapboxMap.getCameraState();
+      final currentCenter = cameraState.center;
+      
+      // Fly to the current location with animation
+      await _mapboxMap.flyTo(
+        CameraOptions(
+          center: currentCenter,
+          zoom: 15.0,
+        ),
+        MapAnimationOptions(duration: 1000),
+      );
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+    } finally {
+      setState(() => _isLocating = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(children: [
-        MapWidget(
-          key: const ValueKey('map'),
-          styleUri: MapboxStyles.MAPBOX_STREETS,
-          cameraOptions: CameraOptions(
-            center: Point(coordinates: Position(144.9631, -37.8136)),
-            zoom: 13.0,
+      body: Stack(
+        children: [
+          MapWidget(
+            key: const ValueKey('map'),
+            styleUri: MapboxStyles.MAPBOX_STREETS,
+            cameraOptions: CameraOptions(
+              center: Point(coordinates: Position(144.9631, -37.8136)),
+              zoom: 13.0,
+            ),
+            onMapCreated: (map) async {
+              _mapboxMap = map;
+              await _initAllTypes();
+              _startZoomListener();
+              setState(() {
+                _mapReady = true;
+                _isLoading = false;
+              });
+            },
           ),
-          onMapCreated: (map) async {
-            _mapboxMap = map;
-            await _initAllTypes();
-            _startZoomListener();
-            setState(() => _mapReady = true);
-          },
-        ),
-        if (_mapReady) SearchBarWidget(mapboxMap: _mapboxMap),
-      ]),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+          if (_mapReady) ...[
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 16,
+              left: 16,
+              right: 16,
+              child: SearchBarWidget(mapboxMap: _mapboxMap),
+            ),
+            Positioned(
+              right: 16,
+              bottom: MediaQuery.of(context).padding.bottom + 80,
+              child: Column(
+                children: [
+                  FloatingActionButton(
+                    heroTag: 'location',
+                    onPressed: _isLocating ? null : _goToCurrentLocation,
+                    child: _isLocating
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Icon(Icons.my_location),
+                  ),
+                  const SizedBox(height: 16),
+                  FloatingActionButton(
+                    heroTag: 'zoom_in',
+                    onPressed: () async {
+                      final currentZoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
+                      await _mapboxMap.flyTo(
+                        CameraOptions(zoom: currentZoom + 1),
+                        MapAnimationOptions(duration: 300),
+                      );
+                    },
+                    child: const Icon(Icons.add),
+                  ),
+                  const SizedBox(height: 16),
+                  FloatingActionButton(
+                    heroTag: 'zoom_out',
+                    onPressed: () async {
+                      final currentZoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
+                      await _mapboxMap.flyTo(
+                        CameraOptions(zoom: currentZoom - 1),
+                        MapAnimationOptions(duration: 300),
+                      );
+                    },
+                    child: const Icon(Icons.remove),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 

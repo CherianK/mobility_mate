@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'config/mapbox_config.dart';
+import 'config/theme.dart';
 import 'screens/map_home_page.dart';
 import 'screens/find_toilet_page.dart';
 import 'screens/upload_page.dart';
@@ -19,7 +20,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Mobility Mate',
-      theme: ThemeData.light(),
+      theme: AppTheme.lightTheme,
+      debugShowCheckedModeBanner: false,
       home: const MainScreen(),
     );
   }
@@ -55,29 +57,31 @@ class _MainScreenState extends State<MainScreen> {
         index: _selectedIndex,
         children: _pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: _onItemTapped,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
+          NavigationDestination(
+            icon: Icon(Icons.search_outlined),
+            selectedIcon: Icon(Icons.search),
             label: 'Find Toilet',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.upload),
+          NavigationDestination(
+            icon: Icon(Icons.upload_outlined),
+            selectedIcon: Icon(Icons.upload),
             label: 'Upload',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.share),
+          NavigationDestination(
+            icon: Icon(Icons.share_outlined),
+            selectedIcon: Icon(Icons.share),
             label: 'Share',
           ),
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        onTap: _onItemTapped,
       ),
     );
   }
