@@ -666,7 +666,7 @@ class _VotePageState extends State<VotePage> {
                                   searchLocations(location['name']);
                                 },
                               );
-                            }).toList()
+                            })
                           ],
                         )
                       : ListView(
@@ -687,7 +687,7 @@ class _VotePageState extends State<VotePage> {
                                       _addToRecentSearches(location);
                                       _showLocationDetails(location);
                                     },
-                                  )).toList(),
+                                  )),
                             ],
                             if (mapboxResults.isNotEmpty) ...[
                               const Padding(
@@ -705,7 +705,7 @@ class _VotePageState extends State<VotePage> {
                                       _addToRecentSearches(location);
                                       _showLocationDetails(location);
                                     },
-                                  )).toList(),
+                                  )),
                             ],
                             if (localResults.isEmpty && mapboxResults.isEmpty)
                               const Padding(

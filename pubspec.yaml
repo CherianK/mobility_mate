@@ -23,8 +23,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   
   url_launcher: ^6.2.5
-  share_plus: ^7.2.1
-  geolocator: ^10.1.0
+  share_plus: ^11.0.0
+  geolocator: ^14.0.0
+  image_picker: ^1.0.1
 
 dev_dependencies:
   flutter_test:
@@ -34,7 +35,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
   # For generating launcher icons (downgraded to avoid conflicts)
-  flutter_launcher_icons: ^0.11.0
+  flutter_launcher_icons: ^0.14.3
 
 flutter_icons:
   android: true
@@ -48,3 +49,4 @@ flutter:
     - assets/icon/icon.png
     - assets/suburb_stations.json
     - assets/icon/toilet.png
+

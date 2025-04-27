@@ -89,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.3),
+                          color: Color.fromRGBO(33, 150, 243, 0.3),
                           blurRadius: 20,
                           spreadRadius: 5,
                         ),
@@ -130,6 +130,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
+                            // ignore: deprecated_member_use
                             color: Colors.blue.withOpacity(0.2),
                             blurRadius: 15,
                             offset: const Offset(0, 8),

@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/mapbox_config.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({Key? key}) : super(key: key);
+  const SearchPage({super.key});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -201,7 +201,7 @@ class _SearchPageState extends State<SearchPage> {
                             Navigator.pop(context, location);
                           },
                         );
-                      }).toList()
+                      })
                     ],
                   )
                 : ListView(
@@ -222,7 +222,7 @@ class _SearchPageState extends State<SearchPage> {
                             _addToRecentSearches(location);
                             Navigator.pop(context, location);
                           },
-                        )).toList(),
+                        )),
                       ],
                       if (mapboxResults.isNotEmpty) ...[
                         const Padding(
@@ -240,7 +240,7 @@ class _SearchPageState extends State<SearchPage> {
                             _addToRecentSearches(location);
                             Navigator.pop(context, location);
                           },
-                        )).toList(),
+                        )),
                       ],
                       if (localResults.isEmpty && mapboxResults.isEmpty)
                         const Padding(
