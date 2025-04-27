@@ -6,6 +6,7 @@ import 'screens/map_home_page.dart';
 import 'screens/find_toilet_page.dart';
 import 'screens/upload_page.dart';
 import 'screens/share_page.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +23,11 @@ class MyApp extends StatelessWidget {
       title: 'Mobility Mate',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      home: const MainScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/map': (context) => const MainScreen(),
+      },
     );
   }
 }
