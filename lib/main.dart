@@ -42,10 +42,10 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   static const List<Widget> _pages = <Widget>[
-    const MapHomePage(),
-    const FindToiletPage(),
-    const UploadPage(),
-    const SharePage(),
+    MapHomePage(),
+    FindToiletPage(),
+    UploadPage(),
+    SharePage(),
   ];
 
   void _onItemTapped(int index) {

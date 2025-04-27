@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import '../utils/tag_formatter.dart';
-import '../utils/icon_utils.dart';
 import '../screens/report_issue_screen.dart'; // Adjust this import if needed
 
 class LocationBottomSheet extends StatelessWidget {
@@ -167,20 +166,54 @@ class LocationBottomSheet extends StatelessWidget {
           itemBuilder: (context, index) {
             final entry = orderedTags[index];
             final icon = iconGetter(entry.key, entry.value);
+            final tagText = formatTag(entry.key, entry.value);
 
-            return Card(
-              elevation: 2,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: 36),
-                  const SizedBox(height: 8),
-                  Text(
-                    formatTag(entry.key, entry.value),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 12),
+            return InkWell(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    contentPadding: const EdgeInsets.all(16),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(icon, size: 48, color: Theme.of(context).primaryColor),
+                        const SizedBox(height: 16),
+                        Text(
+                          tagText,
+                          style: const TextStyle(fontSize: 16),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Close'),
+                      ),
+                    ],
                   ),
-                ],
+                );
+              },
+              child: Card(
+                elevation: 2,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 36),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(
+                        tagText,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 12),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
