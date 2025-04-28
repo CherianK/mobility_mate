@@ -3,3 +3,4 @@ flask-cors
 flask-admin
 flask-pymongo
 python-dotenv
+boto3
