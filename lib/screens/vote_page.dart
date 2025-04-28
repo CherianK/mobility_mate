@@ -236,20 +236,24 @@ class _VotePageState extends State<VotePage> {
                                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                 child: Text('Stations & Suburbs', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                               ),
-                            ...localResults.map((location) => ListTile(
-                                  leading: Icon(
-                                    location['type'] == 'hospital' ? Icons.local_hospital :
-                                    location['type'] == 'tram' ? Icons.tram :
-                                    Icons.train,
-                                    color: Colors.blue,
-                                  ),
-                                  title: Text(location['name']),
-                                  onTap: () {
-                                    _addToRecentSearches(location);
-                                    _showLocationDetails(location);
-                                  },
-                                )),
-                            if (mapboxResults.isNotEmpty)
+                              ...localResults.map((location) => ListTile(
+                                    leading: Icon(
+                                      location['type'] == 'hospital' ? Icons.local_hospital :
+                                      location['type'] == 'pharmacy' ? Icons.local_pharmacy :
+                                      location['type'] == 'tram' ? Icons.tram :
+                                      Icons.health_and_safety_rounded,
+                                      color: location['type'] == 'hospital' ? Colors.blue :
+                                             location['type'] == 'pharmacy' ? Colors.blue :
+                                             Colors.blue,
+                                    ),
+                                    title: Text(location['name']),
+                                    onTap: () {
+                                      _addToRecentSearches(location);
+                                      _showLocationDetails(location);
+                                    },
+                                  )),
+                            ],
+                            if (mapboxResults.isNotEmpty) ...[
                               const Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                 child: Text('Other Locations', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
