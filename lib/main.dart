@@ -8,6 +8,7 @@ import 'screens/upload_page.dart';
 import 'screens/share_page.dart';
 import 'screens/splash_screen.dart';
 import 'screens/vote_page.dart';
+import 'screens/events_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,6 +50,7 @@ class _MainScreenState extends State<MainScreen> {
     UploadPage(venueData: {}),
     SharePage(),
     VotePage(),
+    EventsPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -92,6 +94,11 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.thumbs_up_down_outlined),
             selectedIcon: Icon(Icons.thumbs_up_down),
             label: 'Vote',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.event_outlined),
+            selectedIcon: Icon(Icons.event),
+            label: 'Events',
           ),
         ],
       ),

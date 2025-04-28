@@ -37,10 +37,32 @@ class _VotePageState extends State<VotePage> {
 
   Future<void> loadLocalData() async {
     try {
-      final String jsonString = await rootBundle.loadString('assets/suburb_stations.json');
-      final List<dynamic> data = json.decode(jsonString);
-      allLocations = data.cast<Map<String, dynamic>>();
-      debugPrint('Loaded ${allLocations.length} local locations');
+      // Load station data
+      final String stationsJson = await rootBundle.loadString('assets/suburb_stations.json');
+      final List<dynamic> stationsData = json.decode(stationsJson);
+      
+      // Load hospital data from API
+      final response = await http.get(Uri.parse('https://mobility-mate.onrender.com/medical-location-points'));
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load hospital data: ${response.statusCode}');
+      }
+      final List<dynamic> hospitalsData = json.decode(response.body);
+      
+      // Combine both datasets
+      allLocations = [
+        ...stationsData.map((location) => {
+          ...location,
+          'isLocal': true,
+          'type': 'station',
+        }),
+        ...hospitalsData.map((location) => {
+          ...location,
+          'isLocal': true,
+          'type': 'hospital',
+        }),
+      ];
+      
+      debugPrint('Loaded ${allLocations.length} local locations (${stationsData.length} stations, ${hospitalsData.length} hospitals)');
     } catch (e) {
       debugPrint('Error loading local data: $e');
     }
@@ -62,14 +84,17 @@ class _VotePageState extends State<VotePage> {
 
     // Search local data
     final filteredLocal = allLocations.where((location) {
-      final name = location['Name'].toString().toLowerCase();
+      final name = location['Name']?.toString().toLowerCase() ?? 
+                  location['name']?.toString().toLowerCase() ?? 
+                  location['Name']?.toString().toLowerCase() ?? '';
       return name.contains(query.toLowerCase());
     }).map((location) {
       return {
-        'name': location['Name'],
-        'lat': location['Latitude'],
-        'lon': location['Longitude'],
+        'name': location['Name'] ?? location['name'] ?? location['Name'],
+        'lat': location['Latitude'] ?? location['lat'] ?? location['Location_Lat'],
+        'lon': location['Longitude'] ?? location['lon'] ?? location['Location_Lon'],
         'isLocal': true,
+        'type': location['type'],
       };
     }).toList();
 
@@ -162,20 +187,17 @@ class _VotePageState extends State<VotePage> {
         locationPhotos[locationId] = [
           {
             'id': '${locationId}_1', 
-            'url': 'https://example.com/photo1.jpg', 
-            'description': 'Main entrance',
+            'url': 'https://mobility-mate.s3.ap-southeast-2.amazonaws.com/photos/${locationId}_1.jpg',
             'uploadDate': '2024-03-15T14:30:00Z',
           },
           {
             'id': '${locationId}_2', 
-            'url': 'https://example.com/photo2.jpg', 
-            'description': 'Accessible ramp',
+            'url': 'https://mobility-mate.s3.ap-southeast-2.amazonaws.com/photos/${locationId}_2.jpg',
             'uploadDate': '2024-03-14T09:15:00Z',
           },
           {
             'id': '${locationId}_3', 
-            'url': 'https://example.com/photo3.jpg', 
-            'description': 'Platform view',
+            'url': 'https://mobility-mate.s3.ap-southeast-2.amazonaws.com/photos/${locationId}_3.jpg',
             'uploadDate': '2024-03-13T16:45:00Z',
           },
         ];
@@ -233,10 +255,17 @@ class _VotePageState extends State<VotePage> {
     // Debug logging to see the location data
     debugPrint('Location data: ${location.toString()}');
     
-    // Check if it's a local station (from suburb_stations.json)
+    // Check if it's a local location
     if (location['isLocal'] == true) {
+      final type = location['type']?.toString().toLowerCase() ?? '';
+      
+      if (type == 'hospital') {
+        debugPrint('Identified as hospital: ${location['name']}');
+        return MarkerType.hospital;
+      }
+      
       final name = location['name'].toString().toLowerCase();
-      final type = location['Type']?.toString().toLowerCase() ?? '';
+      final locationType = location['Type']?.toString().toLowerCase() ?? '';
       
       // Check for tram-related keywords in both name and type
       if (name.contains('tram') || 
@@ -244,9 +273,9 @@ class _VotePageState extends State<VotePage> {
           name.contains('lrt') ||
           name.contains('streetcar') ||
           name.contains('tram stop') ||
-          type.contains('tram') ||
-          type.contains('light rail') ||
-          type.contains('lrt') ||
+          locationType.contains('tram') ||
+          locationType.contains('light rail') ||
+          locationType.contains('lrt') ||
           // Check for route and stop number pattern
           RegExp(r'route\s+\d+:\s*stop\s+\d+').hasMatch(name) ||
           RegExp(r'route\s+\d+').hasMatch(name) ||
@@ -266,7 +295,12 @@ class _VotePageState extends State<VotePage> {
     
     if (placeType.contains('toilet') || placeType.contains('restroom')) {
       return MarkerType.toilet;
-    } else if (placeType.contains('hospital') || placeType.contains('medical')) {
+    } else if (placeType.contains('hospital') || 
+               placeType.contains('medical') ||
+               name.contains('hospital') ||
+               name.contains('medical') ||
+               category.contains('hospital') ||
+               category.contains('medical')) {
       return MarkerType.hospital;
     } else if (placeType.contains('tram') || 
                placeType.contains('light rail') || 
@@ -327,7 +361,7 @@ class _VotePageState extends State<VotePage> {
                   color: locationType?.iconName == 'toilet' ? Colors.blue :
                          locationType?.iconName == 'rail' ? Colors.blue :
                          locationType?.iconName == 'rail-light' ? Colors.blue :
-                         locationType?.iconName == 'hospital' ? Colors.blue :
+                         locationType?.iconName == 'hospital' ? Colors.purple :
                          Colors.grey,
                   size: 24,
                 ),
@@ -351,7 +385,7 @@ class _VotePageState extends State<VotePage> {
                         color: locationType?.iconName == 'toilet' ? Colors.blue :
                                locationType?.iconName == 'rail' ? Colors.blue :
                                locationType?.iconName == 'rail-light' ? Colors.blue :
-                               locationType?.iconName == 'hospital' ? Colors.blue :
+                               locationType?.iconName == 'hospital' ? Colors.purple :
                                Colors.grey,
                       ),
                     ),
@@ -525,12 +559,6 @@ class _VotePageState extends State<VotePage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  currentPhotos[currentPhotoIndex]['description'],
-                  style: Theme.of(context).textTheme.titleSmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                Text(
                   'Uploaded: ${_formatDateTime(currentPhotos[currentPhotoIndex]['uploadDate'])}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[600],
@@ -681,7 +709,14 @@ class _VotePageState extends State<VotePage> {
                                 ),
                               ),
                               ...localResults.map((location) => ListTile(
-                                    leading: const Icon(Icons.train),
+                                    leading: Icon(
+                                      location['type'] == 'hospital' ? Icons.local_hospital :
+                                      location['type'] == 'pharmacy' ? Icons.local_pharmacy :
+                                      Icons.health_and_safety_rounded,
+                                      color: location['type'] == 'hospital' ? Colors.blue :
+                                             location['type'] == 'pharmacy' ? Colors.blue :
+                                             Colors.blue,
+                                    ),
                                     title: Text(location['name']),
                                     onTap: () {
                                       _addToRecentSearches(location);
