@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import '../utils/tag_formatter.dart';
-import '../screens/report_issue_screen.dart'; // Adjust this import if needed
+import '../screens/report_issue_screen.dart';
 import '../screens/upload_page.dart';
+import '../utils/location_helper.dart';
 
 class LocationBottomSheet extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -99,13 +100,12 @@ class LocationBottomSheet extends StatelessWidget {
       );
     }
 
-    final lat = data['Location_Lat']?.toString() ?? '';
-    final lon = data['Location_Lon']?.toString() ?? '';
+    final destLat = data['Location_Lat']?.toString() ?? '';
+    final destLon = data['Location_Lon']?.toString() ?? '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Text(
@@ -113,8 +113,6 @@ class LocationBottomSheet extends StatelessWidget {
             style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
-
-        // Buttons
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Wrap(
@@ -123,9 +121,99 @@ class LocationBottomSheet extends StatelessWidget {
             children: [
               ElevatedButton.icon(
                 onPressed: () async {
-                  final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lon');
+                  final choice = await showDialog<String>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Select Mode of Travel'),
+                      content: const Text('How would you like to reach the location?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'wheelchair'),
+                          child: const Text('Wheelchair'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'drive'),
+                          child: const Text('Drive'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (choice == null) return;
+
+                  String? originLat;
+                  String? originLon;
+
+                  // Show wheelchair tip first if applicable
+                  if (choice == 'wheelchair' && context.mounted) {
+                    await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Accessibility Tip'),
+                        content: const Text('Enable "Wheelchair-accessible" under Trip Options in Google Maps for better routes!'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Got it'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  try {
+                    final position = await LocationHelper.getCurrentLocation();
+                    if (position != null) {
+                    originLat = position.latitude.toString();
+                      originLon = position.longitude.toString();
+                    }
+                  } catch (e) {
+                    originLat = null;
+                    originLon = null;
+                  }
+
+                  Uri url;
+                  if (choice == 'drive') {
+                    if (originLat != null && originLon != null) {
+                      url = Uri.parse(
+                          'https://www.google.com/maps/dir/?api=1&origin=$originLat,$originLon&destination=$destLat,$destLon&travelmode=driving');
+                    } else {
+                      url = Uri.parse(
+                          'https://www.google.com/maps/dir/?api=1&destination=$destLat,$destLon&travelmode=driving');
+                    }
+                  } else {
+                    if (originLat != null && originLon != null) {
+                      url = Uri.parse(
+                          'https://www.google.com/maps/dir/?api=1&origin=$originLat,$originLon&destination=$destLat,$destLon&travelmode=walking');
+                    } else {
+                      url = Uri.parse(
+                          'https://www.google.com/maps/dir/?api=1&destination=$destLat,$destLon&travelmode=walking');
+                    }
+                  }
+
+                  if (choice == 'wheelchair' && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'Tip: Enable "Wheelchair-accessible" under Trip Options in Google Maps for better routes!'),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                    await Future.delayed(const Duration(milliseconds: 200));
+                  }
+
                   if (await canLaunchUrl(url)) {
                     await launchUrl(url, mode: LaunchMode.externalApplication);
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Could not launch Google Maps.'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   }
                 },
                 icon: const Icon(Icons.directions),
@@ -143,7 +231,7 @@ class LocationBottomSheet extends StatelessWidget {
               ),
               OutlinedButton.icon(
                 onPressed: () {
-                  Share.share("Check this location: https://maps.google.com/?q=$lat,$lon");
+                  Share.share("Check this location: https://maps.google.com/?q=$destLat,$destLon");
                 },
                 icon: const Icon(Icons.share),
                 label: const Text('Share'),
@@ -153,9 +241,7 @@ class LocationBottomSheet extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => UploadPage(
-                        venueData: data, // or pass only the fields you need
-                      ),
+                      builder: (_) => UploadPage(venueData: data),
                     ),
                   );
                 },
@@ -166,7 +252,6 @@ class LocationBottomSheet extends StatelessWidget {
           ),
         ),
 
-        // Icon Grid
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
