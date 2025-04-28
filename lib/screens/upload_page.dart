@@ -15,80 +15,103 @@ class UploadPage extends StatefulWidget {
 
 class _UploadPageState extends State<UploadPage> {
   final ImagePicker _picker = ImagePicker();
-  List<XFile> _selectedImages = [];
+  XFile? _selectedImage;
   bool _isUploading = false;
 
-  Future<void> _pickImages() async {
-    final List<XFile>? picked = await _picker.pickMultiImage();
-    if (picked != null && picked.isNotEmpty) {
-      setState(() {
-        _selectedImages = picked;
-      });
+  // Map to convert frontend types to backend types
+  final Map<String, String> accessibilityTypeMap = {
+    'Trains': 'train',
+    'Trams': 'tram',
+    'Healthcare': 'healthcare',
+    'Toilets': 'toilet',
+  };
+
+  String _normalizeAccessibilityType(String type) {
+    // Remove any 's' at the end and convert to lowercase
+    return accessibilityTypeMap[type] ?? type.toLowerCase().replaceAll(RegExp(r's$'), '');
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() {
+          _selectedImage = image;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error picking image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
-  Future<void> _uploadImages() async {
-    if (_selectedImages.isEmpty) return;
+  Future<void> _uploadImage() async {
+    if (_selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an image first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isUploading = true);
 
     try {
-      for (var image in _selectedImages) {
-        // 1. Get the upload URL from backend
-        final response = await http.post(
-          Uri.parse('https://mobility-mate.onrender.com/generate-upload-url'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'filename': image.name,
-            'latitude': widget.venueData['Location_Lat'],
-            'longitude': widget.venueData['Location_Lon'],
-            'accessibility_type': widget.venueData['Accessibility_Type_Name'],
-            'content_type': 'image/jpeg',
-          }),
-        );
+      final accessibilityType = _normalizeAccessibilityType(widget.venueData['Accessibility_Type_Name']);
+      
+      // 1. Get the upload URL from backend
+      final response = await http.post(
+        Uri.parse('https://mobility-mate.onrender.com/generate-upload-url'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'filename': _selectedImage!.name,
+          'latitude': widget.venueData['Location_Lat'],
+          'longitude': widget.venueData['Location_Lon'],
+          'accessibility_type': accessibilityType,
+          'content_type': 'image/jpeg',
+        }),
+      );
 
-        if (response.statusCode != 200) {
-          throw Exception('Failed to get upload URL: ${response.body}');
-        }
-
-        final uploadData = jsonDecode(response.body);
-        final uploadUrl = uploadData['upload_url'];
-        final publicUrl = uploadData['public_url'];
-
-        // 2. Upload the image to S3 using the pre-signed URL
-        final file = File(image.path);
-        final uploadResponse = await http.put(
-          Uri.parse(uploadUrl),
-          body: await file.readAsBytes(),
-          headers: {
-            'Content-Type': 'image/jpeg',
-          },
-        );
-
-        if (uploadResponse.statusCode != 200) {
-          throw Exception('Failed to upload image to S3');
-        }
-
-        // Show progress for each image
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Uploaded ${image.name} successfully!'),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
+      if (response.statusCode != 200) {
+        throw Exception('Failed to get upload URL: ${response.body}');
       }
 
-      // Clear the selected images after successful upload
+      final uploadData = jsonDecode(response.body);
+      final uploadUrl = uploadData['upload_url'];
+      final publicUrl = uploadData['public_url'];
+
+      // 2. Upload the image to S3 using the pre-signed URL
+      final file = File(_selectedImage!.path);
+      final uploadResponse = await http.put(
+        Uri.parse(uploadUrl),
+        body: await file.readAsBytes(),
+        headers: {
+          'Content-Type': 'image/jpeg',
+        },
+      );
+
+      if (uploadResponse.statusCode != 200) {
+        throw Exception('Failed to upload image to S3');
+      }
+
+      // Clear the selected image after successful upload
       setState(() {
-        _selectedImages = [];
+        _selectedImage = null;
       });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('All images uploaded successfully!'),
+            content: Text('Image uploaded successfully!'),
+            backgroundColor: Colors.green,
             duration: Duration(seconds: 2),
           ),
         );
@@ -97,7 +120,7 @@ class _UploadPageState extends State<UploadPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error uploading images: $e'),
+            content: Text('Error uploading image: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -175,13 +198,13 @@ class _UploadPageState extends State<UploadPage> {
                 ),
               ),
             ),
-            Text('Select Images',
+            Text('Select Image',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             ElevatedButton.icon(
-              onPressed: _pickImages,
+              onPressed: _pickImage,
               icon: const Icon(Icons.photo_library),
-              label: const Text('Select Images'),
+              label: const Text('Select Image'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -189,48 +212,39 @@ class _UploadPageState extends State<UploadPage> {
               ),
             ),
             const SizedBox(height: 16),
-            if (_selectedImages.isNotEmpty)
-              SizedBox(
-                height: 110,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _selectedImages.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.file(
-                        File(_selectedImages[index].path),
-                        width: 110,
-                        height: 110,
-                        fit: BoxFit.cover,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            if (_selectedImages.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _isUploading ? null : _uploadImages,
-                    icon: _isUploading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Icon(Icons.cloud_upload),
-                    label: Text(_isUploading ? 'Uploading...' : 'Upload'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            if (_selectedImage != null)
+              Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.file(
+                      File(_selectedImage!.path),
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _isUploading ? null : _uploadImage,
+                      icon: _isUploading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Icon(Icons.cloud_upload),
+                      label: Text(_isUploading ? 'Uploading...' : 'Upload'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             const Divider(height: 32),
             Text('Uploaded Images', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
