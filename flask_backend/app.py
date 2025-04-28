@@ -2,12 +2,13 @@ from flask import Flask, redirect
 from flask_cors import CORS
 from flask_pymongo import PyMongo
 from flask_admin import Admin
-from flask_admin.contrib.pymongo import ModelView
 from wtforms import Form
 from dotenv import load_dotenv
 import os
 from routes.report_routes import report_bp
 from routes.location_routes import location_bp
+from routes.upload_routes import upload_bp
+from admin.views import ReadOnlyModelView
 
 # Load environment variables
 load_dotenv()
@@ -24,6 +25,7 @@ mongo = PyMongo(app)
 # Register API routes
 app.register_blueprint(location_bp)
 app.register_blueprint(report_bp)
+app.register_blueprint(upload_bp)
 
 # Home route
 @app.route('/')
@@ -37,15 +39,6 @@ def redirect_to_admin():
 
 # Admin setup
 admin = Admin(app, name="MobilityMate Admin", template_mode="bootstrap4")
-
-class ReadOnlyModelView(ModelView):
-    column_list = ('Location_Lat', 'Location_Lon', 'Accessibility_Type_Name', 'Metadata', 'Tags')
-    can_create = True
-    can_edit = True
-    can_delete = False
-
-    def scaffold_form(self):
-        return Form
 
 # Register MongoDB collections
 admin.add_view(ReadOnlyModelView(mongo.db["toilets-victoria"], "Toilets"))

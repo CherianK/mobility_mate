@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../utils/venue_utils.dart';
 
 class UploadPage extends StatefulWidget {
@@ -26,17 +28,85 @@ class _UploadPageState extends State<UploadPage> {
   }
 
   Future<void> _uploadImages() async {
+    if (_selectedImages.isEmpty) return;
+
     setState(() => _isUploading = true);
-    // TODO: Implement actual upload logic (e.g., API call)
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() => _isUploading = false);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Images uploaded successfully!')),
-      );
+
+    try {
+      for (var image in _selectedImages) {
+        // 1. Get the upload URL from backend
+        final response = await http.post(
+          Uri.parse('https://mobility-mate.onrender.com/generate-upload-url'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'filename': image.name,
+            'latitude': widget.venueData['Location_Lat'],
+            'longitude': widget.venueData['Location_Lon'],
+            'accessibility_type': widget.venueData['Accessibility_Type_Name'],
+            'content_type': 'image/jpeg',
+          }),
+        );
+
+        if (response.statusCode != 200) {
+          throw Exception('Failed to get upload URL: ${response.body}');
+        }
+
+        final uploadData = jsonDecode(response.body);
+        final uploadUrl = uploadData['upload_url'];
+        final publicUrl = uploadData['public_url'];
+
+        // 2. Upload the image to S3 using the pre-signed URL
+        final file = File(image.path);
+        final uploadResponse = await http.put(
+          Uri.parse(uploadUrl),
+          body: await file.readAsBytes(),
+          headers: {
+            'Content-Type': 'image/jpeg',
+          },
+        );
+
+        if (uploadResponse.statusCode != 200) {
+          throw Exception('Failed to upload image to S3');
+        }
+
+        // Show progress for each image
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Uploaded ${image.name} successfully!'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+
+      // Clear the selected images after successful upload
       setState(() {
         _selectedImages = [];
       });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('All images uploaded successfully!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error uploading images: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
     }
   }
 
