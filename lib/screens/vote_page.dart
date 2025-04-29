@@ -712,9 +712,11 @@ class _VotePageState extends State<VotePage> {
                                     leading: Icon(
                                       location['type'] == 'hospital' ? Icons.local_hospital :
                                       location['type'] == 'pharmacy' ? Icons.local_pharmacy :
+                                      location['type'] == 'tram' ? Icons.tram :
                                       Icons.health_and_safety_rounded,
                                       color: location['type'] == 'hospital' ? Colors.blue :
                                              location['type'] == 'pharmacy' ? Colors.blue :
+                                             location['type'] == 'tram' ? Colors.blue :
                                              Colors.blue,
                                     ),
                                     title: Text(location['name']),
