@@ -244,6 +244,7 @@ class _VotePageState extends State<VotePage> {
                                       Icons.health_and_safety_rounded,
                                       color: location['type'] == 'hospital' ? Colors.blue :
                                              location['type'] == 'pharmacy' ? Colors.blue :
+                                             location['type'] == 'tram' ? Colors.blue :
                                              Colors.blue,
                                     ),
                                     title: Text(location['name']),
