@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/mapbox_config.dart';
 import '../models/marker_type.dart';
 import '../utils/icon_utils.dart';
+import '../screens/search_page.dart';
 
 class VotePage extends StatefulWidget {
   const VotePage({super.key});
@@ -15,168 +16,10 @@ class VotePage extends StatefulWidget {
 }
 
 class _VotePageState extends State<VotePage> {
-  final TextEditingController _controller = TextEditingController();
-  List<Map<String, dynamic>> mapboxResults = [];
-  List<Map<String, dynamic>> localResults = [];
-  List<Map<String, dynamic>> recentSearches = [];
-  List<Map<String, dynamic>> allLocations = [];
-  bool isLoading = false;
   Map<String, dynamic>? selectedLocation;
   Map<String, List<Map<String, dynamic>>> locationPhotos = {};
   Map<String, Map<String, Map<String, int>>> locationPhotoVotes = {};
   Map<String, int> currentPhotoIndices = {};
-
-  static const _recentKey = 'vote_recent_searches';
-
-  @override
-  void initState() {
-    super.initState();
-    loadRecentSearches();
-    loadLocalData();
-  }
-
-  Future<void> loadLocalData() async {
-    try {
-      // Load station data
-      final String stationsJson = await rootBundle.loadString('assets/suburb_stations.json');
-      final List<dynamic> stationsData = json.decode(stationsJson);
-      
-      // Load hospital data from API
-      final response = await http.get(Uri.parse('https://mobility-mate.onrender.com/medical-location-points'));
-      if (response.statusCode != 200) {
-        throw Exception('Failed to load hospital data: ${response.statusCode}');
-      }
-      final List<dynamic> hospitalsData = json.decode(response.body);
-      
-      // Combine both datasets
-      allLocations = [
-        ...stationsData.map((location) => {
-          ...location,
-          'isLocal': true,
-          'type': 'station',
-        }),
-        ...hospitalsData.map((location) => {
-          ...location,
-          'isLocal': true,
-          'type': 'hospital',
-        }),
-      ];
-      
-      debugPrint('Loaded ${allLocations.length} local locations (${stationsData.length} stations, ${hospitalsData.length} hospitals)');
-    } catch (e) {
-      debugPrint('Error loading local data: $e');
-    }
-  }
-
-  Future<void> searchLocations(String query) async {
-    if (query.isEmpty) {
-      setState(() {
-        mapboxResults = [];
-        localResults = [];
-        isLoading = false;
-      });
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    // Search local data
-    final filteredLocal = allLocations.where((location) {
-      final name = location['Name']?.toString().toLowerCase() ?? 
-                  location['name']?.toString().toLowerCase() ?? 
-                  location['Name']?.toString().toLowerCase() ?? '';
-      return name.contains(query.toLowerCase());
-    }).map((location) {
-      return {
-        'name': location['Name'] ?? location['name'] ?? location['Name'],
-        'lat': location['Latitude'] ?? location['lat'] ?? location['Location_Lat'],
-        'lon': location['Longitude'] ?? location['lon'] ?? location['Location_Lon'],
-        'isLocal': true,
-        'type': location['type'],
-      };
-    }).toList();
-
-    // Search Mapbox
-    try {
-      final url = Uri.parse(
-        'https://api.mapbox.com/geocoding/v5/mapbox.places/$query.json'
-        '?access_token=${MapboxConfig.accessToken}'
-        '&country=au'
-        '&types=address,place,poi'
-        '&limit=5'
-      );
-
-      final response = await http.get(url);
-      
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final features = data['features'] as List;
-        
-        final mapboxLocations = features.map((feature) {
-          final coordinates = feature['center'] as List;
-          final lat = coordinates[1] as double;
-          final lon = coordinates[0] as double;
-          return {
-            'name': feature['place_name'],
-            'lat': lat,
-            'lon': lon,
-            'isLocal': false,
-          };
-        }).toList();
-
-        setState(() {
-          mapboxResults = mapboxLocations;
-          localResults = filteredLocal;
-          isLoading = false;
-        });
-      } else {
-        debugPrint('Mapbox API Error: ${response.statusCode}');
-        setState(() {
-          mapboxResults = [];
-          localResults = filteredLocal;
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error: $e');
-      setState(() {
-        mapboxResults = [];
-        localResults = filteredLocal;
-        isLoading = false;
-      });
-    }
-  }
-
-  void _addToRecentSearches(Map<String, dynamic> location) async {
-    recentSearches.removeWhere((loc) => loc['name'] == location['name']);
-    recentSearches.insert(0, location);
-    if (recentSearches.length > 5) {
-      recentSearches = recentSearches.sublist(0, 5);
-    }
-    await saveRecentSearches();
-  }
-
-  Future<void> saveRecentSearches() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> encoded =
-        recentSearches.map((loc) => json.encode(loc)).toList();
-    await prefs.setStringList(_recentKey, encoded);
-  }
-
-  Future<void> loadRecentSearches() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String>? encoded = prefs.getStringList(_recentKey);
-    if (encoded != null) {
-      final List<Map<String, dynamic>> decoded = encoded
-          .map((e) => Map<String, dynamic>.from(json.decode(e)))
-          .toList();
-      setState(() {
-        recentSearches = decoded;
-      });
-    }
-  }
 
   void _showLocationDetails(Map<String, dynamic> location) {
     final locationId = location['id'] ?? location['name'];
@@ -361,7 +204,7 @@ class _VotePageState extends State<VotePage> {
                   color: locationType?.iconName == 'toilet' ? Colors.blue :
                          locationType?.iconName == 'rail' ? Colors.blue :
                          locationType?.iconName == 'rail-light' ? Colors.blue :
-                         locationType?.iconName == 'hospital' ? Colors.purple :
+                         locationType?.iconName == 'hospital' ? Colors.blue :
                          Colors.grey,
                   size: 24,
                 ),
@@ -640,131 +483,57 @@ class _VotePageState extends State<VotePage> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: TextField(
-                    controller: _controller,
-                    onChanged: (value) {
-                      Future.delayed(const Duration(milliseconds: 300), () {
-                        if (value == _controller.text) {
-                          searchLocations(value);
-                        }
-                      });
+                  child: GestureDetector(
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SearchPage()),
+                      );
+
+                      if (result != null && result is Map<String, dynamic>) {
+                        _showLocationDetails(result);
+                      }
                     },
-                    decoration: InputDecoration(
-                      hintText: 'Search for a location...',
-                      border: OutlineInputBorder(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.grey[300]!),
                       ),
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _controller.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _controller.clear();
-                                searchLocations('');
-                              },
-                            )
-                          : null,
+                      child: Row(
+                        children: [
+                          Icon(Icons.search, color: Colors.grey[600]),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Search for a location...',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                if (isLoading)
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: CircularProgressIndicator(),
-                  ),
                 Expanded(
-                  child: _controller.text.isEmpty
-                      ? ListView(
-                          children: [
-                            if (recentSearches.isNotEmpty)
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                child: Text(
-                                  'Recent Searches',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold, fontSize: 16),
-                                ),
-                              ),
-                            ...recentSearches.map((location) {
-                              return ListTile(
-                                leading: const Icon(Icons.history),
-                                title: Text(location['name']),
-                                onTap: () {
-                                  _controller.text = location['name'];
-                                  searchLocations(location['name']);
-                                },
-                              );
-                            })
-                          ],
-                        )
-                      : ListView(
-                          children: [
-                            if (localResults.isNotEmpty) ...[
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                child: Text(
-                                  'Stations & Suburbs',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold, fontSize: 16),
-                                ),
-                              ),
-                              ...localResults.map((location) => ListTile(
-                                    leading: Icon(
-                                      location['type'] == 'hospital' ? Icons.local_hospital :
-                                      location['type'] == 'pharmacy' ? Icons.local_pharmacy :
-                                      location['type'] == 'tram' ? Icons.tram :
-                                      Icons.health_and_safety_rounded,
-                                      color: location['type'] == 'hospital' ? Colors.blue :
-                                             location['type'] == 'pharmacy' ? Colors.blue :
-                                             location['type'] == 'tram' ? Colors.blue :
-                                             Colors.blue,
-                                    ),
-                                    title: Text(location['name']),
-                                    onTap: () {
-                                      _addToRecentSearches(location);
-                                      _showLocationDetails(location);
-                                    },
-                                  )),
-                            ],
-                            if (mapboxResults.isNotEmpty) ...[
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                child: Text(
-                                  'Other Locations',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold, fontSize: 16),
-                                ),
-                              ),
-                              ...mapboxResults.map((location) => ListTile(
-                                    leading: const Icon(Icons.location_on),
-                                    title: Text(location['name']),
-                                    onTap: () {
-                                      _addToRecentSearches(location);
-                                      _showLocationDetails(location);
-                                    },
-                                  )),
-                            ],
-                            if (localResults.isEmpty && mapboxResults.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.all(16),
-                                child: Center(
-                                  child: Text(
-                                    'No results found',
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                ),
-                              ),
-                          ],
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.search, size: 64, color: Colors.grey),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Search for a location to vote on its photos',
+                          style: TextStyle(color: Colors.grey),
                         ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 } 
