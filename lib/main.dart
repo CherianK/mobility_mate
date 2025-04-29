@@ -8,6 +8,7 @@ import 'screens/upload_page.dart';
 import 'screens/share_page.dart';
 import 'screens/splash_screen.dart';
 import 'screens/vote_page.dart';
+import 'screens/tutorial_overlay.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +44,6 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   static const List<Widget> _pages = <Widget>[
-
     MapHomePage(),
     FindToiletPage(),
     UploadPage(venueData: {}),
@@ -54,6 +54,23 @@ class _MainScreenState extends State<MainScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Show tutorial after the screen is built
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        // Wait a short moment to ensure the screen is fully built
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          await TutorialOverlay.showTutorial(context);
+        }
+      } catch (e) {
+        debugPrint('Error initializing tutorial: $e');
+      }
     });
   }
 
