@@ -26,6 +26,7 @@ dependencies:
   share_plus: ^11.0.0
   geolocator: ^14.0.0
   image_picker: ^1.0.1
+  google_fonts: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -49,4 +50,5 @@ flutter:
     - assets/icon/icon.png
     - assets/suburb_stations.json
     - assets/icon/toilet.png
+    - assets/images/
 
