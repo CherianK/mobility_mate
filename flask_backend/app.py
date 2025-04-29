@@ -8,6 +8,7 @@ import os
 from routes.report_routes import report_bp
 from routes.location_routes import location_bp
 from routes.upload_routes import upload_bp
+from routes.events import events_bp
 from admin.views import ReadOnlyModelView
 
 # Load environment variables
@@ -26,6 +27,7 @@ mongo = PyMongo(app)
 app.register_blueprint(location_bp)
 app.register_blueprint(report_bp)
 app.register_blueprint(upload_bp)
+app.register_blueprint(events_bp)
 
 # Home route
 @app.route('/')
