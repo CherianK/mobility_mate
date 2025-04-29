@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:google_fonts/google_fonts.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,12 +14,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
   late Animation<Offset> _slideAnimation;
+  late Animation<double> _firstLineAnimation;
+  late Animation<double> _secondLineAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 3),
       vsync: this,
     );
 
@@ -46,10 +49,23 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       ),
     );
 
+    _firstLineAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.5, 0.8, curve: Curves.easeInOut),
+      ),
+    );
+
+    _secondLineAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.7, 1.0, curve: Curves.easeInOut),
+      ),
+    );
+
     _controller.forward();
 
-    // ✅ Updated: Navigate to '/main' instead of '/map'
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 4), () {
       Navigator.pushReplacementNamed(context, '/main');
     });
   }
@@ -60,18 +76,49 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     super.dispose();
   }
 
+  Widget _buildAnimatedText(String text, Animation<double> animation) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return ClipRect(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            widthFactor: animation.value,
+            child: Text(
+              text,
+              style: GoogleFonts.satisfy(
+                fontSize: 36,
+                color: Colors.white,
+                fontWeight: FontWeight.w400,
+                letterSpacing: 0.5,
+                height: 1.3,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.2),
+                    offset: const Offset(1, 1),
+                    blurRadius: 2,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF3CA9AB), // Hex color #3CA9AB
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.blue.shade100,
-              Colors.white,
+              const Color(0xFF3CA9AB), // Hex color #3CA9AB
+              const Color(0xFF3CA9AB).withOpacity(0.8), // Slightly transparent version
             ],
           ),
         ),
@@ -87,13 +134,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color.fromRGBO(33, 150, 243, 0.3),
-                          blurRadius: 20,
-                          spreadRadius: 5,
-                        ),
-                      ],
                     ),
                     child: Image.asset(
                       'assets/icon/icon.png',
@@ -101,62 +141,38 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     ),
                   ),
                   const SizedBox(height: 32),
-                  // App name with gradient
-                  ShaderMask(
-                    shaderCallback: (bounds) => LinearGradient(
-                      colors: [
-                        Colors.blue.shade700,
-                        Colors.blue.shade400,
-                      ],
-                    ).createShader(bounds),
-                    child: const Text(
-                      'Mobility Mate',
-                      style: TextStyle(
-                        fontSize: 36,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
-                      ),
+                  // App name with contrasting color
+                  Text(
+                    'Mobility Mate',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 42,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  // Call to action with slide animation
+                  const SizedBox(height: 32),
+                  // Call to action with cursive animation
                   SlideTransition(
                     position: _slideAnimation,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Colors.white.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            // ignore: deprecated_member_use
-                            color: Colors.blue.withOpacity(0.2),
+                            color: Colors.white.withOpacity(0.2),
                             blurRadius: 15,
                             offset: const Offset(0, 8),
                           ),
                         ],
                       ),
                       child: Column(
-                        children: const [
-                          Text(
-                            'Accessible spaces',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Color(0xFF2196F3),
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          Text(
-                            'Inclusive lives',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Color(0xFF2196F3),
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                        children: [
+                          _buildAnimatedText('Accessible spaces', _firstLineAnimation),
+                          const SizedBox(height: 8),
+                          _buildAnimatedText('Inclusive lives', _secondLineAnimation),
                         ],
                       ),
                     ),
@@ -168,7 +184,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     height: 40,
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.blue.shade400,
+                        Colors.white.withOpacity(0.8),
                       ),
                       strokeWidth: 3,
                     ),
