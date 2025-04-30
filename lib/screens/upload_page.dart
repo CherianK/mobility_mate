@@ -20,10 +20,10 @@ class _UploadPageState extends State<UploadPage> {
 
   // Map to convert frontend types to backend types
   final Map<String, String> accessibilityTypeMap = {
-    'Trains': 'train',
-    'Trams': 'tram',
+    'Trains': 'trains',
+    'Trams': 'trams',
     'Healthcare': 'healthcare',
-    'Toilets': 'toilet',
+    'Toilets': 'toilets',
   };
 
   String _normalizeAccessibilityType(String type) {
