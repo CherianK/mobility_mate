@@ -11,9 +11,9 @@ upload_bp = Blueprint('upload', __name__)
 # Map of accessibility types to collection names
 COLLECTION_MAP = {
     'healthcare': 'medical-victoria',
-    'toilet': 'toilets-victoria',
-    'train': 'trains-victoria',
-    'tram': 'trams-victoria'
+    'toilets': 'toilets-victoria',
+    'trains': 'trains-victoria',
+    'trams': 'trams-victoria'
 }
 
 @upload_bp.route('/generate-upload-url', methods=['POST'])
