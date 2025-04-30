@@ -20,6 +20,7 @@ class _EventsPageState extends State<EventsPage> {
   String errorMessage = '';
   Set<int> expandedDescriptions = {};
   String sortBy = 'date'; // 'date', 'location', or 'distance'
+  bool isAscending = true;
   Position? currentPosition;
 
   Future<void> _launchUrl(String url) async {
@@ -70,13 +71,13 @@ class _EventsPageState extends State<EventsPage> {
         filteredEvents.sort((a, b) {
           final dateA = DateTime.parse(a['dates']?['start']?['dateTime'] ?? '');
           final dateB = DateTime.parse(b['dates']?['start']?['dateTime'] ?? '');
-          return dateA.compareTo(dateB);
+          return isAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
         });
       } else if (sortBy == 'location') {
         filteredEvents.sort((a, b) {
           final venueA = a['_embedded']?['venues']?[0]?['name'] ?? '';
           final venueB = b['_embedded']?['venues']?[0]?['name'] ?? '';
-          return venueA.compareTo(venueB);
+          return isAscending ? venueA.compareTo(venueB) : venueB.compareTo(venueA);
         });
       } else if (sortBy == 'distance' && currentPosition != null) {
         filteredEvents.sort((a, b) {
@@ -85,7 +86,6 @@ class _EventsPageState extends State<EventsPage> {
           
           if (venueA == null || venueB == null) return 0;
           
-          // Convert string coordinates to double, defaulting to 0 if invalid
           final latA = double.tryParse(venueA['location']?['latitude']?.toString() ?? '0') ?? 0;
           final lonA = double.tryParse(venueA['location']?['longitude']?.toString() ?? '0') ?? 0;
           final latB = double.tryParse(venueB['location']?['latitude']?.toString() ?? '0') ?? 0;
@@ -105,15 +105,22 @@ class _EventsPageState extends State<EventsPage> {
             lonB,
           );
           
-          return distanceA.compareTo(distanceB);
+          return isAscending ? distanceA.compareTo(distanceB) : distanceB.compareTo(distanceA);
         });
       }
     });
   }
 
-  void _toggleSort() {
+  void _handleSort(String newSortBy) {
     setState(() {
-      sortBy = sortBy == 'date' ? 'location' : 'date';
+      if (sortBy == newSortBy) {
+        // Toggle ascending/descending if clicking the same sort button
+        isAscending = !isAscending;
+      } else {
+        // Reset to ascending when changing sort type
+        sortBy = newSortBy;
+        isAscending = true;
+      }
       _sortEvents();
     });
   }
@@ -231,7 +238,11 @@ class _EventsPageState extends State<EventsPage> {
   String _formatTime(String isoDate) {
     try {
       final date = DateTime.parse(isoDate);
-      return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+      final hour = date.hour;
+      final minute = date.minute;
+      final period = hour < 12 ? 'AM' : 'PM';
+      final displayHour = hour % 12 == 0 ? 12 : hour % 12;
+      return '${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
     } catch (e) {
       return 'Time not available';
     }
@@ -244,7 +255,19 @@ class _EventsPageState extends State<EventsPage> {
 
   String _getLocalTime(Map<String, dynamic>? dates) {
     if (dates == null) return 'Time not available';
-    return dates['localTime'] ?? _formatTime(dates['start']?['dateTime'] ?? '');
+    
+    // Try to get the time from various possible fields in order of preference
+    final time = dates['start']?['localTime'] ?? 
+                dates['start']?['time'] ?? 
+                dates['localTime'] ?? 
+                dates['time'];
+    
+    if (time != null) {
+      return time;
+    }
+    
+    // If no time field is found, try to format the dateTime
+    return _formatTime(dates['start']?['dateTime'] ?? '');
   }
 
   String _cleanEventInfo(String? info) {
@@ -377,7 +400,33 @@ class _EventsPageState extends State<EventsPage> {
           : errorMessage.isNotEmpty
               ? Center(child: Text(errorMessage))
               : events.isEmpty
-                  ? const Center(child: Text('No events found'))
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.event_busy,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No Wheelchair Accessible Events Available',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Please check back later for new events',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   : CustomScrollView(
                       slivers: [
                         SliverAppBar(
@@ -412,14 +461,28 @@ class _EventsPageState extends State<EventsPage> {
                                       ),
                                       const SizedBox(width: 8),
                                       ElevatedButton.icon(
-                                        onPressed: () {
-                                          setState(() {
-                                            sortBy = 'date';
-                                            _sortEvents();
-                                          });
-                                        },
-                                        icon: const Icon(Icons.calendar_today, size: 16),
-                                        label: const Text('Date'),
+                                        onPressed: () => _handleSort('date'),
+                                        icon: Icon(
+                                          Icons.calendar_today,
+                                          size: 16,
+                                          color: sortBy == 'date' 
+                                              ? Colors.white 
+                                              : Theme.of(context).primaryColor,
+                                        ),
+                                        label: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Text('Date'),
+                                            if (sortBy == 'date') ...[
+                                              const SizedBox(width: 4),
+                                              Icon(
+                                                isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                                                size: 12,
+                                                color: Colors.white,
+                                              ),
+                                            ],
+                                          ],
+                                        ),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: sortBy == 'date' 
                                               ? Theme.of(context).primaryColor 
@@ -433,14 +496,28 @@ class _EventsPageState extends State<EventsPage> {
                                       ),
                                       const SizedBox(width: 4),
                                       ElevatedButton.icon(
-                                        onPressed: () {
-                                          setState(() {
-                                            sortBy = 'location';
-                                            _sortEvents();
-                                          });
-                                        },
-                                        icon: const Icon(Icons.location_on, size: 16),
-                                        label: const Text('Location'),
+                                        onPressed: () => _handleSort('location'),
+                                        icon: Icon(
+                                          Icons.location_on,
+                                          size: 16,
+                                          color: sortBy == 'location' 
+                                              ? Colors.white 
+                                              : Theme.of(context).primaryColor,
+                                        ),
+                                        label: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Text('Location'),
+                                            if (sortBy == 'location') ...[
+                                              const SizedBox(width: 4),
+                                              Icon(
+                                                isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                                                size: 12,
+                                                color: Colors.white,
+                                              ),
+                                            ],
+                                          ],
+                                        ),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: sortBy == 'location' 
                                               ? Theme.of(context).primaryColor 
@@ -456,10 +533,7 @@ class _EventsPageState extends State<EventsPage> {
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           if (currentPosition != null) {
-                                            setState(() {
-                                              sortBy = 'distance';
-                                              _sortEvents();
-                                            });
+                                            _handleSort('distance');
                                           } else {
                                             ScaffoldMessenger.of(context).showSnackBar(
                                               const SnackBar(
@@ -468,8 +542,27 @@ class _EventsPageState extends State<EventsPage> {
                                             );
                                           }
                                         },
-                                        icon: const Icon(Icons.near_me, size: 16),
-                                        label: const Text('Distance'),
+                                        icon: Icon(
+                                          Icons.near_me,
+                                          size: 16,
+                                          color: sortBy == 'distance' 
+                                              ? Colors.white 
+                                              : Theme.of(context).primaryColor,
+                                        ),
+                                        label: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Text('Distance'),
+                                            if (sortBy == 'distance') ...[
+                                              const SizedBox(width: 4),
+                                              Icon(
+                                                isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                                                size: 12,
+                                                color: Colors.white,
+                                              ),
+                                            ],
+                                          ],
+                                        ),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: sortBy == 'distance' 
                                               ? Theme.of(context).primaryColor 
