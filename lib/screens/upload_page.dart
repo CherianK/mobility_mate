@@ -204,7 +204,7 @@ class _UploadPageState extends State<UploadPage> {
                         child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                children: [
                               Icon(
                                 Icons.cloud_upload_outlined,
                                 size: 48,
@@ -222,15 +222,15 @@ class _UploadPageState extends State<UploadPage> {
                         ),
                       )
                     else
-                      ClipRRect(
+                  ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Stack(
                           children: [
                             Image.file(
-                              File(_selectedImage!.path),
-                              height: 200,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
+                      File(_selectedImage!.path),
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                             ),
                             Positioned(
                               top: 8,
@@ -247,9 +247,9 @@ class _UploadPageState extends State<UploadPage> {
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                    const SizedBox(height: 16),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
@@ -265,25 +265,25 @@ class _UploadPageState extends State<UploadPage> {
                         if (_selectedImage != null) ...[
                           const SizedBox(width: 8),
                           Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: _isUploading ? null : _uploadImage,
-                              icon: _isUploading
-                                  ? const SizedBox(
+                    child: ElevatedButton.icon(
+                      onPressed: _isUploading ? null : _uploadImage,
+                      icon: _isUploading
+                          ? const SizedBox(
                                       width: 20,
                                       height: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         color: Colors.white,
                                       ),
-                                    )
+                            )
                                   : const Icon(Icons.cloud_upload_outlined),
-                              label: Text(_isUploading ? 'Uploading...' : 'Upload'),
-                              style: ElevatedButton.styleFrom(
+                      label: Text(_isUploading ? 'Uploading...' : 'Upload'),
+                      style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 12),
-                              ),
-                            ),
-                          ),
-                        ],
+                      ),
+                    ),
+                  ),
+                ],
                       ],
                     ),
                   ],
