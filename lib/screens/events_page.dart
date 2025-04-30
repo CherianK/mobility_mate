@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:geolocator/geolocator.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
@@ -18,7 +19,8 @@ class _EventsPageState extends State<EventsPage> {
   bool isLoading = true;
   String errorMessage = '';
   Set<int> expandedDescriptions = {};
-  String sortBy = 'date'; // 'date' or 'location'
+  String sortBy = 'date'; // 'date', 'location', or 'distance'
+  Position? currentPosition;
 
   Future<void> _launchUrl(String url) async {
     final Uri uri = Uri.parse(url);
@@ -27,19 +29,83 @@ class _EventsPageState extends State<EventsPage> {
     }
   }
 
+  Future<void> _getCurrentLocation() async {
+    try {
+      bool serviceEnabled;
+      LocationPermission permission;
+
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception('Location services are disabled.');
+      }
+
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Location permissions are denied');
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception('Location permissions are permanently denied');
+      }
+
+      currentPosition = await Geolocator.getCurrentPosition();
+    } catch (e) {
+      print('DEBUG: Error getting location: $e');
+      setState(() {
+        errorMessage = 'Unable to get current location. Please enable location services.';
+      });
+    }
+  }
+
+  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2) / 1000; // Convert to kilometers
+  }
+
   void _sortEvents() {
     setState(() {
       if (sortBy == 'date') {
         filteredEvents.sort((a, b) {
           final dateA = DateTime.parse(a['dates']?['start']?['dateTime'] ?? '');
           final dateB = DateTime.parse(b['dates']?['start']?['dateTime'] ?? '');
-          return dateA.compareTo(dateB); // Ascending order (earliest to latest)
+          return dateA.compareTo(dateB);
         });
-      } else {
+      } else if (sortBy == 'location') {
         filteredEvents.sort((a, b) {
           final venueA = a['_embedded']?['venues']?[0]?['name'] ?? '';
           final venueB = b['_embedded']?['venues']?[0]?['name'] ?? '';
           return venueA.compareTo(venueB);
+        });
+      } else if (sortBy == 'distance' && currentPosition != null) {
+        filteredEvents.sort((a, b) {
+          final venueA = a['_embedded']?['venues']?[0];
+          final venueB = b['_embedded']?['venues']?[0];
+          
+          if (venueA == null || venueB == null) return 0;
+          
+          // Convert string coordinates to double, defaulting to 0 if invalid
+          final latA = double.tryParse(venueA['location']?['latitude']?.toString() ?? '0') ?? 0;
+          final lonA = double.tryParse(venueA['location']?['longitude']?.toString() ?? '0') ?? 0;
+          final latB = double.tryParse(venueB['location']?['latitude']?.toString() ?? '0') ?? 0;
+          final lonB = double.tryParse(venueB['location']?['longitude']?.toString() ?? '0') ?? 0;
+          
+          final distanceA = _calculateDistance(
+            currentPosition!.latitude,
+            currentPosition!.longitude,
+            latA,
+            lonA,
+          );
+          
+          final distanceB = _calculateDistance(
+            currentPosition!.latitude,
+            currentPosition!.longitude,
+            latB,
+            lonB,
+          );
+          
+          return distanceA.compareTo(distanceB);
         });
       }
     });
@@ -55,10 +121,11 @@ class _EventsPageState extends State<EventsPage> {
   @override
   void initState() {
     super.initState();
-    _fetchEvents().then((_) {
-      // Sort by date in ascending order by default
-      sortBy = 'date';
-      _sortEvents();
+    _getCurrentLocation().then((_) {
+      _fetchEvents().then((_) {
+        sortBy = 'date';
+        _sortEvents();
+      });
     });
   }
 
@@ -336,6 +403,14 @@ class _EventsPageState extends State<EventsPage> {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
+                                      Text(
+                                        'Sort By:',
+                                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                          color: Theme.of(context).primaryColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           setState(() {
@@ -343,8 +418,8 @@ class _EventsPageState extends State<EventsPage> {
                                             _sortEvents();
                                           });
                                         },
-                                        icon: const Icon(Icons.calendar_today),
-                                        label: const Text('Sort by Date'),
+                                        icon: const Icon(Icons.calendar_today, size: 16),
+                                        label: const Text('Date'),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: sortBy == 'date' 
                                               ? Theme.of(context).primaryColor 
@@ -352,9 +427,11 @@ class _EventsPageState extends State<EventsPage> {
                                           foregroundColor: sortBy == 'date' 
                                               ? Colors.white 
                                               : Theme.of(context).primaryColor,
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          minimumSize: const Size(0, 32),
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 4),
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           setState(() {
@@ -362,8 +439,8 @@ class _EventsPageState extends State<EventsPage> {
                                             _sortEvents();
                                           });
                                         },
-                                        icon: const Icon(Icons.location_on),
-                                        label: const Text('Sort by Location'),
+                                        icon: const Icon(Icons.location_on, size: 16),
+                                        label: const Text('Location'),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: sortBy == 'location' 
                                               ? Theme.of(context).primaryColor 
@@ -371,6 +448,37 @@ class _EventsPageState extends State<EventsPage> {
                                           foregroundColor: sortBy == 'location' 
                                               ? Colors.white 
                                               : Theme.of(context).primaryColor,
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          minimumSize: const Size(0, 32),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          if (currentPosition != null) {
+                                            setState(() {
+                                              sortBy = 'distance';
+                                              _sortEvents();
+                                            });
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Please enable location services to sort by distance'),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        icon: const Icon(Icons.near_me, size: 16),
+                                        label: const Text('Distance'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: sortBy == 'distance' 
+                                              ? Theme.of(context).primaryColor 
+                                              : Colors.white,
+                                          foregroundColor: sortBy == 'distance' 
+                                              ? Colors.white 
+                                              : Theme.of(context).primaryColor,
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          minimumSize: const Size(0, 32),
                                         ),
                                       ),
                                     ],
