@@ -136,122 +136,159 @@ class _UploadPageState extends State<UploadPage> {
   @override
   Widget build(BuildContext context) {
     final venue = widget.venueData;
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('Upload for ${extractVenueName(venue) ?? 'Venue'}'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Upload Images',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
+            Text('Venue Details',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
             Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              margin: const EdgeInsets.only(bottom: 20),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (extractVenueType(venue) != null)
-                      Row(
-                        children: [
-                          const Icon(Icons.info_outline, color: Colors.blueAccent),
-                          const SizedBox(width: 8),
-                          Text('Type: ${extractVenueType(venue)}', style: Theme.of(context).textTheme.titleMedium),
-                        ],
+                      ListTile(
+                        leading: const Icon(Icons.category_outlined),
+                        title: const Text('Type'),
+                        subtitle: Text(extractVenueType(venue)!),
                       ),
-                    // Name widget logic
-                    (() {
-                      final nameValue = extractVenueName(venue);
-                      if (nameValue != null) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.label, color: Colors.green),
-                              const SizedBox(width: 8),
-                              Text('Name: $nameValue', style: Theme.of(context).textTheme.bodyMedium),
-                            ],
-                          ),
-                        );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    })(),
+                    if (extractVenueName(venue) != null)
+                      ListTile(
+                        leading: const Icon(Icons.place_outlined),
+                        title: const Text('Name'),
+                        subtitle: Text(extractVenueName(venue)!),
+                      ),
                     if (venue['Location_Lat'] != null && venue['Location_Lon'] != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.location_on, color: Colors.redAccent),
-                            const SizedBox(width: 8),
-                            Text('Location: ${venue['Location_Lat']}, ${venue['Location_Lon']}', style: Theme.of(context).textTheme.bodySmall),
-                          ],
-                        ),
+                      ListTile(
+                        leading: const Icon(Icons.location_on_outlined),
+                        title: const Text('Location'),
+                        subtitle: Text('${venue['Location_Lat']}, ${venue['Location_Lon']}'),
                       ),
                   ],
                 ),
               ),
             ),
-            Text('Select Image',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            ElevatedButton.icon(
-              onPressed: _pickImage,
-              icon: const Icon(Icons.photo_library),
-              label: const Text('Select Image'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
             const SizedBox(height: 16),
-            if (_selectedImage != null)
-              Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.file(
-                      File(_selectedImage!.path),
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _isUploading ? null : _uploadImage,
-                      icon: _isUploading
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Icon(Icons.cloud_upload),
-                      label: Text(_isUploading ? 'Uploading...' : 'Upload'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            Text('Upload Images',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    if (_selectedImage == null)
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context).dividerColor,
+                          ),
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.cloud_upload_outlined,
+                                size: 48,
+                                color: Theme.of(context).hintColor,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'No image selected',
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  color: Theme.of(context).hintColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Stack(
+                          children: [
+                            Image.file(
+                              File(_selectedImage!.path),
+                              height: 200,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.close, color: Colors.white),
+                                  onPressed: () => setState(() => _selectedImage = null),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _pickImage,
+                            icon: const Icon(Icons.photo_library_outlined),
+                            label: const Text('Select Image'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                        if (_selectedImage != null) ...[
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _isUploading ? null : _uploadImage,
+                              icon: _isUploading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.cloud_upload_outlined),
+                              label: Text(_isUploading ? 'Uploading...' : 'Upload'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            const Divider(height: 32),
-            Text('Uploaded Images', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
-            // TODO: Show uploaded images for this venue here
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text('No uploaded images yet.'),
             ),
           ],
         ),

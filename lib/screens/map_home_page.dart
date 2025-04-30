@@ -49,6 +49,16 @@ final Map<String, Map<String, dynamic>> _markerData = {};
     // Quietly try to get user location, fallback to Melbourne if not available
     final position = await LocationHelper.getCurrentLocation();
     if (position != null) {
+      // Enable the location component with pulsing effect before centering
+      await _mapboxMap.location.updateSettings(
+        LocationComponentSettings(
+          enabled: true,
+          pulsingEnabled: true,
+          pulsingColor: Colors.blue.value,
+          pulsingMaxRadius: 50.0,
+        ),
+      );
+      
       await _mapboxMap.flyTo(
         CameraOptions(
           center: Point(coordinates: Position(position.longitude, position.latitude)),
@@ -142,6 +152,18 @@ final Map<String, Map<String, dynamic>> _markerData = {};
       }
 
       final position = await geo.Geolocator.getCurrentPosition();
+      
+      // Enable the location component with pulsing effect
+      await _mapboxMap.location.updateSettings(
+        LocationComponentSettings(
+          enabled: true,
+          pulsingEnabled: true,
+          pulsingColor: Colors.blue.value,
+          pulsingMaxRadius: 50.0,
+        ),
+      );
+
+      // Center the map on the user's location
       await _mapboxMap.flyTo(
         CameraOptions(
           center: Point(coordinates: Position(position.longitude, position.latitude)),
@@ -149,6 +171,7 @@ final Map<String, Map<String, dynamic>> _markerData = {};
         ),
         MapAnimationOptions(duration: 1000),
       );
+
       debugPrint(' Centered on user location: ${position.latitude}, ${position.longitude}');
     } catch (e) {
       debugPrint(' Error getting location: $e');
