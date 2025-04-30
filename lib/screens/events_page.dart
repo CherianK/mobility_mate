@@ -14,8 +14,11 @@ class EventsPage extends StatefulWidget {
 
 class _EventsPageState extends State<EventsPage> {
   List<dynamic> events = [];
+  List<dynamic> filteredEvents = [];
   bool isLoading = true;
   String errorMessage = '';
+  Set<int> expandedDescriptions = {};
+  String sortBy = 'date'; // 'date' or 'location'
 
   Future<void> _launchUrl(String url) async {
     final Uri uri = Uri.parse(url);
@@ -24,10 +27,39 @@ class _EventsPageState extends State<EventsPage> {
     }
   }
 
+  void _sortEvents() {
+    setState(() {
+      if (sortBy == 'date') {
+        filteredEvents.sort((a, b) {
+          final dateA = DateTime.parse(a['dates']?['start']?['dateTime'] ?? '');
+          final dateB = DateTime.parse(b['dates']?['start']?['dateTime'] ?? '');
+          return dateA.compareTo(dateB); // Ascending order (earliest to latest)
+        });
+      } else {
+        filteredEvents.sort((a, b) {
+          final venueA = a['_embedded']?['venues']?[0]?['name'] ?? '';
+          final venueB = b['_embedded']?['venues']?[0]?['name'] ?? '';
+          return venueA.compareTo(venueB);
+        });
+      }
+    });
+  }
+
+  void _toggleSort() {
+    setState(() {
+      sortBy = sortBy == 'date' ? 'location' : 'date';
+      _sortEvents();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    _fetchEvents();
+    _fetchEvents().then((_) {
+      // Sort by date in ascending order by default
+      sortBy = 'date';
+      _sortEvents();
+    });
   }
 
   Future<void> _fetchEvents() async {
@@ -38,6 +70,7 @@ class _EventsPageState extends State<EventsPage> {
 
     try {
       final now = DateTime.now();
+      final tomorrow = now.add(const Duration(days: 1));
       final response = await http.post(
         Uri.parse('https://mobility-mate.onrender.com/events'),
         headers: {
@@ -51,7 +84,7 @@ class _EventsPageState extends State<EventsPage> {
           "unit": "km",
           "countryCode": "AU",
           "stateCode": "VIC",
-          "startDateTime": now.toIso8601String(),
+          "startDateTime": tomorrow.toIso8601String(),
           "endDateTime": now.add(const Duration(days: 180)).toIso8601String()
         }),
       ).timeout(
@@ -61,37 +94,29 @@ class _EventsPageState extends State<EventsPage> {
         },
       );
 
-      print('DEBUG: Response Status Code: ${response.statusCode}');
-      print('DEBUG: Response Body: ${response.body}');
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('DEBUG: Full Response Data: $data');
-        print('DEBUG: Response Data Type: ${data.runtimeType}');
-        print('DEBUG: Response Data Keys: ${data.keys}');
+        List<dynamic> allEvents = [];
         
-        // Check if data is directly an array
         if (data is List) {
-          setState(() {
-            events = data;
-            print('DEBUG: Events List Length: ${events.length}');
-            if (events.isNotEmpty) {
-              print('DEBUG: First Event: ${events[0]}');
-            }
-            isLoading = false;
-          });
+          allEvents = data;
         } else {
-          // If data is an object, try to find the events array
-          final eventsList = data['events'] ?? data['data'] ?? data['_embedded']?['events'] ?? [];
-          setState(() {
-            events = eventsList is List ? eventsList : [];
-            print('DEBUG: Events List Length: ${events.length}');
-            if (events.isNotEmpty) {
-              print('DEBUG: First Event: ${events[0]}');
-            }
-            isLoading = false;
-          });
+          allEvents = data['events'] ?? data['data'] ?? data['_embedded']?['events'] ?? [];
         }
+
+        // Filter for wheelchair-accessible events
+        final accessibleEvents = allEvents.where((event) {
+          final accessibility = event['accessibility'];
+          return accessibility != null && 
+                 (accessibility['info'] != null || 
+                  accessibility['adaCustomCopy'] != null);
+        }).toList();
+
+        setState(() {
+          events = accessibleEvents;
+          filteredEvents = accessibleEvents;
+          isLoading = false;
+        });
       } else if (response.statusCode == 404) {
         setState(() {
           errorMessage = 'Events service is currently unavailable. Please try again later.';
@@ -155,41 +180,114 @@ class _EventsPageState extends State<EventsPage> {
     return dates['localTime'] ?? _formatTime(dates['start']?['dateTime'] ?? '');
   }
 
+  String _cleanEventInfo(String? info) {
+    if (info == null) return '';
+    
+    // Split the text by newlines
+    final lines = info.split('\n');
+    
+    // Find the line containing "Finish - X:XXpm"
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i].trim();
+      if (line.contains(RegExp(r'Finish\s*-\s*\d{1,2}:\d{2}\s*[AaPp][Mm]'))) {
+        // Get the text after "Finish - X:XXpm" in the same line
+        final finishTimeMatch = RegExp(r'Finish\s*-\s*\d{1,2}:\d{2}\s*[AaPp][Mm]').firstMatch(line);
+        if (finishTimeMatch != null) {
+          final textAfterFinish = line.substring(finishTimeMatch.end).trim();
+          // If there's text after the finish time in the same line, include it
+          if (textAfterFinish.isNotEmpty) {
+            return [textAfterFinish, ...lines.skip(i + 1)].join('\n').trim();
+          }
+        }
+        // If no text after finish time in the same line, start from next line
+        return lines.skip(i + 1).join('\n').trim();
+      }
+    }
+    
+    // If no finish time found, return the original text
+    return info;
+  }
+
   void _showAccessibilityInfo(BuildContext context, Map<String, dynamic> event) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Accessibility Information',
-              style: Theme.of(context).textTheme.titleLarge,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.4,
+        minChildSize: 0.2,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => SingleChildScrollView(
+          controller: scrollController,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with drag handle
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Text(
+                  'Accessibility Information',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (event['accessibility']?['info'] != null) ...[
+                  Text(
+                    'General Information',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    event['accessibility']['info'],
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                if (event['accessibility']?['adaCustomCopy'] != null) ...[
+                  Text(
+                    'Additional Information',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    event['accessibility']['adaCustomCopy'],
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text('Close'),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            if (event['accessibility']?['info'] != null)
-              Text(
-                'Accessibility Info: ${event['accessibility']['info']}',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            if (event['accessibility']?['adaCustomCopy'] != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Additional Info: ${event['accessibility']['adaCustomCopy']}',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -213,158 +311,264 @@ class _EventsPageState extends State<EventsPage> {
               ? Center(child: Text(errorMessage))
               : events.isEmpty
                   ? const Center(child: Text('No events found'))
-                  : ListView.builder(
-                      itemCount: events.length,
-                      itemBuilder: (context, index) {
-                        final event = events[index];
-                        final venue = event['_embedded']?['venues']?[0] ?? {};
-                        final images = event['images'] ?? [];
-                        
-                        return Card(
-                          margin: const EdgeInsets.all(8),
-                          elevation: 4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Event images
-                              if (images.isNotEmpty)
-                                Image.network(
-                                  images[0]['url'],
-                                  width: double.infinity,
-                                  height: 200,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      height: 200,
-                                      color: Colors.grey[300],
-                                      child: const Center(
-                                        child: Icon(Icons.image_not_supported, size: 50),
+                  : CustomScrollView(
+                      slivers: [
+                        SliverAppBar(
+                          expandedHeight: 120,
+                          floating: true,
+                          pinned: false,
+                          backgroundColor: const Color(0xFFE6F3FF),
+                          flexibleSpace: FlexibleSpaceBar(
+                            background: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Wheelchair Accessible Events in Melbourne',
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          setState(() {
+                                            sortBy = 'date';
+                                            _sortEvents();
+                                          });
+                                        },
+                                        icon: const Icon(Icons.calendar_today),
+                                        label: const Text('Sort by Date'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: sortBy == 'date' 
+                                              ? Theme.of(context).primaryColor 
+                                              : Colors.white,
+                                          foregroundColor: sortBy == 'date' 
+                                              ? Colors.white 
+                                              : Theme.of(context).primaryColor,
+                                        ),
                                       ),
-                                    );
-                                  },
-                                ),
-                              Padding(
-                                padding: const EdgeInsets.all(16),
+                                      const SizedBox(width: 8),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          setState(() {
+                                            sortBy = 'location';
+                                            _sortEvents();
+                                          });
+                                        },
+                                        icon: const Icon(Icons.location_on),
+                                        label: const Text('Sort by Location'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: sortBy == 'location' 
+                                              ? Theme.of(context).primaryColor 
+                                              : Colors.white,
+                                          foregroundColor: sortBy == 'location' 
+                                              ? Colors.white 
+                                              : Theme.of(context).primaryColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              if (index >= filteredEvents.length) return null;
+                              final event = filteredEvents[index];
+                              final venue = event['_embedded']?['venues']?[0] ?? {};
+                              final images = event['images'] ?? [];
+                              
+                              return Card(
+                                margin: const EdgeInsets.all(8),
+                                elevation: 4,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Event name
-                                    Text(
-                                      event['name'] ?? 'Untitled Event',
-                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    
-                                    // Segment type
-                                    if (event['segment']?['name'] != null)
+                                    // Event images
+                                    if (images != null && images.isNotEmpty && images[0] != null && images[0]['url'] != null)
+                                      Image.network(
+                                        images[0]['url'],
+                                        width: double.infinity,
+                                        height: 200,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Container(
+                                            height: 200,
+                                            color: Colors.grey[300],
+                                            child: const Center(
+                                              child: Icon(Icons.image_not_supported, size: 50),
+                                            ),
+                                          );
+                                        },
+                                      )
+                                    else
                                       Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.purple.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(4),
-                                        ),
-                                        child: Text(
-                                          event['segment']['name'],
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: Colors.purple,
-                                          ),
+                                        height: 200,
+                                        color: Colors.grey[300],
+                                        child: const Center(
+                                          child: Icon(Icons.image_not_supported, size: 50),
                                         ),
                                       ),
-                                    const SizedBox(height: 12),
-                                    
-                                    // Venue
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.location_on, size: 20, color: Colors.grey),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            venue['name'] ?? 'Venue not specified',
-                                            style: Theme.of(context).textTheme.bodyMedium,
+                                    Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // Event name
+                                          Text(
+                                            event['name'] ?? 'Untitled Event',
+                                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                          const SizedBox(height: 12),
+                                          
+                                          // Segment type
+                                          if (event['segment']?['name'] != null)
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.purple.withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                event['segment']['name'],
+                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                  color: Colors.purple,
+                                                ),
+                                              ),
+                                            ),
+                                          const SizedBox(height: 12),
+                                          
+                                          // Venue
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.location_on, size: 20, color: Colors.grey),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  venue['name'] ?? 'Venue not specified',
+                                                  style: Theme.of(context).textTheme.bodyMedium,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          
+                                          // Date and Time
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                _getLocalDate(event['dates']),
+                                                style: Theme.of(context).textTheme.bodyMedium,
+                                              ),
+                                              const SizedBox(width: 16),
+                                              const Icon(Icons.access_time, size: 20, color: Colors.grey),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                _getLocalTime(event['dates']),
+                                                style: Theme.of(context).textTheme.bodyMedium,
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 12),
+                                          
+                                          // Event info
+                                          if (event['info'] != null) ...[
+                                            Text(
+                                              'About',
+                                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  _cleanEventInfo(event['info']),
+                                                  style: Theme.of(context).textTheme.bodyMedium,
+                                                  maxLines: expandedDescriptions.contains(index) ? null : 3,
+                                                  overflow: expandedDescriptions.contains(index) ? null : TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(height: 4),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      if (expandedDescriptions.contains(index)) {
+                                                        expandedDescriptions.remove(index);
+                                                      } else {
+                                                        expandedDescriptions.add(index);
+                                                      }
+                                                    });
+                                                  },
+                                                  child: Text(
+                                                    expandedDescriptions.contains(index) ? 'See less' : 'See more',
+                                                    style: TextStyle(
+                                                      color: Theme.of(context).primaryColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 16),
+                                          ],
+                                          
+                                          // Accessibility info button
+                                          if (event['accessibility'] != null)
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: OutlinedButton.icon(
+                                                onPressed: () => _showAccessibilityInfo(context, event),
+                                                icon: const Icon(Icons.accessible),
+                                                label: const Text('View Accessibility Information'),
+                                                style: OutlinedButton.styleFrom(
+                                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                                ),
+                                              ),
+                                            ),
+                                          const SizedBox(height: 8),
+                                          
+                                          // Ticketmaster button
+                                          if (event['url'] != null)
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: ElevatedButton.icon(
+                                                onPressed: () => _launchUrl(event['url']),
+                                                icon: const Icon(Icons.shopping_cart),
+                                                label: const Text('View on Ticketmaster'),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Theme.of(context).primaryColor,
+                                                  foregroundColor: Colors.white,
+                                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
                                     ),
-                                    const SizedBox(height: 8),
-                                    
-                                    // Date and Time
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          _getLocalDate(event['dates']),
-                                          style: Theme.of(context).textTheme.bodyMedium,
-                                        ),
-                                        const SizedBox(width: 16),
-                                        const Icon(Icons.access_time, size: 20, color: Colors.grey),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          _getLocalTime(event['dates']),
-                                          style: Theme.of(context).textTheme.bodyMedium,
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    
-                                    // Event info
-                                    if (event['info'] != null) ...[
-                                      Text(
-                                        'About',
-                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        event['info'],
-                                        style: Theme.of(context).textTheme.bodyMedium,
-                                      ),
-                                      const SizedBox(height: 16),
-                                    ],
-                                    
-                                    // Accessibility info button
-                                    if (event['accessibility'] != null)
-                                      SizedBox(
-                                        width: double.infinity,
-                                        child: OutlinedButton.icon(
-                                          onPressed: () => _showAccessibilityInfo(context, event),
-                                          icon: const Icon(Icons.accessible),
-                                          label: const Text('View Accessibility Information'),
-                                          style: OutlinedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(vertical: 12),
-                                          ),
-                                        ),
-                                      ),
-                                    const SizedBox(height: 8),
-                                    
-                                    // Ticketmaster button
-                                    if (event['url'] != null)
-                                      SizedBox(
-                                        width: double.infinity,
-                                        child: ElevatedButton.icon(
-                                          onPressed: () => _launchUrl(event['url']),
-                                          icon: const Icon(Icons.shopping_cart),
-                                          label: const Text('View on Ticketmaster'),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Theme.of(context).primaryColor,
-                                            foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(vertical: 12),
-                                          ),
-                                        ),
-                                      ),
                                   ],
                                 ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
-                        );
-                      },
+                        ),
+                      ],
                     ),
     );
   }
