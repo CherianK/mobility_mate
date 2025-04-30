@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/mapbox_config.dart';
 import '../models/marker_type.dart';
 import '../utils/icon_utils.dart';
-import '../screens/search_page.dart';
+import '../widgets/search_bar.dart';
 
 class VotePage extends StatefulWidget {
   const VotePage({super.key});
@@ -195,19 +195,36 @@ class _VotePageState extends State<VotePage> {
                   padding: const EdgeInsets.all(16),
                   child: TextField(
                     controller: _controller,
+                    onChanged: (value) {
+                      Future.delayed(const Duration(milliseconds: 300), () {
+                        if (value == _controller.text) {
+                          searchLocations(value);
+                        }
+                      });
+                    },
                     decoration: InputDecoration(
                       hintText: 'Search for a location...',
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () => searchLocations(_controller.text),
-                      ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _controller.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _controller.clear();
+                                searchLocations('');
+                              },
+                            )
+                          : null,
                     ),
-                    onSubmitted: (value) => searchLocations(value),
                   ),
                 ),
+                if (isLoading)
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: CircularProgressIndicator(),
+                  ),
                 Expanded(
                   child: _controller.text.isEmpty
                       ? ListView(
