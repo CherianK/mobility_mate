@@ -11,8 +11,11 @@ upload_bp = Blueprint('upload', __name__)
 # Map of accessibility types to collection names
 COLLECTION_MAP = {
     'healthcare': 'medical-victoria',
+    'toilet': 'toilets-victoria',
     'toilets': 'toilets-victoria',
+    'train': 'trains-victoria',
     'trains': 'trains-victoria',
+    'tram': 'trams-victoria',
     'trams': 'trams-victoria'
 }
 
@@ -38,10 +41,17 @@ def generate_upload_url():
         collection = get_collection(collection_name)
 
         # 3. Verify the location exists
+        # Try both singular and plural for Accessibility_Type_Name
+        possible_types = [accessibility_type]
+        if accessibility_type.endswith('s'):
+            possible_types.append(accessibility_type[:-1])
+        else:
+            possible_types.append(accessibility_type + 's')
+
         location = collection.find_one({
             'Location_Lat': float(latitude),
             'Location_Lon': float(longitude),
-            'Accessibility_Type_Name': accessibility_type
+            'Accessibility_Type_Name': {'$in': possible_types}
         })
 
         if not location:
