@@ -44,11 +44,10 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   static const List<Widget> _pages = <Widget>[
-
     MapHomePage(),
-    FindToiletPage(),
-    UploadPage(venueData: {}),
-    SharePage(),
+    // FindToiletPage(),
+    // UploadPage(venueData: {}),
+    // SharePage(),
     VotePage(),
     EventsPage(),
   ];
@@ -75,21 +74,21 @@ class _MainScreenState extends State<MainScreen> {
             selectedIcon: Icon(Icons.home),
             label: 'Home',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.search_outlined),
-            selectedIcon: Icon(Icons.search),
-            label: 'Find Toilet',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.upload_outlined),
-            selectedIcon: Icon(Icons.upload),
-            label: 'Upload',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.share_outlined),
-            selectedIcon: Icon(Icons.share),
-            label: 'Share',
-          ),
+          // NavigationDestination(
+          //   icon: Icon(Icons.search_outlined),
+          //   selectedIcon: Icon(Icons.search),
+          //   label: 'Find Toilet',
+          // ),
+          // NavigationDestination(
+          //   icon: Icon(Icons.upload_outlined),
+          //   selectedIcon: Icon(Icons.upload),
+          //   label: 'Upload',
+          // ),
+          // NavigationDestination(
+          //   icon: Icon(Icons.share_outlined),
+          //   selectedIcon: Icon(Icons.share),
+          //   label: 'Share',
+          // ),
           NavigationDestination(
             icon: Icon(Icons.thumbs_up_down_outlined),
             selectedIcon: Icon(Icons.thumbs_up_down),
