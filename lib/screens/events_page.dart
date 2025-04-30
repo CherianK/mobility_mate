@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
@@ -27,36 +28,93 @@ class _EventsPageState extends State<EventsPage> {
     });
 
     try {
-      // Humanitix API key
-      const apiKey = '70cd9168ac4dc1c7f2b89b0e312a761ec679dd17c0747a4d4389dc118d2647bd60847191e1468129a128ddf0814ba8c27c9b59cbf57bf13d3a286e84aee97a360f840f41d4bc218b4973d11aa90c5658589821f861e42c6547670f81b7695bb366af4da18f24c2ab1cceff0b129288'; // Replace with your actual Humanitix API key
-      
-      // Humanitix API endpoint for Melbourne events
-      final response = await http.get(
-        Uri.parse(
-          'https://api.humanitix.com/v1/events'
-          '?location=Melbourne'
-          '&accessibility=wheelchair'
-          '&sort=date'
-          '&limit=20'
-        ),
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-      );
+      // Mock data for testing
+      final mockData = {
+        '_embedded': {
+          'events': [
+            {
+              'name': 'Melbourne Comedy Festival',
+              'dates': {
+                'start': {
+                  'dateTime': '2024-04-01T19:30:00Z'
+                }
+              },
+              '_embedded': {
+                'venues': [
+                  {
+                    'name': 'Melbourne Town Hall'
+                  }
+                ]
+              },
+              'images': [
+                {
+                  'url': 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+                }
+              ],
+              'priceRanges': [
+                {
+                  'min': 25.00
+                }
+              ]
+            },
+            {
+              'name': 'Australian Open 2024',
+              'dates': {
+                'start': {
+                  'dateTime': '2024-01-15T10:00:00Z'
+                }
+              },
+              '_embedded': {
+                'venues': [
+                  {
+                    'name': 'Melbourne Park'
+                  }
+                ]
+              },
+              'images': [
+                {
+                  'url': 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+                }
+              ],
+              'priceRanges': [
+                {
+                  'min': 45.00
+                }
+              ]
+            },
+            {
+              'name': 'Melbourne Food & Wine Festival',
+              'dates': {
+                'start': {
+                  'dateTime': '2024-03-15T11:00:00Z'
+                }
+              },
+              '_embedded': {
+                'venues': [
+                  {
+                    'name': 'Federation Square'
+                  }
+                ]
+              },
+              'images': [
+                {
+                  'url': 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+                }
+              ],
+              'priceRanges': [
+                {
+                  'min': 35.00
+                }
+              ]
+            }
+          ]
+        }
+      };
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          events = data['events'] ?? [];
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          errorMessage = 'Failed to load events: ${response.statusCode}';
-          isLoading = false;
-        });
-      }
+      setState(() {
+        events = mockData['_embedded']?['events'] ?? [];
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
         errorMessage = 'Error: $e';
@@ -99,7 +157,9 @@ class _EventsPageState extends State<EventsPage> {
                       itemCount: events.length,
                       itemBuilder: (context, index) {
                         final event = events[index];
-                        final venue = event['venue'] ?? {};
+                        final venue = event['_embedded']?['venues']?[0] ?? {};
+                        final images = event['images'] ?? [];
+                        final imageUrl = images.isNotEmpty ? images[0]['url'] : null;
                         
                         return Card(
                           margin: const EdgeInsets.all(8),
@@ -107,9 +167,9 @@ class _EventsPageState extends State<EventsPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Event image
-                              if (event['imageUrl'] != null)
+                              if (imageUrl != null)
                                 Image.network(
-                                  event['imageUrl'],
+                                  imageUrl,
                                   height: 200,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
@@ -131,14 +191,14 @@ class _EventsPageState extends State<EventsPage> {
                                         const Icon(Icons.calendar_today, size: 16),
                                         const SizedBox(width: 8),
                                         Text(
-                                          _formatDate(event['startDate']),
+                                          _formatDate(event['dates']?['start']?['dateTime'] ?? ''),
                                           style: Theme.of(context).textTheme.bodyMedium,
                                         ),
                                         const SizedBox(width: 16),
                                         const Icon(Icons.access_time, size: 16),
                                         const SizedBox(width: 8),
                                         Text(
-                                          _formatTime(event['startDate']),
+                                          _formatTime(event['dates']?['start']?['dateTime'] ?? ''),
                                           style: Theme.of(context).textTheme.bodyMedium,
                                         ),
                                       ],
@@ -167,35 +227,36 @@ class _EventsPageState extends State<EventsPage> {
                                         style: Theme.of(context).textTheme.bodyMedium,
                                       ),
                                     const SizedBox(height: 16),
-                                    // Accessibility badge
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
+                                    // Price range
+                                    if (event['priceRanges'] != null && event['priceRanges'].isNotEmpty)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(16),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.attach_money,
+                                              color: Colors.green,
+                                              size: 16,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              'From \$${event['priceRanges'][0]['min']}',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(color: Colors.green),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.accessible,
-                                            color: Colors.blue,
-                                            size: 16,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            'Wheelchair Accessible',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall
-                                                ?.copyWith(color: Colors.blue),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
