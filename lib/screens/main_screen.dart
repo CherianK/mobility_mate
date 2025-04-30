@@ -27,36 +27,58 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: _selectedIndex,
+            onTap: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            backgroundColor: Colors.white,
+            selectedItemColor: const Color(0xFF007AFF), // iOS blue
+            unselectedItemColor: const Color(0xFF8E8E93), // iOS gray
+            selectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w600, // semibold
+            ),
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.search),
+                label: 'Find Toilet',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.upload),
+                label: 'Upload',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.share),
+                label: 'Share',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.thumbs_up_down),
+                label: 'Vote',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Find Toilet',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.upload),
-            label: 'Upload',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.share),
-            label: 'Share',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.thumbs_up_down),
-            label: 'Vote',
-          ),
-        ],
+        ),
       ),
     );
   }
