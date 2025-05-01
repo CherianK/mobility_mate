@@ -12,6 +12,8 @@ class TutorialOverlay extends StatefulWidget {
   static Future<void> resetTutorialState() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_shown_tutorial', false);
+    print('TutorialOverlay: Tutorial state reset');
+
   }
 
   @override
@@ -34,12 +36,14 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
     ),
     TutorialStep(
       title: 'Home',
+
       description: 'Explore accessible locations and features around you. View wheelchair ramps, accessible entrances, and other accessibility features.',
       position: const Offset(0.17, 0.95),
       radius: 30,
       icon: Icons.home,
     ),
     TutorialStep(
+
       title: 'Tap the Markers',
       description: 'Tap one of the below markers on the map to see detailed accessibility information.',
       position: const Offset(0.5, 0.5),
