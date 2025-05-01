@@ -396,85 +396,60 @@ class _VotePageState extends State<VotePage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  SizedBox(
-                    height: 200,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: images.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            right: index != images.length - 1 ? 8.0 : 0,
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => Dialog(
-                                  child: Stack(
-                                    children: [
-                                      CachedNetworkImage(
-                                        imageUrl: images[index],
-                                        fit: BoxFit.contain,
-                                        placeholder: (context, url) => const Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                        errorWidget: (context, url, error) =>
-                                            const Icon(Icons.error),
-                                      ),
-                                      Positioned(
-                                        right: 8,
-                                        top: 8,
-                                        child: IconButton(
-                                          icon: const Icon(
-                                            Icons.close,
-                                            color: Colors.white,
-                                          ),
-                                          onPressed: () => Navigator.pop(context),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: const Color(0xFFE0E0E0),
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              padding: const EdgeInsets.all(4),
+                  // Photo slider with page dots
+                  Column(
+                    children: [
+                      SizedBox(
+                        height: 200,
+                        child: PageView.builder(
+                          itemCount: images.length,
+                          onPageChanged: (index) {
+                            setState(() {
+                              currentPhotoIndices[locationId] = index;
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            final imageUrl = images[index];
+                            return Card(
+                              margin: const EdgeInsets.only(right: 8),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(8),
                                 child: CachedNetworkImage(
-                                  imageUrl: images[index],
-                                  width: 200,
-                                  height: 200,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Container(
-                                    width: 200,
-                                    height: 200,
-                                    color: Colors.grey[300],
+                                  imageUrl: imageUrl,
+                                  fit: BoxFit.contain, // Adjusted to accommodate both portrait and landscape photos
+                                  errorWidget: (context, url, error) => Container(
+                                    color: Colors.grey[200],
                                     child: const Center(
-                                      child: CircularProgressIndicator(),
+                                      child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
                                     ),
                                   ),
-                                  errorWidget: (context, url, error) => Container(
-                                    width: 200,
-                                    height: 200,
-                                    color: Colors.grey[300],
-                                    child: const Icon(Icons.error),
-                                  ),
                                 ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ...List.generate(
+                            images.length,
+                            (index) => Container(
+                              width: 8,
+                              height: 8,
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: currentPhotoIndex == index
+                                    ? locationType?.color ?? Colors.grey
+                                    : Colors.grey[300],
                               ),
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
