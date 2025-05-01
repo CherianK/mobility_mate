@@ -318,16 +318,51 @@ class _EventsPageState extends State<EventsPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with drag handle
+                // Centered drag handle with animation
                 Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Animated indicator
+                      Positioned(
+                        top: 2,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0.0, end: 1.0),
+                          duration: const Duration(seconds: 3),
+                          curve: Curves.easeInOut,
+                          builder: (context, value, child) {
+                            return Opacity(
+                              opacity: (1 - value).clamp(0.0, 1.0),
+                              child: Transform.translate(
+                                offset: Offset(0, 6 * value),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.keyboard_arrow_up,
+                                    color: Colors.blue,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      // Drag handle
+                      Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Text(

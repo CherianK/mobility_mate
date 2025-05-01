@@ -9,6 +9,7 @@ import 'screens/share_page.dart';
 import 'screens/splash_screen.dart';
 import 'screens/vote_page.dart';
 import 'screens/events_page.dart';
+import 'widgets/tutorial_overlay.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,46 +61,48 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          // NavigationDestination(
-          //   icon: Icon(Icons.search_outlined),
-          //   selectedIcon: Icon(Icons.search),
-          //   label: 'Find Toilet',
-          // ),
-          // NavigationDestination(
-          //   icon: Icon(Icons.upload_outlined),
-          //   selectedIcon: Icon(Icons.upload),
-          //   label: 'Upload',
-          // ),
-          // NavigationDestination(
-          //   icon: Icon(Icons.share_outlined),
-          //   selectedIcon: Icon(Icons.share),
-          //   label: 'Share',
-          // ),
-          NavigationDestination(
-            icon: Icon(Icons.thumbs_up_down_outlined),
-            selectedIcon: Icon(Icons.thumbs_up_down),
-            label: 'Vote',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.event_outlined),
-            selectedIcon: Icon(Icons.event),
-            label: 'Events',
-          ),
-        ],
+    return TutorialOverlay(
+      child: Scaffold(
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _pages,
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: _onItemTapped,
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            // NavigationDestination(
+            //   icon: Icon(Icons.search_outlined),
+            //   selectedIcon: Icon(Icons.search),
+            //   label: 'Find Toilet',
+            // ),
+            // NavigationDestination(
+            //   icon: Icon(Icons.upload_outlined),
+            //   selectedIcon: Icon(Icons.upload),
+            //   label: 'Upload',
+            // ),
+            // NavigationDestination(
+            //   icon: Icon(Icons.share_outlined),
+            //   selectedIcon: Icon(Icons.share),
+            //   label: 'Share',
+            // ),
+            NavigationDestination(
+              icon: Icon(Icons.thumbs_up_down_outlined),
+              selectedIcon: Icon(Icons.thumbs_up_down),
+              label: 'Vote',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.event_outlined),
+              selectedIcon: Icon(Icons.event),
+              label: 'Events',
+            ),
+          ],
+        ),
       ),
     );
   }

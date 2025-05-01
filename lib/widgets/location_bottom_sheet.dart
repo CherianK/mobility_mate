@@ -33,7 +33,8 @@ class LocationBottomSheet extends StatelessWidget {
       child: DraggableScrollableSheet(
         initialChildSize: 0.4,
         minChildSize: 0.2,
-        maxChildSize: 0.85,
+        maxChildSize: 0.9,
+        expand: false,
         builder: (context, scrollController) {
           return Container(
             decoration: BoxDecoration(
@@ -49,17 +50,50 @@ class LocationBottomSheet extends StatelessWidget {
             ),
             child: Column(
               children: [
-                // Drag handle
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE5E5EA),
-                      borderRadius: BorderRadius.circular(2),
+                // Drag handle with animation
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Animated indicator
+                    Positioned(
+                      top: 2,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(seconds: 3),
+                        curve: Curves.easeInOut,
+                        builder: (context, value, child) {
+                          return Opacity(
+                            opacity: (1 - value).clamp(0.0, 1.0),
+                            child: Transform.translate(
+                              offset: Offset(0, 6 * value),
+                              child: Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.keyboard_arrow_up,
+                                  color: Colors.blue,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
+                    // Existing drag handle
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE5E5EA),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ],
                 ),
                 // Header with title and close button
                 Container(
