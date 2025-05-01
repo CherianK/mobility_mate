@@ -5,6 +5,7 @@ import '../utils/tag_formatter.dart';
 import '../screens/report_issue_screen.dart';
 import '../screens/upload_page.dart';
 import '../utils/location_helper.dart';
+import '../utils/share_helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class LocationBottomSheet extends StatelessWidget {
@@ -309,7 +310,24 @@ class LocationBottomSheet extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {
-                        Share.share("Check this location: https://maps.google.com/?q=$destLat,$destLon");
+                        
+                        final lat = double.tryParse(destLat);
+                        final lon = double.tryParse(destLon);
+                        final List<String> featureDescriptions = orderedTags
+                          .map((entry) => formatTag(entry.key, entry.value))
+                          .where((value) => value.trim().isNotEmpty)
+                          .toList();
+                        
+                        
+                        if (lat != null && lon != null) {
+                          ShareHelper.shareLocationWithDetails(
+                            latitude: lat,
+                            longitude: lon,
+                            name: title,
+                            features: featureDescriptions,
+                            context: context,
+                          );
+                        }
                       },
                       icon: const Icon(Icons.share_outlined),
                       label: const Text('Share'),
