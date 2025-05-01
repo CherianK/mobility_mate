@@ -13,6 +13,7 @@ class TutorialOverlay extends StatefulWidget {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_shown_tutorial', false);
     print('TutorialOverlay: Tutorial state reset');
+
   }
 
   @override
@@ -27,36 +28,51 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
 
   final List<TutorialStep> _steps = [
     TutorialStep(
-      title: 'Search Locations',
-      description: 'Find accessible features in Victoria. Type a location to search.',
+      title: 'Accessibility Search',
+      description: 'Find wheelchair-accessible locations and features in Victoria. Plan your trip with ease.',
       position: const Offset(0.5, 0.08),
       radius: 40,
       icon: Icons.search,
     ),
     TutorialStep(
       title: 'Home',
-      description: 'View the map and find accessible features around you',
+
+      description: 'Explore accessible locations and features around you. View wheelchair ramps, accessible entrances, and other accessibility features.',
       position: const Offset(0.17, 0.95),
       radius: 30,
       icon: Icons.home,
     ),
     TutorialStep(
+
+      title: 'Tap the Markers',
+      description: 'Tap one of the below markers on the map to see detailed accessibility information.',
+      position: const Offset(0.5, 0.5),
+      radius: 40,
+      icon: Icons.touch_app,
+      additionalIcons: [
+        Icons.wc,
+        Icons.train,
+        Icons.tram,
+        Icons.local_hospital,
+      ],
+    ),
+    TutorialStep(
       title: 'Vote',
-      description: 'Vote on accessibility features and help improve our data',
+      description: 'Vote on accessibility features to help improve information for the community. Your input makes a difference!',
       position: const Offset(0.5, 0.95),
       radius: 30,
       icon: Icons.thumbs_up_down,
     ),
     TutorialStep(
       title: 'Events',
-      description: 'Discover and join accessibility-related events',
+      description: 'Discover inclusive events and activities. Join the accessibility community and stay informed.',
       position: const Offset(0.83, 0.95),
       radius: 30,
       icon: Icons.event,
     ),
     TutorialStep(
-      title: 'More Features',
-      description: 'Upload new images, report issues, and share with others',
+      title: 'Contribute & Share',
+      description: 'Help build our accessibility database by uploading photos, reporting issues, and sharing accessible locations with others.',
       position: const Offset(0.5, 0.5),
       radius: 40,
       icon: Icons.more_horiz,
@@ -71,7 +87,6 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    print('TutorialOverlay: Initializing...');
     
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
@@ -97,9 +112,8 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('has_shown_tutorial', true);
-      print('TutorialOverlay: Marked tutorial as shown');
     } catch (e) {
-      print('TutorialOverlay: Error marking tutorial as shown: $e');
+      // Handle error silently
     }
   }
 
@@ -108,13 +122,11 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
       setState(() {
         _currentStep++;
       });
-      print('TutorialOverlay: Moving to step $_currentStep');
     } else {
       setState(() {
         _showTutorial = false;
       });
       _markTutorialAsShown();
-      print('TutorialOverlay: Tutorial completed');
     }
   }
 
@@ -123,12 +135,10 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
       _showTutorial = false;
     });
     _markTutorialAsShown();
-    print('TutorialOverlay: Tutorial skipped');
   }
 
   @override
   Widget build(BuildContext context) {
-    print('TutorialOverlay: Building with _showTutorial: $_showTutorial');
     return Stack(
       children: [
         widget.child,
