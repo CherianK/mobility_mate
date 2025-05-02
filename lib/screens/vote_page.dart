@@ -337,6 +337,49 @@ class _VotePageState extends State<VotePage> {
     return MarkerType.train;
   }
 
+  List<Widget> _buildTagsList(Map<String, dynamic> tags) {
+    return tags.entries.where((entry) => entry.key != 'Name').map((entry) {
+      final key = entry.key.replaceAll('_', ' ').split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ');
+      final value = entry.value.toString().toLowerCase();
+
+      Color valueColor;
+      String displayValue;
+
+      if (value == 'yes') {
+        valueColor = Colors.green;
+        displayValue = 'Available';
+      } else if (value == 'no') {
+        valueColor = Colors.red;
+        displayValue = 'Unavailable';
+      } else {
+        valueColor = Colors.blue;
+        displayValue = entry.value.toString();
+      }
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              key,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              displayValue,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: valueColor),
+              textAlign: TextAlign.right,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      );
+    }).toList();
+  }
+
   Widget _buildLocationDetails() {
     if (selectedLocation == null) return const SizedBox.shrink();
 
@@ -351,6 +394,7 @@ class _VotePageState extends State<VotePage> {
     final displayName = locationType?.displayName ?? 'Location';
 
     final images = selectedLocation!['images'] as List<dynamic>? ?? [];
+    final tags = selectedLocation!['tags'] as Map<String, dynamic>? ?? {};
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -522,46 +566,10 @@ class _VotePageState extends State<VotePage> {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 1,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: _getAccessibilityFeatures(selectedLocation!).length,
-            itemBuilder: (context, index) {
-              final feature = _getAccessibilityFeatures(selectedLocation!)[index];
-              return Card(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(iconGetter(feature['key'], feature['value']), size: 24),
-                    const SizedBox(height: 4),
-                    Text(
-                      feature['label'],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+          ..._buildTagsList(tags),
         ],
       ),
     );
-  }
-
-  List<Map<String, dynamic>> _getAccessibilityFeatures(Map<String, dynamic> location) {
-    // TODO: Implement logic to extract accessibility features from location data
-    return [
-      {'key': 'wheelchair', 'value': 'yes', 'label': 'Wheelchair Access'},
-      {'key': 'tactile_paving', 'value': 'yes', 'label': 'Tactile Paving'},
-      {'key': 'elevator', 'value': 'yes', 'label': 'Elevator'},
-    ];
   }
 
   @override
@@ -581,7 +589,9 @@ class _VotePageState extends State<VotePage> {
             : null,
       ),
       body: selectedLocation != null
-          ? _buildLocationDetails()
+          ? SingleChildScrollView(
+              child: _buildLocationDetails(),
+            )
           : Column(
               children: [
                 Padding(
