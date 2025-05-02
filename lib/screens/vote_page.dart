@@ -210,11 +210,11 @@ class _VotePageState extends State<VotePage> {
 
   void _voteOnPhoto(String photoId, bool isAccurate) {
     if (selectedLocation == null) return;
-    
+
     final locationId = selectedLocation!['id'] ?? selectedLocation!['name'];
     final currentVotes = locationPhotoVotes[locationId] ?? {};
     final photoVotes = currentVotes[photoId] ?? {'accurate': 0, 'inaccurate': 0};
-    
+
     setState(() {
       // If the user clicks the same vote again, remove their vote
       if (photoVotes[isAccurate ? 'accurate' : 'inaccurate']! > 0) {
@@ -225,11 +225,42 @@ class _VotePageState extends State<VotePage> {
         // Add the new vote
         photoVotes[isAccurate ? 'accurate' : 'inaccurate'] = 1;
       }
-      
+
       // Update the votes for this photo
       currentVotes[photoId] = photoVotes;
       locationPhotoVotes[locationId] = currentVotes;
     });
+  }
+
+  Widget _buildPhotoVoting(String photoId) {
+    final locationId = selectedLocation!['id'] ?? selectedLocation!['name'];
+    final currentVotes = locationPhotoVotes[locationId] ?? {};
+    final photoVotes = currentVotes[photoId] ?? {'accurate': 0, 'inaccurate': 0};
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: photoVotes['accurate']! > 0 ? Colors.blue : Colors.grey,
+            foregroundColor: Colors.white,
+          ),
+          icon: const Icon(Icons.thumb_up),
+          label: Text('Accurate ${photoVotes['accurate']}'),
+          onPressed: () => _voteOnPhoto(photoId, true),
+        ),
+        const SizedBox(width: 16),
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: photoVotes['inaccurate']! > 0 ? Colors.blue : Colors.grey,
+            foregroundColor: Colors.white,
+          ),
+          icon: const Icon(Icons.thumb_down),
+          label: Text('Inaccurate ${photoVotes['inaccurate']}'),
+          onPressed: () => _voteOnPhoto(photoId, false),
+        ),
+      ],
+    );
   }
 
   MarkerType? _determineLocationType(Map<String, dynamic> location) {
@@ -400,7 +431,7 @@ class _VotePageState extends State<VotePage> {
                   Column(
                     children: [
                       SizedBox(
-                        height: 200,
+                        height: 300, // Increased height for photos
                         child: PageView.builder(
                           itemCount: images.length,
                           onPageChanged: (index) {
@@ -410,21 +441,22 @@ class _VotePageState extends State<VotePage> {
                           },
                           itemBuilder: (context, index) {
                             final imageUrl = images[index];
-                            return Card(
-                              margin: const EdgeInsets.only(right: 8),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: CachedNetworkImage(
-                                  imageUrl: imageUrl,
-                                  fit: BoxFit.contain, // Adjusted to accommodate both portrait and landscape photos
-                                  errorWidget: (context, url, error) => Container(
-                                    color: Colors.grey[200],
-                                    child: const Center(
-                                      child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                            return Column(
+                              children: [
+                                Expanded(
+                                  child: CachedNetworkImage(
+                                    imageUrl: imageUrl,
+                                    fit: BoxFit.contain, // Adjusted to accommodate both portrait and landscape photos
+                                    errorWidget: (context, url, error) => Container(
+                                      color: Colors.grey[200],
+                                      child: const Center(
+                                        child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
+                                _buildPhotoVoting(locationPhotos[locationId]![index]['id']),
+                              ],
                             );
                           },
                         ),
