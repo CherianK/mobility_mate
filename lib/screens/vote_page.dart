@@ -359,11 +359,18 @@ class _VotePageState extends State<VotePage> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: Text(
-              key,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
+          Row(
+            children: [
+              Icon(
+                getTrainIcon(entry.key, 'yes'), // Use the icon logic for "yes" values regardless of availability
+                color: valueColor, // Match the icon color to the value color
+              ),
+              const SizedBox(width: 8),
+              Text(
+                key,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+            ],
           ),
           const SizedBox(width: 8),
           Expanded(
