@@ -22,6 +22,9 @@ MONGO_URI = os.getenv("MONGO_URI")
 app = Flask(__name__)
 CORS(app)
 
+# Security configuration
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")  
+
 # MongoDB setup
 app.config["MONGO_URI"] = MONGO_URI
 mongo = PyMongo(app)
