@@ -5,11 +5,14 @@ from flask_admin import Admin
 from wtforms import Form
 from dotenv import load_dotenv
 import os
+
 from routes.report_routes import report_bp
 from routes.location_routes import location_bp
 from routes.upload_routes import upload_bp
 from routes.events import events_bp
-from admin.views import ReadOnlyModelView
+
+from admin.views import ReadOnlyModelView, AdminIndexView
+from admin.auth import init_login
 
 # Load environment variables
 load_dotenv()
@@ -22,6 +25,10 @@ CORS(app)
 # MongoDB setup
 app.config["MONGO_URI"] = MONGO_URI
 mongo = PyMongo(app)
+app.mongo = mongo  # ✅ Needed for current_app.mongo in auth.py
+
+# Initialize login manager
+init_login(app, mongo)
 
 # Register API routes
 app.register_blueprint(location_bp)
@@ -39,16 +46,14 @@ def home():
 def redirect_to_admin():
     return redirect('/admin')
 
-# Admin setup
-admin = Admin(app, name="MobilityMate Admin", template_mode="bootstrap4")
-
-# Register MongoDB collections
+# ✅ Updated Admin setup with authentication
+admin = Admin(app, name="MobilityMate Admin", template_mode="bootstrap4", index_view=AdminIndexView(mongo))
 admin.add_view(ReadOnlyModelView(mongo.db["toilets-victoria"], "Toilets"))
 admin.add_view(ReadOnlyModelView(mongo.db["trains-victoria"], "Trains"))
 admin.add_view(ReadOnlyModelView(mongo.db["trams-victoria"], "Trams"))
 admin.add_view(ReadOnlyModelView(mongo.db["medical-victoria"], "Hospitals"))
 
-# Render-compatible launch
+# Run the app
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))  # Fallback to 10000
     app.run(host='0.0.0.0', port=port)
