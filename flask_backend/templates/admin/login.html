@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        form {
+            border: 1px solid #ccc;
+            padding: 2rem;
+            border-radius: 8px;
+            background: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        label {
+            margin-top: 1rem;
+            display: block;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.25rem;
+        }
+        button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+        }
+    </style>
+</head>
+<body>
+    <form method="post">
+        <h2>MobilityMate Admin Login</h2>
+        {{ form.hidden_tag() }}
+        <label>Username</label>
+        {{ form.username() }}
+        <label>Password</label>
+        {{ form.password() }}
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
