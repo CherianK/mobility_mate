@@ -33,7 +33,7 @@ class AdminIndexView(AdminIndexView):
                 user = User(form.username.data)
                 login_user(user)
                 return redirect(url_for('.index'))
-        return self.render('admin/login.html', form=form)
+        return self.render('login.html', form=form)
 
     @expose('/logout/')
     def logout_view(self):
