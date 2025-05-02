@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/mapbox_config.dart';
 import '../models/marker_type.dart';
 import '../utils/icon_utils.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class VotePage extends StatefulWidget {
   const VotePage({super.key});
@@ -37,32 +38,49 @@ class _VotePageState extends State<VotePage> {
 
   Future<void> loadLocalData() async {
     try {
-      // Load station data
-      final String stationsJson = await rootBundle.loadString('assets/suburb_stations.json');
-      final List<dynamic> stationsData = json.decode(stationsJson);
-      
-      // Load hospital data from API
-      final response = await http.get(Uri.parse('https://mobility-mate.onrender.com/medical-location-points'));
-      if (response.statusCode != 200) {
-        throw Exception('Failed to load hospital data: ${response.statusCode}');
+      // Load train data from API
+      final trainResponse = await http.get(Uri.parse('https://mobility-mate.onrender.com/train-location-points'));
+      if (trainResponse.statusCode != 200) {
+        throw Exception('Failed to load train data: ${trainResponse.statusCode}');
       }
-      final List<dynamic> hospitalsData = json.decode(response.body);
-      
-      // Combine both datasets
+      final List<dynamic> trainData = json.decode(trainResponse.body);
+
+      // Load tram data from API
+      final tramResponse = await http.get(Uri.parse('https://mobility-mate.onrender.com/tram-location-points'));
+      if (tramResponse.statusCode != 200) {
+        throw Exception('Failed to load tram data: ${tramResponse.statusCode}');
+      }
+      final List<dynamic> tramData = json.decode(tramResponse.body);
+
+      // Load hospital data from API
+      final hospitalResponse = await http.get(Uri.parse('https://mobility-mate.onrender.com/medical-location-points'));
+      if (hospitalResponse.statusCode != 200) {
+        throw Exception('Failed to load hospital data: ${hospitalResponse.statusCode}');
+      }
+      final List<dynamic> hospitalData = json.decode(hospitalResponse.body);
+
+      // Combine all datasets
       allLocations = [
-        ...stationsData.map((location) => {
+        ...trainData.map((location) => {
           ...location,
           'isLocal': true,
-          'type': 'station',
+          'type': 'train',
         }),
-        ...hospitalsData.map((location) => {
+        ...tramData.map((location) => {
+          ...location,
+          'isLocal': true,
+          'type': 'tram',
+        }),
+        ...hospitalData.map((location) => {
           ...location,
           'isLocal': true,
           'type': 'hospital',
         }),
       ];
-      
-      debugPrint('Loaded ${allLocations.length} local locations (${stationsData.length} stations, ${hospitalsData.length} hospitals)');
+
+      debugPrint('First few entries in allLocations: ${allLocations.take(5).toList()}');
+      //debugPrint('Loaded ${allLocations.length} local locations');
+      //debugPrint('All locations data: ${allLocations.map((location) => location['name'] ?? location['Name']).toList()}');
     } catch (e) {
       debugPrint('Error loading local data: $e');
     }
@@ -82,71 +100,43 @@ class _VotePageState extends State<VotePage> {
       isLoading = true;
     });
 
-    // Search local data
+    debugPrint('Search query: $query');
+    debugPrint('All locations: ${allLocations.length}');
+
+    // Ensure allLocations is populated correctly
+    if (allLocations.isEmpty) {
+      debugPrint('Error: allLocations is empty. Ensure data is loaded correctly from APIs.');
+    }
+
+    // Normalize search query and location names for better matching
+    final normalizedQuery = query.toLowerCase().trim();
+
+    debugPrint('Normalized query: $normalizedQuery');
+    //debugPrint('Location names in allLocations: ${allLocations.map((location) => location['Name']?.toString().toLowerCase().trim() ?? location['name']?.toString().toLowerCase().trim() ?? '').toList()}');
+
     final filteredLocal = allLocations.where((location) {
-      final name = location['Name']?.toString().toLowerCase() ?? 
-                  location['name']?.toString().toLowerCase() ?? 
-                  location['Name']?.toString().toLowerCase() ?? '';
-      return name.contains(query.toLowerCase());
+      final name = location['Metadata']?['name']?.toString().toLowerCase().trim() ?? 
+                  location['Tags']?['name']?.toString().toLowerCase().trim() ?? '';
+      return name.contains(normalizedQuery);
     }).map((location) {
       return {
-        'name': location['Name'] ?? location['name'] ?? location['Name'],
-        'lat': location['Latitude'] ?? location['lat'] ?? location['Location_Lat'],
-        'lon': location['Longitude'] ?? location['lon'] ?? location['Location_Lon'],
+        'name': location['Metadata']?['name'] ?? location['Tags']?['name'] ?? 'Unknown Location',
+        'lat': location['Location_Lat'],
+        'lon': location['Location_Lon'],
         'isLocal': true,
         'type': location['type'],
+        'images': location['Images'] ?? [],
+        'tags': location['Tags'] ?? {},
       };
     }).toList();
 
-    // Search Mapbox
-    try {
-      final url = Uri.parse(
-        'https://api.mapbox.com/geocoding/v5/mapbox.places/$query.json'
-        '?access_token=${MapboxConfig.accessToken}'
-        '&country=au'
-        '&types=address,place,poi'
-        '&limit=5'
-      );
+    debugPrint('Filtered local results: ${filteredLocal.length}');
+    debugPrint('Filtered local results (names): ${filteredLocal.map((location) => location['name']).toList()}');
 
-      final response = await http.get(url);
-      
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final features = data['features'] as List;
-        
-        final mapboxLocations = features.map((feature) {
-          final coordinates = feature['center'] as List;
-          final lat = coordinates[1] as double;
-          final lon = coordinates[0] as double;
-          return {
-            'name': feature['place_name'],
-            'lat': lat,
-            'lon': lon,
-            'isLocal': false,
-          };
-        }).toList();
-
-        setState(() {
-          mapboxResults = mapboxLocations;
-          localResults = filteredLocal;
-          isLoading = false;
-        });
-      } else {
-        debugPrint('Mapbox API Error: ${response.statusCode}');
-        setState(() {
-          mapboxResults = [];
-          localResults = filteredLocal;
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error: $e');
-      setState(() {
-        mapboxResults = [];
-        localResults = filteredLocal;
-        isLoading = false;
-      });
-    }
+    setState(() {
+      localResults = filteredLocal;
+      isLoading = false;
+    });
   }
 
   void _addToRecentSearches(Map<String, dynamic> location) async {
@@ -182,29 +172,19 @@ class _VotePageState extends State<VotePage> {
     final locationId = location['id'] ?? location['name'];
     setState(() {
       selectedLocation = location;
-      // Initialize photos for this location if not already present
+      // Use the image URLs from the `Images` array in the data
       if (!locationPhotos.containsKey(locationId)) {
-        locationPhotos[locationId] = [
-          {
-            'id': '${locationId}_1', 
-            'url': 'https://mobility-mate.s3.ap-southeast-2.amazonaws.com/photos/${locationId}_1.jpg',
-            'uploadDate': '2024-03-15T14:30:00Z',
-          },
-          {
-            'id': '${locationId}_2', 
-            'url': 'https://mobility-mate.s3.ap-southeast-2.amazonaws.com/photos/${locationId}_2.jpg',
-            'uploadDate': '2024-03-14T09:15:00Z',
-          },
-          {
-            'id': '${locationId}_3', 
-            'url': 'https://mobility-mate.s3.ap-southeast-2.amazonaws.com/photos/${locationId}_3.jpg',
-            'uploadDate': '2024-03-13T16:45:00Z',
-          },
-        ];
+        locationPhotos[locationId] = (selectedLocation!['images'] as List<dynamic>)
+            .map((url) => {
+                  'id': '${locationId}_${(selectedLocation!['images'] as List<dynamic>).indexOf(url)}',
+                  'url': url,
+                  //'uploadDate': 'Unknown', // Placeholder for upload date
+                })
+            .toList() as List<Map<String, dynamic>>;
+
         // Initialize votes for this location if not already present
         if (!locationPhotoVotes.containsKey(locationId)) {
           locationPhotoVotes[locationId] = {};
-          // Initialize votes for each photo
           for (var photo in locationPhotos[locationId]!) {
             locationPhotoVotes[locationId]![photo['id']] = {
               'accurate': 0,
@@ -212,6 +192,7 @@ class _VotePageState extends State<VotePage> {
             };
           }
         }
+
         // Initialize current photo index for this location
         currentPhotoIndices[locationId] = 0;
       }
@@ -229,11 +210,11 @@ class _VotePageState extends State<VotePage> {
 
   void _voteOnPhoto(String photoId, bool isAccurate) {
     if (selectedLocation == null) return;
-    
+
     final locationId = selectedLocation!['id'] ?? selectedLocation!['name'];
     final currentVotes = locationPhotoVotes[locationId] ?? {};
     final photoVotes = currentVotes[photoId] ?? {'accurate': 0, 'inaccurate': 0};
-    
+
     setState(() {
       // If the user clicks the same vote again, remove their vote
       if (photoVotes[isAccurate ? 'accurate' : 'inaccurate']! > 0) {
@@ -244,11 +225,42 @@ class _VotePageState extends State<VotePage> {
         // Add the new vote
         photoVotes[isAccurate ? 'accurate' : 'inaccurate'] = 1;
       }
-      
+
       // Update the votes for this photo
       currentVotes[photoId] = photoVotes;
       locationPhotoVotes[locationId] = currentVotes;
     });
+  }
+
+  Widget _buildPhotoVoting(String photoId) {
+    final locationId = selectedLocation!['id'] ?? selectedLocation!['name'];
+    final currentVotes = locationPhotoVotes[locationId] ?? {};
+    final photoVotes = currentVotes[photoId] ?? {'accurate': 0, 'inaccurate': 0};
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: photoVotes['accurate']! > 0 ? Colors.blue : Colors.grey,
+            foregroundColor: Colors.white,
+          ),
+          icon: const Icon(Icons.thumb_up),
+          label: Text('Accurate ${photoVotes['accurate']}'),
+          onPressed: () => _voteOnPhoto(photoId, true),
+        ),
+        const SizedBox(width: 16),
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: photoVotes['inaccurate']! > 0 ? Colors.blue : Colors.grey,
+            foregroundColor: Colors.white,
+          ),
+          icon: const Icon(Icons.thumb_down),
+          label: Text('Inaccurate ${photoVotes['inaccurate']}'),
+          onPressed: () => _voteOnPhoto(photoId, false),
+        ),
+      ],
+    );
   }
 
   MarkerType? _determineLocationType(Map<String, dynamic> location) {
@@ -325,6 +337,56 @@ class _VotePageState extends State<VotePage> {
     return MarkerType.train;
   }
 
+  List<Widget> _buildTagsList(Map<String, dynamic> tags) {
+    return tags.entries.where((entry) => entry.key != 'Name').map((entry) {
+      final key = entry.key.replaceAll('_', ' ').split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ');
+      final value = entry.value.toString().toLowerCase();
+
+      Color valueColor;
+      String displayValue;
+
+      if (value == 'yes') {
+        valueColor = Colors.green;
+        displayValue = 'Available';
+      } else if (value == 'no') {
+        valueColor = Colors.red;
+        displayValue = 'Unavailable';
+      } else {
+        valueColor = Colors.blue;
+        displayValue = entry.value.toString();
+      }
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                getTrainIcon(entry.key, 'yes'), // Use the icon logic for "yes" values regardless of availability
+                color: valueColor, // Match the icon color to the value color
+              ),
+              const SizedBox(width: 8),
+              Text(
+                key,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              displayValue,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: valueColor),
+              textAlign: TextAlign.right,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      );
+    }).toList();
+  }
+
   Widget _buildLocationDetails() {
     if (selectedLocation == null) return const SizedBox.shrink();
 
@@ -337,6 +399,9 @@ class _VotePageState extends State<VotePage> {
     final locationType = _determineLocationType(selectedLocation!);
     final iconGetter = locationType?.iconGetter ?? getTrainIcon;
     final displayName = locationType?.displayName ?? 'Location';
+
+    final images = selectedLocation!['images'] as List<dynamic>? ?? [];
+    final tags = selectedLocation!['tags'] as Map<String, dynamic>? ?? {};
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -397,176 +462,108 @@ class _VotePageState extends State<VotePage> {
           const SizedBox(height: 16),
 
           // Photos section
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Photos',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'How accurate are these photos?',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          if (currentPhotos.isEmpty)
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.photo_camera, size: 48, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text('No photos available yet'),
-                  ],
-                ),
-              ),
-            )
-          else
-            Column(
-              children: [
-                // Photo slider
-                SizedBox(
-                  height: 200,
-                  child: PageView.builder(
-                    itemCount: currentPhotos.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        currentPhotoIndices[locationId] = index;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      final photo = currentPhotos[index];
-                      final vote = currentVotes[photo['id']];
-                      
-                      return Card(
-                        margin: const EdgeInsets.only(right: 8),
-                        child: Stack(
-                          children: [
-                            // Photo placeholder
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Center(
-                                child: Icon(Icons.photo, size: 48, color: Colors.grey),
-                              ),
-                            ),
-                            // Voting buttons
-                            Positioned(
-                              bottom: 8,
-                              left: 8,
-                              right: 8,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  ElevatedButton.icon(
-                                    onPressed: () => _voteOnPhoto(photo['id'], true),
-                                    icon: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.thumb_up,
-                                          color: (vote?['accurate'] ?? 0) > 0 ? Colors.white : null,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '${vote?['accurate'] ?? 0}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: (vote?['accurate'] ?? 0) > 0 ? Colors.white : null,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    label: Text(
-                                      'Accurate',
-                                      style: TextStyle(
-                                        color: (vote?['accurate'] ?? 0) > 0 ? Colors.white : null,
-                                      ),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: (vote?['accurate'] ?? 0) > 0 ? Colors.green : null,
-                                    ),
-                                  ),
-                                  ElevatedButton.icon(
-                                    onPressed: () => _voteOnPhoto(photo['id'], false),
-                                    icon: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.thumb_down,
-                                          color: (vote?['inaccurate'] ?? 0) > 0 ? Colors.white : null,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '${vote?['inaccurate'] ?? 0}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: (vote?['inaccurate'] ?? 0) > 0 ? Colors.white : null,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    label: Text(
-                                      'Inaccurate',
-                                      style: TextStyle(
-                                        color: (vote?['inaccurate'] ?? 0) > 0 ? Colors.white : null,
-                                      ),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: (vote?['inaccurate'] ?? 0) > 0 ? Colors.red : null,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+          if (images.isNotEmpty) ...[
+            const Divider(height: 1, color: Color(0xFFE5E5EA)),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Photos',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                // Photo description and indicator
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ...List.generate(
-                      currentPhotos.length,
-                      (index) => Container(
-                        width: 8,
-                        height: 8,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: currentPhotoIndex == index
-                              ? locationType?.color ?? Colors.grey
-                              : Colors.grey[300],
+                  const SizedBox(height: 12),
+                  // Photo slider with page dots
+                  Column(
+                    children: [
+                      SizedBox(
+                        height: 300, // Increased height for photos
+                        child: PageView.builder(
+                          itemCount: images.length,
+                          onPageChanged: (index) {
+                            setState(() {
+                              currentPhotoIndices[locationId] = index;
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            final imageUrl = images[index];
+                            return Column(
+                              children: [
+                                Expanded(
+                                  child: CachedNetworkImage(
+                                    imageUrl: imageUrl,
+                                    fit: BoxFit.contain, // Adjusted to accommodate both portrait and landscape photos
+                                    errorWidget: (context, url, error) => Container(
+                                      color: Colors.grey[200],
+                                      child: const Center(
+                                        child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                _buildPhotoVoting(locationPhotos[locationId]![index]['id']),
+                              ],
+                            );
+                          },
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Uploaded: ${_formatDateTime(currentPhotos[currentPhotoIndex]['uploadDate'])}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ...List.generate(
+                            images.length,
+                            (index) => Container(
+                              width: 8,
+                              height: 8,
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: currentPhotoIndex == index
+                                    ? locationType?.color ?? Colors.grey
+                                    : Colors.grey[300],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+                ],
+              ),
             ),
+          ] else ...[
+            const Divider(height: 1, color: Color(0xFFE5E5EA)),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Photos',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No attached pictures',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           const SizedBox(height: 16),
 
@@ -576,46 +573,10 @@ class _VotePageState extends State<VotePage> {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 1,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: _getAccessibilityFeatures(selectedLocation!).length,
-            itemBuilder: (context, index) {
-              final feature = _getAccessibilityFeatures(selectedLocation!)[index];
-              return Card(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(iconGetter(feature['key'], feature['value']), size: 24),
-                    const SizedBox(height: 4),
-                    Text(
-                      feature['label'],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+          ..._buildTagsList(tags),
         ],
       ),
     );
-  }
-
-  List<Map<String, dynamic>> _getAccessibilityFeatures(Map<String, dynamic> location) {
-    // TODO: Implement logic to extract accessibility features from location data
-    return [
-      {'key': 'wheelchair', 'value': 'yes', 'label': 'Wheelchair Access'},
-      {'key': 'tactile_paving', 'value': 'yes', 'label': 'Tactile Paving'},
-      {'key': 'elevator', 'value': 'yes', 'label': 'Elevator'},
-    ];
   }
 
   @override
@@ -635,7 +596,9 @@ class _VotePageState extends State<VotePage> {
             : null,
       ),
       body: selectedLocation != null
-          ? _buildLocationDetails()
+          ? SingleChildScrollView(
+              child: _buildLocationDetails(),
+            )
           : Column(
               children: [
                 Padding(
@@ -767,4 +730,4 @@ class _VotePageState extends State<VotePage> {
     _controller.dispose();
     super.dispose();
   }
-} 
+}
