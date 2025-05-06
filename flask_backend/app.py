@@ -11,12 +11,13 @@ from routes.location_routes import location_bp
 from routes.upload_routes import upload_bp
 from routes.events import events_bp
 
-from admin.views import ReadOnlyModelView, AdminIndexView
+from admin.views import DeletableModelView, AdminIndexView
 from admin.auth import init_login
 
 # Load environment variables
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
+
 
 # Initialize app and CORS
 app = Flask(__name__)
@@ -50,10 +51,10 @@ def redirect_to_admin():
 
 # ✅ Updated Admin setup with authentication
 admin = Admin(app, name="MobilityMate Admin", template_mode="bootstrap4", index_view=AdminIndexView(mongo))
-admin.add_view(ReadOnlyModelView(mongo.db["toilets-victoria"], "Toilets"))
-admin.add_view(ReadOnlyModelView(mongo.db["trains-victoria"], "Trains"))
-admin.add_view(ReadOnlyModelView(mongo.db["trams-victoria"], "Trams"))
-admin.add_view(ReadOnlyModelView(mongo.db["medical-victoria"], "Hospitals"))
+admin.add_view(DeletableModelView(mongo.db["toilets-victoria"], "Toilets"))
+admin.add_view(DeletableModelView(mongo.db["trains-victoria"], "Trains"))
+admin.add_view(DeletableModelView(mongo.db["trams-victoria"], "Trams"))
+admin.add_view(DeletableModelView(mongo.db["medical-victoria"], "Hospitals"))
 
 # Run the app
 if __name__ == '__main__':
