@@ -2,7 +2,7 @@ from flask_admin import expose, AdminIndexView
 from flask_admin.contrib.pymongo import ModelView
 from flask_login import current_user, login_user, logout_user
 from flask import url_for, redirect, request
-from .forms import LoginForm
+from .forms import LoginForm, EditForm
 from .auth import User
 from wtforms import Form
 
@@ -65,11 +65,13 @@ class AdminIndexView(AdminIndexView):
 
 
 # 📋 View for MongoDB collections with read-only access
-class ReadOnlyModelView(SecureModelView):
-    column_list = ('Location_Lat', 'Location_Lon', 'Accessibility_Type_Name', 'Metadata', 'Tags','Images')
+class DeletableModelView(SecureModelView):
+    column_list = ('Location_Lat', 'Location_Lon', 'Accessibility_Type_Name', 'Metadata', 'Tags', 'Images')
     can_create = False
-    can_edit = False
-    can_delete = False
-
+    can_edit = True
+    can_delete = True 
+    
     def scaffold_form(self):
-        return Form
+        return EditForm
+
+
