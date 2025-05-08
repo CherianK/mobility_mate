@@ -1,5 +1,3 @@
-# views.py
-
 from flask_admin import expose, AdminIndexView, BaseView
 from flask_admin.contrib.pymongo import ModelView
 from flask_login import current_user, login_user, logout_user
@@ -48,7 +46,7 @@ class AdminIndexView(AdminIndexView):
         return redirect(url_for('.index'))
 
 
-# ✅ Image Approval View (instead of edit)
+# ✅ Image Approval View (no editing or CRUD)
 class ApprovalAdminView(BaseView):
     def __init__(self, mongo, collection_name, **kwargs):
         super().__init__(**kwargs)

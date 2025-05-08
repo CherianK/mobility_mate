@@ -10,7 +10,7 @@ from routes.location_routes import location_bp
 from routes.upload_routes import upload_bp
 from routes.events import events_bp
 
-from admin.views import ApprovalAdminView, AdminIndexView  # ✅ updated import
+from admin.views import ApprovalAdminView, AdminIndexView  # ✅ Only using approval view
 from admin.auth import init_login
 
 # Load environment variables
@@ -26,7 +26,7 @@ app.secret_key = os.getenv("SECRET_KEY")
 # MongoDB setup
 app.config["MONGO_URI"] = MONGO_URI
 mongo = PyMongo(app)
-app.mongo = mongo  # ✅ needed for auth
+app.mongo = mongo  # ✅ Needed for current_app.mongo in auth.py
 
 # Initialize login manager
 init_login(app, mongo)
@@ -47,10 +47,9 @@ def home():
 def redirect_to_admin():
     return redirect('/admin')
 
-# ✅ Updated Flask-Admin setup with approval views
+# ✅ Flask-Admin setup with approval views only
 admin = Admin(app, name="MobilityMate Admin", template_mode="bootstrap4", index_view=AdminIndexView(mongo))
 
-# Approval views for different collections
 admin.add_view(ApprovalAdminView(mongo, "toilets-victoria", name="Toilet Approvals", endpoint="toilet_approval"))
 admin.add_view(ApprovalAdminView(mongo, "trains-victoria", name="Train Approvals", endpoint="train_approval"))
 admin.add_view(ApprovalAdminView(mongo, "trams-victoria", name="Tram Approvals", endpoint="tram_approval"))
