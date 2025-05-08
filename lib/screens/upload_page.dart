@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../utils/venue_utils.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class UploadPage extends StatefulWidget {
   final Map<String, dynamic> venueData;
@@ -17,6 +18,21 @@ class _UploadPageState extends State<UploadPage> {
   final ImagePicker _picker = ImagePicker();
   XFile? _selectedImage;
   bool _isUploading = false;
+  List<Map<String, dynamic>> _existingImages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExistingImages();
+  }
+
+  void _loadExistingImages() {
+    if (widget.venueData['Images'] != null) {
+      setState(() {
+        _existingImages = List<Map<String, dynamic>>.from(widget.venueData['Images']);
+      });
+    }
+  }
 
   // Map to convert frontend types to backend types
   final Map<String, String> accessibilityTypeMap = {
@@ -29,6 +45,15 @@ class _UploadPageState extends State<UploadPage> {
   String _normalizeAccessibilityType(String type) {
     // Remove any 's' at the end and convert to lowercase
     return accessibilityTypeMap[type] ?? type.toLowerCase().replaceAll(RegExp(r's$'), '');
+  }
+
+  String _formatDateTime(String isoString) {
+    try {
+      final dateTime = DateTime.parse(isoString);
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return 'Unknown date';
+    }
   }
 
   Future<void> _pickImage() async {
@@ -102,8 +127,14 @@ class _UploadPageState extends State<UploadPage> {
         throw Exception('Failed to upload image to S3');
       }
 
-      // Clear the selected image after successful upload
+      // Add the new image to the existing images list
       setState(() {
+        _existingImages.add({
+          'image_url': publicUrl,
+          'image_upload_time': DateTime.now().toUtc().toIso8601String() + 'Z',
+          'approved_status': false,
+          'image_approved_time': null
+        });
         _selectedImage = null;
       });
 
@@ -190,7 +221,50 @@ class _UploadPageState extends State<UploadPage> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (_existingImages.isNotEmpty) ...[
+                      Text('Existing Images',
+                          style: Theme.of(context).textTheme.titleSmall),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 120,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _existingImages.length,
+                          itemBuilder: (context, index) {
+                            final image = _existingImages[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: CachedNetworkImage(
+                                      imageUrl: image['image_url'],
+                                      height: 120,
+                                      width: 120,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(
+                                        color: Colors.grey[200],
+                                        child: const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => Container(
+                                        color: Colors.grey[200],
+                                        child: const Icon(Icons.error),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                     if (_selectedImage == null)
                       Container(
                         height: 200,
@@ -204,7 +278,7 @@ class _UploadPageState extends State<UploadPage> {
                         child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                            children: [
                               Icon(
                                 Icons.cloud_upload_outlined,
                                 size: 48,
@@ -222,15 +296,15 @@ class _UploadPageState extends State<UploadPage> {
                         ),
                       )
                     else
-                  ClipRRect(
+                      ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Stack(
                           children: [
                             Image.file(
-                      File(_selectedImage!.path),
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+                              File(_selectedImage!.path),
+                              height: 200,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
                             ),
                             Positioned(
                               top: 8,
@@ -247,9 +321,9 @@ class _UploadPageState extends State<UploadPage> {
                               ),
                             ),
                           ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
@@ -265,25 +339,25 @@ class _UploadPageState extends State<UploadPage> {
                         if (_selectedImage != null) ...[
                           const SizedBox(width: 8),
                           Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _isUploading ? null : _uploadImage,
-                      icon: _isUploading
-                          ? const SizedBox(
+                            child: ElevatedButton.icon(
+                              onPressed: _isUploading ? null : _uploadImage,
+                              icon: _isUploading
+                                  ? const SizedBox(
                                       width: 20,
                                       height: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         color: Colors.white,
                                       ),
-                            )
+                                    )
                                   : const Icon(Icons.cloud_upload_outlined),
-                      label: Text(_isUploading ? 'Uploading...' : 'Upload'),
-                      style: ElevatedButton.styleFrom(
+                              label: Text(_isUploading ? 'Uploading...' : 'Upload'),
+                              style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
-                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],

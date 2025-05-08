@@ -5,6 +5,7 @@ import boto3
 import os
 from datetime import datetime
 from services.db_service import get_collection  
+from datetime import datetime
 
 upload_bp = Blueprint('upload', __name__)
 
@@ -84,10 +85,16 @@ def generate_upload_url():
         # 7. Generate public URL
         public_url = f"https://{bucket_name}.s3.{os.environ.get('S3_REGION')}.amazonaws.com/{key}"
 
-        # 8. Update the document using _id for efficiency
+        image_data = {
+            "image_url": public_url,
+            "image_upload_time": datetime.utcnow().isoformat() + "Z",
+            "approved_status": False,
+            "image_approved_time": None
+        }
+
         result = collection.update_one(
-            {'_id': location['_id']},  # 🔥 Only using _id now
-            {'$push': {'Images': public_url}}
+            {'_id': location['_id']},
+            {'$push': {'Images': image_data}}
         )
 
         if result.modified_count == 0:
