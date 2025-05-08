@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:confetti/confetti.dart';
+import 'dart:math';
 
 class TutorialOverlay extends StatefulWidget {
   final Widget child;
@@ -13,7 +15,6 @@ class TutorialOverlay extends StatefulWidget {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_shown_tutorial', false);
     print('TutorialOverlay: Tutorial state reset');
-
   }
 
   @override
@@ -22,28 +23,43 @@ class TutorialOverlay extends StatefulWidget {
 
 class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProviderStateMixin {
   bool _showTutorial = true;
+  bool _showConfetti = false;
   int _currentStep = 0;
+  bool _dontShowAgain = false;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+  late ConfettiController _confettiController;
 
   final List<TutorialStep> _steps = [
     TutorialStep(
-      title: 'Accessibility Search',
+      title: 'Search',
       description: 'Find wheelchair-accessible locations and features in Victoria. Plan your trip with ease.',
-      position: const Offset(0.5, 0.08),
+      position: const Offset(0.12, 0.10),
       radius: 40,
       icon: Icons.search,
     ),
     TutorialStep(
       title: 'Home',
-
-      description: 'Explore accessible locations and features around you. View wheelchair ramps, accessible entrances, and other accessibility features.',
-      position: const Offset(0.17, 0.95),
+      description: 'Explore accessible locations and features around you.',
+      position: const Offset(0.17, 0.90),
       radius: 30,
       icon: Icons.home,
     ),
     TutorialStep(
-
+      title: 'Vote',
+      description: 'Vote to help improve information for the community. Your input makes a difference!',
+      position: const Offset(0.5, 0.90),
+      radius: 30,
+      icon: Icons.thumbs_up_down,
+    ),
+    TutorialStep(
+      title: 'Events',
+      description: 'Discover accessible events. Be part of the community and stay informed.',
+      position: const Offset(0.83, 0.90),
+      radius: 30,
+      icon: Icons.event,
+    ),
+    TutorialStep(
       title: 'Tap the Markers',
       description: 'Tap one of the below markers on the map to see detailed accessibility information.',
       position: const Offset(0.5, 0.5),
@@ -55,20 +71,6 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
         Icons.tram,
         Icons.local_hospital,
       ],
-    ),
-    TutorialStep(
-      title: 'Vote',
-      description: 'Vote on accessibility features to help improve information for the community. Your input makes a difference!',
-      position: const Offset(0.5, 0.95),
-      radius: 30,
-      icon: Icons.thumbs_up_down,
-    ),
-    TutorialStep(
-      title: 'Events',
-      description: 'Discover inclusive events and activities. Join the accessibility community and stay informed.',
-      position: const Offset(0.83, 0.95),
-      radius: 30,
-      icon: Icons.event,
     ),
     TutorialStep(
       title: 'Contribute & Share',
@@ -84,9 +86,24 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
     ),
   ];
 
+  Future<void> _checkTutorialPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final dontShowAgain = prefs.getBool('dont_show_tutorial_again') ?? false;
+      if (dontShowAgain) {
+        setState(() {
+          _showTutorial = false;
+        });
+      }
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _checkTutorialPreference();
     
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
@@ -100,11 +117,14 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
       parent: _pulseController,
       curve: Curves.easeInOut,
     ));
+
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
+    _confettiController.dispose();
     super.dispose();
   }
 
@@ -112,6 +132,9 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('has_shown_tutorial', true);
+      if (_dontShowAgain) {
+        await prefs.setBool('dont_show_tutorial_again', true);
+      }
     } catch (e) {
       // Handle error silently
     }
@@ -125,8 +148,27 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
     } else {
       setState(() {
         _showTutorial = false;
+        _showConfetti = true;
       });
+      _confettiController.play();
       _markTutorialAsShown();
+      
+      // Hide confetti after animation completes
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) {
+          setState(() {
+            _showConfetti = false;
+          });
+        }
+      });
+    }
+  }
+
+  void _previousStep() {
+    if (_currentStep > 0) {
+      setState(() {
+        _currentStep--;
+      });
     }
   }
 
@@ -191,110 +233,194 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                   left: 20,
                   right: 20,
                   top: MediaQuery.of(context).size.height * 0.4,
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _steps[_currentStep].title,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          _steps[_currentStep].description,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black87,
-                            height: 1.4,
-                          ),
-                        ),
-                        if (_steps[_currentStep].additionalIcons != null) ...[
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: _steps[_currentStep].additionalIcons!.map((icon) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                child: Icon(
-                                  icon,
-                                  color: Colors.blue,
-                                  size: 32,
-                                ),
-                              );
-                            }).toList(),
+                  child: SingleChildScrollView(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
                           ),
                         ],
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextButton(
-                              onPressed: _skipTutorial,
-                              child: const Text('Skip Tutorial'),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _steps[_currentStep].title,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
                             ),
-                            const SizedBox(width: 16),
-                            ElevatedButton(
-                              onPressed: _nextStep,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                              ),
-                              child: Text(
-                                _currentStep < _steps.length - 1 ? 'Next' : 'Got it!',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            _steps[_currentStep].description,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.black87,
+                              height: 1.4,
+                            ),
+                          ),
+                          if (_steps[_currentStep].additionalIcons != null) ...[
+                            const SizedBox(height: 16),
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              spacing: 16,
+                              children: _steps[_currentStep].additionalIcons!.map((icon) {
+                                return Icon(
+                                  icon,
+                                  color: Colors.blue,
+                                  size: 28,
+                                );
+                              }).toList(),
                             ),
                           ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // Progress indicators
-                Positioned(
-                  top: 16,
-                  left: 0,
-                  right: 0,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      _steps.length,
-                      (index) => Container(
-                        width: 8,
-                        height: 8,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: index == _currentStep ? Colors.blue : Colors.white.withOpacity(0.5),
-                        ),
+                          const SizedBox(height: 16),
+                          // Progress bar and step counter
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Step ${_currentStep + 1}',
+                                      style: const TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${_steps.length} steps',
+                                      style: TextStyle(
+                                        color: Colors.blue.withOpacity(0.7),
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: LinearProgressIndicator(
+                                    value: (_currentStep + 1) / _steps.length,
+                                    backgroundColor: Colors.blue.withOpacity(0.1),
+                                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                                    minHeight: 6,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          if (_currentStep == _steps.length - 1) ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Checkbox(
+                                  value: _dontShowAgain,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _dontShowAgain = value ?? false;
+                                    });
+                                  },
+                                  activeColor: Colors.blue,
+                                ),
+                                const Text(
+                                  'Don\'t show this again',
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (_currentStep < _steps.length - 1)
+                                TextButton(
+                                  onPressed: _skipTutorial,
+                                  child: const Text('Skip Tutorial'),
+                                ),
+                              if (_currentStep < _steps.length - 1)
+                                const SizedBox(width: 12),
+                              if (_currentStep > 0)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 12),
+                                  child: IconButton(
+                                    onPressed: _previousStep,
+                                    icon: const Icon(Icons.arrow_back),
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ElevatedButton(
+                                onPressed: _nextStep,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                ),
+                                child: Text(
+                                  _currentStep < _steps.length - 1 ? 'Next' : 'Got it!',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
+              ],
+            ),
+          ),
+        if (_showConfetti)
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: pi / 2,
+              maxBlastForce: 5,
+              minBlastForce: 2,
+              emissionFrequency: 0.05,
+              numberOfParticles: 50,
+              gravity: 0.1,
+              shouldLoop: false,
+              colors: const [
+                Colors.blue,
+                Colors.red,
+                Colors.green,
+                Colors.yellow,
+                Colors.purple,
+                Colors.orange,
+                Colors.pink,
+                Colors.teal,
+                Colors.indigo,
+                Colors.amber,
               ],
             ),
           ),
