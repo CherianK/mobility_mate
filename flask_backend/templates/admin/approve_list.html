@@ -1,0 +1,48 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+<div class="container">
+    <h2>Pending Image Approvals</h2>
+
+    {% if locations %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Location Name</th>
+                        <th>Type</th>
+                        <th>Unapproved Images</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for location in locations %}
+                        <tr>
+                            <td>{{ location.get('Location_Name', 'Unnamed Location') }}</td>
+                            <td>{{ location.get('Accessibility_Type_Name', 'Unknown Type') }}</td>
+                            <td>
+                                {% set unapproved_count = location.get('Images', [])|selectattr('approved_status', 'equalto', false)|list|length %}
+                                {{ unapproved_count }}
+                            </td>
+                            <td>
+                                {% for image in location.get('Images', []) %}
+                                    {% if not image.get('approved_status', false) %}
+                                        <a href="{{ url_for('approvaladminview.approve_image', location_id=location._id, image_index=loop.index0) }}" 
+                                           class="btn btn-primary btn-sm">
+                                            Review Image {{ loop.index }}
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No pending image approvals found.
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 
