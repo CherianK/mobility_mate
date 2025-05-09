@@ -41,13 +41,6 @@ class LocationBottomSheet extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, -2),
-                ),
-              ],
             ),
             child: Column(
               children: [
@@ -96,37 +89,6 @@ class LocationBottomSheet extends StatelessWidget {
                     ),
                   ],
                 ),
-                // Header with title and close button
-                Container(
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Color(0xFFE5E5EA),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: onClose,
-                        tooltip: 'Close',
-                      ),
-                    ],
-                  ),
-                ),
                 // Content
                 Expanded(
                   child: SingleChildScrollView(
@@ -172,6 +134,29 @@ class LocationBottomSheet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Title and close button
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: onClose,
+                tooltip: 'Close',
+              ),
+            ],
+          ),
+        ),
         // Action buttons
         Padding(
           padding: const EdgeInsets.all(16.0),
@@ -521,52 +506,56 @@ class LocationBottomSheet extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 3,
-                  children: orderedTags.map((entry) {
-                    final icon = iconGetter(entry.key, entry.value);
-                    final formattedValue = formatTag(entry.key, entry.value);
-                    Color iconColor = const Color(0xFF2C7BE5); // Default blue color
-                    
-                    // Customize icon colors based on tag type
-                    if (entry.key.toLowerCase().contains('male') || 
-                        entry.key.toLowerCase().contains('female') ||
-                        entry.key.toLowerCase().contains('gender')) {
-                      iconColor = const Color(0xFF9C27B0); // Purple for gender-related
-                    } else if (entry.key.toLowerCase().contains('wheelchair')) {
-                      iconColor = const Color(0xFF2C7BE5); // Blue for wheelchair
-                    }
-                    
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF0F0F5),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      child: Row(
-                        children: [
-                          Icon(icon, size: 18, color: iconColor),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              formattedValue,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                ...orderedTags.map((entry) {
+                  final key = entry.key.replaceAll('_', ' ').split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ');
+                  final value = entry.value.toString().toLowerCase();
+
+                  Color valueColor;
+                  String displayValue;
+
+                  if (value == 'yes') {
+                    valueColor = Colors.green;
+                    displayValue = 'Available';
+                  } else if (value == 'no') {
+                    valueColor = Colors.red;
+                    displayValue = 'Unavailable';
+                  } else {
+                    valueColor = Colors.blue;
+                    displayValue = entry.value.toString();
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              iconGetter(entry.key, entry.value),
+                              color: valueColor,
                             ),
+                            const SizedBox(width: 8),
+                            Text(
+                              key,
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            displayValue,
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: valueColor),
+                            textAlign: TextAlign.right,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ],
             ),
           ),
