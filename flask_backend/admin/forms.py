@@ -1,19 +1,18 @@
+# forms.py
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField
-from wtforms.validators import InputRequired
-from wtforms import Form
+from wtforms import StringField, PasswordField, BooleanField, HiddenField
+from wtforms.validators import DataRequired
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[
-        InputRequired(message="Username is required")
+        DataRequired(message="Username is required")
     ])
     password = PasswordField('Password', validators=[
-        InputRequired(message="Password is required")
+        DataRequired(message="Password is required")
     ])
 
-class EditForm(Form):
-    Location_Lat = StringField('Latitude')
-    Location_Lon = StringField('Longitude')
-    Accessibility_Type_Name = StringField('Type')
-    Metadata = StringField('Metadata')
-    Tags = StringField('Tags')           
+class ApprovalForm(FlaskForm):
+    image_url = StringField('Image URL', render_kw={'readonly': True})
+    approved_status = BooleanField('Approve this image?')
+    location_id = HiddenField('Location ID', validators=[DataRequired()])
+    image_index = HiddenField('Image Index', validators=[DataRequired()])

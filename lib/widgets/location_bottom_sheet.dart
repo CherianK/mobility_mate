@@ -107,7 +107,10 @@ class LocationBottomSheet extends StatelessWidget {
   Widget _buildContent(BuildContext context) {
     final Map<String, dynamic> tags = data['Tags'] ?? {};
     final List<MapEntry<String, dynamic>> allTags = tags.entries.toList();
-    final List<String> images = List<String>.from(data['Images'] ?? []);
+    final List<String> images = (data['Images'] as List<dynamic>? ?? [])
+      .where((img) => img is Map && img['approved_status'] == true)
+      .map<String>((img) => img['image_url'] as String)
+      .toList();
     final prioritizedKeys = [
       'wheelchair',
       'access',
