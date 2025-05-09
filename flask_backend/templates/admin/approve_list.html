@@ -1,48 +1,49 @@
+{# flask_backend/templates/admin/approve_list.html #}
 {% extends 'admin/master.html' %}
 
 {% block body %}
-<div class="container">
-    <h2>Pending Image Approvals</h2>
+<div class="container mt-4">
+  <h2>Pending Image Approvals</h2>
 
-    {% if locations %}
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Location Name</th>
-                        <th>Type</th>
-                        <th>Unapproved Images</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for location in locations %}
-                        <tr>
-                            <td>{{ location.get('Location_Name', 'Unnamed Location') }}</td>
-                            <td>{{ location.get('Accessibility_Type_Name', 'Unknown Type') }}</td>
-                            <td>
-                                {% set unapproved_count = location.get('Images', [])|selectattr('approved_status', 'equalto', false)|list|length %}
-                                {{ unapproved_count }}
-                            </td>
-                            <td>
-                                {% for image in location.get('Images', []) %}
-                                    {% if not image.get('approved_status', false) %}
-                                        <a href="{{ url_for('approvaladminview.approve_image', location_id=location._id, image_index=loop.index0) }}" 
-                                           class="btn btn-primary btn-sm">
-                                            Review Image {{ loop.index }}
-                                        </a>
-                                    {% endif %}
-                                {% endfor %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+  {% if locations %}
+    <div class="accordion mt-3" id="locationAccordion">
+      {% for location in locations %}
+        <div class="card mb-2">
+          <div class="card-header" id="heading{{ loop.index }}">
+            <h5 class="mb-0">
+              <button class="btn btn-link" type="button" data-toggle="collapse"
+                      data-target="#collapse{{ loop.index }}" aria-expanded="true"
+                      aria-controls="collapse{{ loop.index }}">
+                {{ location.Metadata.name or location.Tags.name or "Unnamed Location" }}
+              </button>
+            </h5>
+          </div>
+
+          <div id="collapse{{ loop.index }}" class="collapse"
+               aria-labelledby="heading{{ loop.index }}"
+               data-parent="#locationAccordion">
+            <div class="card-body">
+              {% for image in location.Images %}
+                {% if not image.approved_status %}
+                  <div class="mb-3 d-flex align-items-center">
+                    <img src="{{ image.image_url }}" alt="Pending Image"
+                         style="height: 120px; border: 1px solid #ccc; border-radius: 4px; margin-right: 12px;">
+                    <a href="{{ url_for(request.endpoint + '.approve_image', location_id=location._id, image_index=loop.index0) }}"
+                       class="btn btn-primary">
+                      Review / Approve
+                    </a>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
         </div>
-    {% else %}
-        <div class="alert alert-info">
-            No pending image approvals found.
-        </div>
-    {% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info mt-3">
+      No pending images for approval.
+    </div>
+  {% endif %}
 </div>
-{% endblock %} 
+{% endblock %}
