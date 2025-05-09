@@ -15,8 +15,9 @@
         </div>
         <div class="card-body text-center">
           <div class="row justify-content-center">
-            {% for image_index, image in location.Images | enumerate %}
+            {% for image in location.Images %}
               {% if not image.approved_status %}
+                {% set image_index = loop.index0 %}
                 <div class="col-md-6 mb-4">
                   <img src="{{ image.image_url }}" alt="Pending Image"
                        style="max-width: 100%; height: auto; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 12px;">
