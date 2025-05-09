@@ -1,13 +1,13 @@
-from flask_admin import expose, AdminIndexView
+from flask_admin import expose, AdminIndexView, BaseView
 from flask_admin.contrib.pymongo import ModelView
 from flask_login import current_user, login_user, logout_user
-from flask import url_for, redirect, request
-from .forms import LoginForm, EditForm
+from flask import url_for, redirect, request, flash, render_template
+from .forms import LoginForm, ApprovalForm
 from .auth import User
-from wtforms import Form
+from bson import ObjectId
+from datetime import datetime
 
-
-# 🔒 Base view with authentication checks for secure admin views
+# 🔒 Base view for authentication-protected views
 class SecureModelView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated
@@ -16,7 +16,7 @@ class SecureModelView(ModelView):
         return redirect(url_for('admin.login_view', next=request.url))
 
 
-# 🏠 Custom admin dashboard (with login/logout)
+# 🏠 Admin dashboard with login/logout
 class AdminIndexView(AdminIndexView):
     def __init__(self, mongo, **kwargs):
         super().__init__(**kwargs)
@@ -24,38 +24,20 @@ class AdminIndexView(AdminIndexView):
 
     @expose('/')
     def index(self):
-        print(">> current_user:", current_user)
-        print(">> authenticated:", current_user.is_authenticated)
-
         if not current_user.is_authenticated:
             return redirect(url_for('.login_view'))
-
         return super().index()
 
     @expose('/login/', methods=('GET', 'POST'))
     def login_view(self):
         form = LoginForm()
-
-        if request.method == 'POST':
-            print(">> POST received")
-            print(">> form.valid? ", form.validate())
-            print(">> Username: ", form.username.data)
-            print(">> Password: ", form.password.data)
-
+        if request.method == 'POST' and form.validate():
             user_data = self.mongo.db.users.find_one({"username": form.username.data})
-            print(">> user_data: ", user_data)
-
-            if user_data:
-                if form.password.data == user_data["password"]:  # 🔐 Replace with check_password_hash if hashed
-                    print(">> Password matched — logging in!")
-                    user = User(user_data["username"])
-                    login_user(user)
-                    return redirect(url_for('.index'))
-                else:
-                    print(">> Incorrect password")
-            else:
-                print(">> User not found")
-
+            if user_data and form.password.data == user_data.get("password"):
+                user = User(user_data["username"])
+                login_user(user)
+                return redirect(url_for('.index'))
+            flash("Invalid username or password", "danger")
         return self.render('admin/login.html', form=form)
 
     @expose('/logout/')
@@ -64,14 +46,57 @@ class AdminIndexView(AdminIndexView):
         return redirect(url_for('.index'))
 
 
-# 📋 View for MongoDB collections with read-only access
-class DeletableModelView(SecureModelView):
-    column_list = ('Location_Lat', 'Location_Lon', 'Accessibility_Type_Name', 'Metadata', 'Tags', 'Images')
-    can_create = False
-    can_edit = True
-    can_delete = True 
-    
-    def scaffold_form(self):
-        return EditForm
+# ✅ Image Approval View (no editing or CRUD)
+class ApprovalAdminView(BaseView):
+    def __init__(self, mongo, collection_name, **kwargs):
+        super().__init__(**kwargs)
+        self.mongo = mongo
+        self.collection = mongo.db[collection_name]
 
+    @expose('/')
+    def index(self):
+        if not current_user.is_authenticated:
+            return redirect(url_for('admin.login_view'))
 
+        locations = list(self.collection.find({
+            "Images": {"$elemMatch": {"approved_status": False}}
+        }))
+        return self.render('admin/approve_list.html', locations=locations)
+
+    @expose('/approve/<location_id>/<int:image_index>/', methods=['GET', 'POST'])
+    def approve_image(self, location_id, image_index):
+        if not current_user.is_authenticated:
+            return redirect(url_for('admin.login_view'))
+
+        location = self.collection.find_one({"_id": ObjectId(location_id)})
+        if not location:
+            flash("Location not found", "danger")
+            return redirect(url_for('.index'))
+
+        try:
+            image_data = location.get("Images", [])[image_index]
+        except IndexError:
+            flash("Image not found at the specified index", "danger")
+            return redirect(url_for('.index'))
+
+        form = ApprovalForm(
+            image_url=image_data.get("image_url"),
+            location_id=str(location_id),
+            image_index=str(image_index),
+            approved_status=image_data.get("approved_status", False)
+        )
+
+        if form.validate_on_submit():
+            approved = form.approved_status.data
+            approved_time = datetime.utcnow().isoformat() + "Z" if approved else None
+            self.collection.update_one(
+                {"_id": ObjectId(location_id)},
+                {"$set": {
+                    f"Images.{image_index}.approved_status": approved,
+                    f"Images.{image_index}.image_approved_time": approved_time
+                }}
+            )
+            flash("Image approval updated", "success")
+            return redirect(url_for('.index'))
+
+        return self.render('admin/approve_image.html', form=form, image=image_data)

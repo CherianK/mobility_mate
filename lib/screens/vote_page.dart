@@ -125,7 +125,10 @@ class _VotePageState extends State<VotePage> {
         'lon': location['Location_Lon'],
         'isLocal': true,
         'type': location['type'],
-        'images': location['Images'] ?? [],
+        'images': (location['Images'] as List<dynamic>? ?? [])
+          .where((img) => img is Map && img['approved_status'] == true)
+          .map((img) => img['image_url'] as String)
+          .toList(),
         'tags': location['Tags'] ?? {},
       };
     }).toList();
