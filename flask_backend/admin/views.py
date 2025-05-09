@@ -2,12 +2,13 @@ from flask_admin import expose, AdminIndexView, BaseView
 from flask_admin.contrib.pymongo import ModelView
 from flask_login import current_user, login_user, logout_user
 from flask import url_for, redirect, request, flash, render_template
-from .forms import LoginForm, ApprovalForm
+from .forms import LoginForm
 from .auth import User
 from bson import ObjectId
 from datetime import datetime
 
-# 🔒 Base view for authentication-protected views
+
+# 🔒 Secure model view requiring login
 class SecureModelView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated
@@ -16,7 +17,7 @@ class SecureModelView(ModelView):
         return redirect(url_for('admin.login_view', next=request.url))
 
 
-# 🏠 Admin dashboard with login/logout
+# 🏠 Admin Dashboard with login/logout support
 class AdminIndexView(AdminIndexView):
     def __init__(self, mongo, **kwargs):
         super().__init__(**kwargs)
@@ -46,7 +47,7 @@ class AdminIndexView(AdminIndexView):
         return redirect(url_for('.index'))
 
 
-# ✅ Image Approval View (no editing or CRUD)
+# ✅ Simple Inline Image Approval View
 class ApprovalAdminView(BaseView):
     def __init__(self, mongo, collection_name, **kwargs):
         super().__init__(**kwargs)
@@ -63,40 +64,22 @@ class ApprovalAdminView(BaseView):
         }))
         return self.render('admin/approve_list.html', locations=locations)
 
-    @expose('/approve/<location_id>/<int:image_index>/', methods=['GET', 'POST'])
+    @expose('/approve/<location_id>/<int:image_index>/', methods=['POST'])
     def approve_image(self, location_id, image_index):
         if not current_user.is_authenticated:
             return redirect(url_for('admin.login_view'))
 
-        location = self.collection.find_one({"_id": ObjectId(location_id)})
-        if not location:
-            flash("Location not found", "danger")
-            return redirect(url_for('.index'))
-
-        try:
-            image_data = location.get("Images", [])[image_index]
-        except IndexError:
-            flash("Image not found at the specified index", "danger")
-            return redirect(url_for('.index'))
-
-        form = ApprovalForm(
-            image_url=image_data.get("image_url"),
-            location_id=str(location_id),
-            image_index=str(image_index),
-            approved_status=image_data.get("approved_status", False)
+        update_result = self.collection.update_one(
+            {"_id": ObjectId(location_id)},
+            {"$set": {
+                f"Images.{image_index}.approved_status": True,
+                f"Images.{image_index}.image_approved_time": datetime.utcnow().isoformat() + "Z"
+            }}
         )
 
-        if form.validate_on_submit():
-            approved = form.approved_status.data
-            approved_time = datetime.utcnow().isoformat() + "Z" if approved else None
-            self.collection.update_one(
-                {"_id": ObjectId(location_id)},
-                {"$set": {
-                    f"Images.{image_index}.approved_status": approved,
-                    f"Images.{image_index}.image_approved_time": approved_time
-                }}
-            )
-            flash("Image approval updated", "success")
-            return redirect(url_for('.index'))
+        if update_result.modified_count > 0:
+            flash("✅ Image approved successfully", "success")
+        else:
+            flash("⚠️ Failed to approve image", "danger")
 
-        return self.render('admin/approve_image.html', form=form, image=image_data)
+        return redirect(url_for(f'{request.endpoint.split(".")[0]}.index'))

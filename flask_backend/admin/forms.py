@@ -10,9 +10,3 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[
         DataRequired(message="Password is required")
     ])
-
-class ApprovalForm(FlaskForm):
-    image_url = StringField('Image URL', render_kw={'readonly': True})
-    approved_status = BooleanField('Approve this image?')
-    location_id = HiddenField('Location ID', validators=[DataRequired()])
-    image_index = HiddenField('Image Index', validators=[DataRequired()])

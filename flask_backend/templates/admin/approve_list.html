@@ -1,47 +1,41 @@
-{# flask_backend/templates/admin/approve_list.html #}
 {% extends 'admin/master.html' %}
 
 {% block body %}
 <div class="container mt-4">
-  <h2>Pending Image Approvals</h2>
+  <h2 class="mb-4">
+    <img src="https://cdn-icons-png.flaticon.com/512/1007/1007959.png" width="30" style="margin-right: 10px;">
+    Pending Image Approvals
+  </h2>
 
   {% if locations %}
-    <div class="accordion mt-3" id="locationAccordion">
-      {% for location in locations %}
-        <div class="card mb-2">
-          <div class="card-header" id="heading{{ loop.index }}">
-            <h5 class="mb-0">
-              <button class="btn btn-link" type="button" data-toggle="collapse"
-                      data-target="#collapse{{ loop.index }}" aria-expanded="true"
-                      aria-controls="collapse{{ loop.index }}">
-                {{ location.Metadata.name or location.Tags.name or "Unnamed Location" }}
-              </button>
-            </h5>
-          </div>
-
-          <div id="collapse{{ loop.index }}" class="collapse"
-               aria-labelledby="heading{{ loop.index }}"
-               data-parent="#locationAccordion">
-            <div class="card-body">
-              {% for image in location.Images %}
-                {% if not image.approved_status %}
-                  <div class="mb-3 d-flex align-items-center">
-                    <img src="{{ image.image_url }}" alt="Pending Image"
-                         style="height: 120px; border: 1px solid #ccc; border-radius: 4px; margin-right: 12px;">
-                    <a href="{{ url_for(request.endpoint + '.approve_image', location_id=location._id, image_index=loop.index0) }}"
-                       class="btn btn-primary">
-                      Review / Approve
-                    </a>
-                  </div>
-                {% endif %}
-              {% endfor %}
-            </div>
+    {% for location in locations %}
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light font-weight-bold">
+          {{ location.Metadata.name or location.Tags.name or "Unnamed Location" }}
+        </div>
+        <div class="card-body text-center">
+          <div class="row justify-content-center">
+            {% for image_index, image in location.Images | enumerate %}
+              {% if not image.approved_status %}
+                <div class="col-md-6 mb-4">
+                  <img src="{{ image.image_url }}" alt="Pending Image"
+                       style="max-width: 100%; height: auto; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 12px;">
+                  <form method="POST"
+                        action="{{ url_for(request.endpoint.split('.')[0] + '.approve_image', location_id=location._id, image_index=image_index) }}"
+                        onsubmit="return confirm('Are you sure you want to approve this image?');">
+                    <button type="submit" class="btn btn-success btn-lg">
+                      ✅ Approve
+                    </button>
+                  </form>
+                </div>
+              {% endif %}
+            {% endfor %}
           </div>
         </div>
-      {% endfor %}
-    </div>
+      </div>
+    {% endfor %}
   {% else %}
-    <div class="alert alert-info mt-3">
+    <div class="alert alert-info">
       No pending images for approval.
     </div>
   {% endif %}
