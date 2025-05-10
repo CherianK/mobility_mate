@@ -170,18 +170,58 @@ class LocationBottomSheet extends StatelessWidget {
                     final choice = await showDialog<String>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Select Mode of Travel'),
-                        content: const Text('How would you like to reach the location?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, 'wheelchair'),
-                            child: const Text('Wheelchair'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, 'drive'),
-                            child: const Text('Drive'),
-                          ),
-                        ],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        title: Row(
+                          children: [
+                            Icon(Icons.directions, color: Colors.blue.shade700),
+                            const SizedBox(width: 12),
+                            const Text(
+                              'Select Mode of Travel',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'How would you like to reach the location?',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildTravelModeButton(
+                                    context,
+                                    'wheelchair',
+                                    Icons.accessible,
+                                    'Wheelchair',
+                                    Colors.blue.shade700,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _buildTravelModeButton(
+                                    context,
+                                    'drive',
+                                    Icons.directions_car,
+                                    'Drive',
+                                    Colors.green.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     );
 
@@ -193,73 +233,102 @@ class LocationBottomSheet extends StatelessWidget {
                     if (choice == 'wheelchair' && context.mounted) {
                       await showDialog(
                         context: context,
-                        barrierDismissible: false,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Accessibility Tip'),
-                          content: const Text('Enable "Wheelchair-accessible" under Trip Options in Google Maps for better routes!'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Got it'),
+                        barrierDismissible: true,
+                        builder: (context) => GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: GestureDetector(
+                              onTap: () {}, // Prevent taps from propagating to the parent GestureDetector
+                              child: AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                title: Row(
+                                  children: [
+                                    Icon(Icons.info_outline, color: Colors.blue.shade700),
+                                    const SizedBox(width: 12),
+                                    const Text(
+                                      'Accessibility Tip',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade50,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: Colors.blue.shade100,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.accessibility_new,
+                                            color: Colors.blue.shade700,
+                                            size: 24,
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: Text(
+                                              'Enable "Wheelchair-accessible" under Trip Options in Google Maps for better routes!',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.blue.shade900,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  Center(
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        // Continue with Google Maps after Got it is pressed
+                                        _launchGoogleMaps(context, destLat, destLon, originLat, originLon, choice);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.blue.shade700,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'Got it',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    try {
-                      final position = await LocationHelper.getCurrentLocation();
-                      if (position != null) {
-                        originLat = position.latitude.toString();
-                        originLon = position.longitude.toString();
-                      }
-                    } catch (e) {
-                      originLat = null;
-                      originLon = null;
-                    }
-
-                    Uri url;
-                    if (choice == 'drive') {
-                      if (originLat != null && originLon != null) {
-                        url = Uri.parse(
-                            'https://www.google.com/maps/dir/?api=1&origin=$originLat,$originLon&destination=$destLat,$destLon&travelmode=driving');
-                      } else {
-                        url = Uri.parse(
-                            'https://www.google.com/maps/dir/?api=1&destination=$destLat,$destLon&travelmode=driving');
-                      }
-                    } else {
-                      if (originLat != null && originLon != null) {
-                        url = Uri.parse(
-                            'https://www.google.com/maps/dir/?api=1&origin=$originLat,$originLon&destination=$destLat,$destLon&travelmode=walking');
-                      } else {
-                        url = Uri.parse(
-                            'https://www.google.com/maps/dir/?api=1&destination=$destLat,$destLon&travelmode=walking');
-                      }
-                    }
-
-                    if (choice == 'wheelchair' && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Tip: Enable "Wheelchair-accessible" under Trip Options in Google Maps for better routes!'),
-                          duration: Duration(seconds: 3),
-                        ),
-                      );
-                      await Future.delayed(const Duration(milliseconds: 200));
-                    }
-
-                    if (await canLaunchUrl(url)) {
-                      await launchUrl(url, mode: LaunchMode.externalApplication);
-                    } else {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Could not launch Google Maps.'),
-                            backgroundColor: Colors.red,
                           ),
-                        );
-                      }
+                        ),
+                      );
+                      return; // Return here to prevent the Google Maps call when dialog is dismissed by tapping outside
                     }
+
+                    // Move the Google Maps launch logic to a separate method
+                    _launchGoogleMaps(context, destLat, destLon, originLat, originLon, choice);
                   },
                   icon: const Icon(Icons.directions_outlined, color: Colors.white),
                   label: const Text('Get Directions', style: TextStyle(color: Colors.white)),
@@ -562,5 +631,96 @@ class LocationBottomSheet extends StatelessWidget {
         ],
       ],
     );
+  }
+
+  Widget _buildTravelModeButton(
+    BuildContext context,
+    String mode,
+    IconData icon,
+    String label,
+    Color color,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => Navigator.pop(context, mode),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: color.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: color,
+                size: 32,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchGoogleMaps(BuildContext context, String destLat, String destLon, String? originLat, String? originLon, String choice) async {
+    Uri url;
+    if (choice == 'drive') {
+      if (originLat != null && originLon != null) {
+        url = Uri.parse(
+            'https://www.google.com/maps/dir/?api=1&origin=$originLat,$originLon&destination=$destLat,$destLon&travelmode=driving');
+      } else {
+        url = Uri.parse(
+            'https://www.google.com/maps/dir/?api=1&destination=$destLat,$destLon&travelmode=driving');
+      }
+    } else {
+      if (originLat != null && originLon != null) {
+        url = Uri.parse(
+            'https://www.google.com/maps/dir/?api=1&origin=$originLat,$originLon&destination=$destLat,$destLon&travelmode=walking');
+      } else {
+        url = Uri.parse(
+            'https://www.google.com/maps/dir/?api=1&destination=$destLat,$destLon&travelmode=walking');
+      }
+    }
+
+    if (choice == 'wheelchair' && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Tip: Enable "Wheelchair-accessible" under Trip Options in Google Maps for better routes!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      await Future.delayed(const Duration(milliseconds: 200));
+    }
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not launch Google Maps.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
