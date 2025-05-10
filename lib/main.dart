@@ -9,7 +9,7 @@ import 'screens/share_page.dart';
 import 'screens/splash_screen.dart';
 import 'screens/vote_page.dart';
 import 'screens/events_page.dart';
-import 'widgets/tutorial_overlay.dart';
+import 'widgets/spotlight_tutorial_overlay.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +43,12 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+  
+  // Add GlobalKeys for navigation items
+  final GlobalKey _homeKey = GlobalKey();
+  final GlobalKey _voteKey = GlobalKey();
+  final GlobalKey _eventsKey = GlobalKey();
+  final GlobalKey _navBarKey = GlobalKey();
 
   static const List<Widget> _pages = <Widget>[
     MapHomePage(),
@@ -61,48 +67,71 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return TutorialOverlay(
-      child: Scaffold(
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: _pages,
-        ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _selectedIndex,
-          onDestinationSelected: _onItemTapped,
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: 'Home',
+    return Material(
+      child: Stack(
+        children: [
+          // Bottom layer: Scaffold with map and navigation
+          Scaffold(
+            body: IndexedStack(
+              index: _selectedIndex,
+              children: _pages,
             ),
-            // NavigationDestination(
-            //   icon: Icon(Icons.search_outlined),
-            //   selectedIcon: Icon(Icons.search),
-            //   label: 'Find Toilet',
-            // ),
-            // NavigationDestination(
-            //   icon: Icon(Icons.upload_outlined),
-            //   selectedIcon: Icon(Icons.upload),
-            //   label: 'Upload',
-            // ),
-            // NavigationDestination(
-            //   icon: Icon(Icons.share_outlined),
-            //   selectedIcon: Icon(Icons.share),
-            //   label: 'Share',
-            // ),
-            NavigationDestination(
-              icon: Icon(Icons.thumbs_up_down_outlined),
-              selectedIcon: Icon(Icons.thumbs_up_down),
-              label: 'Vote',
+            bottomNavigationBar: RepaintBoundary(
+              key: _navBarKey,
+              child: NavigationBar(
+                selectedIndex: _selectedIndex,
+                onDestinationSelected: _onItemTapped,
+                destinations: [
+                  NavigationDestination(
+                    key: _homeKey,
+                    icon: Icon(Icons.home_outlined),
+                    selectedIcon: Icon(Icons.home),
+                    label: 'Home',
+                  ),
+                  // NavigationDestination(
+                  //   icon: Icon(Icons.search_outlined),
+                  //   selectedIcon: Icon(Icons.search),
+                  //   label: 'Find Toilet',
+                  // ),
+                  // NavigationDestination(
+                  //   icon: Icon(Icons.upload_outlined),
+                  //   selectedIcon: Icon(Icons.upload),
+                  //   label: 'Upload',
+                  // ),
+                  // NavigationDestination(
+                  //   icon: Icon(Icons.share_outlined),
+                  //   selectedIcon: Icon(Icons.share),
+                  //   label: 'Share',
+                  // ),
+                  NavigationDestination(
+                    key: _voteKey,
+                    icon: Icon(Icons.thumbs_up_down_outlined),
+                    selectedIcon: Icon(Icons.thumbs_up_down),
+                    label: 'Vote',
+                  ),
+                  NavigationDestination(
+                    key: _eventsKey,
+                    icon: Icon(Icons.event_outlined),
+                    selectedIcon: Icon(Icons.event),
+                    label: 'Events',
+                  ),
+                ],
+              ),
             ),
-            NavigationDestination(
-              icon: Icon(Icons.event_outlined),
-              selectedIcon: Icon(Icons.event),
-              label: 'Events',
+          ),
+          // Top layer: Spotlight overlay
+          Positioned.fill(
+            child: SpotlightTutorialOverlay(
+              navigationKeys: {
+                'home': _homeKey,
+                'vote': _voteKey,
+                'events': _eventsKey,
+                'navBar': _navBarKey,
+              },
+              child: Container(),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
