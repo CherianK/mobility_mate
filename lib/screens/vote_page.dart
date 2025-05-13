@@ -10,7 +10,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../widgets/custom_app_bar.dart';
 
 class VotePage extends StatefulWidget {
-  const VotePage({super.key});
+  final Map<String, dynamic>? initialLocation;
+  const VotePage({super.key, this.initialLocation});
 
   @override
   State<VotePage> createState() => _VotePageState();
@@ -27,6 +28,7 @@ class _VotePageState extends State<VotePage> {
   Map<String, List<Map<String, dynamic>>> locationPhotos = {};
   Map<String, Map<String, Map<String, int>>> locationPhotoVotes = {};
   Map<String, int> currentPhotoIndices = {};
+  final PageController _pageController = PageController();
 
   static const _recentKey = 'vote_recent_searches';
 
@@ -35,6 +37,11 @@ class _VotePageState extends State<VotePage> {
     super.initState();
     loadRecentSearches();
     loadLocalData();
+    if (widget.initialLocation != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showLocationDetails(widget.initialLocation!);
+      });
+    }
   }
 
   Future<void> loadLocalData() async {
@@ -267,6 +274,23 @@ class _VotePageState extends State<VotePage> {
     );
   }
 
+  Widget _buildPageIndicator(int count, int currentIndex) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(count, (index) {
+        return Container(
+          width: 8,
+          height: 8,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: currentIndex == index ? Colors.blue : Colors.grey.withOpacity(0.3),
+          ),
+        );
+      }),
+    );
+  }
+
   MarkerType? _determineLocationType(Map<String, dynamic> location) {
     // Debug logging to see the location data
     debugPrint('Location data: ${location.toString()}');
@@ -464,79 +488,113 @@ class _VotePageState extends State<VotePage> {
             ],
           ),
           const SizedBox(height: 16),
-
-          // Photos section
+          // Photos Section
           if (images.isNotEmpty) ...[
-            const Divider(height: 1, color: Color(0xFFE5E5EA)),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            const Text(
+              'Photos',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 280,
+              child: Stack(
                 children: [
-                  const Text(
-                    'Photos',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Photo slider with page dots
-                  Column(
-                    children: [
-                      SizedBox(
-                        height: 300, // Increased height for photos
-                        child: PageView.builder(
-                          itemCount: images.length,
-                          onPageChanged: (index) {
-                            setState(() {
-                              currentPhotoIndices[locationId] = index;
-                            });
-                          },
-                          itemBuilder: (context, index) {
-                            final imageUrl = images[index];
-                            return Column(
-                              children: [
-                                Expanded(
-                                  child: CachedNetworkImage(
-                                    imageUrl: imageUrl,
-                                    fit: BoxFit.contain, // Adjusted to accommodate both portrait and landscape photos
-                                    errorWidget: (context, url, error) => Container(
-                                      color: Colors.grey[200],
-                                      child: const Center(
-                                        child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                  PageView.builder(
+                    controller: _pageController,
+                    itemCount: images.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        currentPhotoIndices[locationId] = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      final photoId = '${locationId}_$index';
+                      return Container(
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => Dialog(
+                                      child: Stack(
+                                        children: [
+                                          CachedNetworkImage(
+                                            imageUrl: images[index],
+                                            fit: BoxFit.contain,
+                                            placeholder: (context, url) => const Center(
+                                              child: CircularProgressIndicator(),
+                                            ),
+                                            errorWidget: (context, url, error) =>
+                                                const Icon(Icons.error),
+                                          ),
+                                          Positioned(
+                                            right: 8,
+                                            top: 8,
+                                            child: IconButton(
+                                              icon: const Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                              ),
+                                              onPressed: () => Navigator.pop(context),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: const Color(0xFFE0E0E0),
+                                      width: 1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding: const EdgeInsets.all(4),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: CachedNetworkImage(
+                                      imageUrl: images[index],
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(
+                                        color: Colors.grey[300],
+                                        child: const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => Container(
+                                        color: Colors.grey[300],
+                                        child: const Icon(Icons.error),
                                       ),
                                     ),
                                   ),
                                 ),
-                                _buildPhotoVoting(locationPhotos[locationId]![index]['id']),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ...List.generate(
-                            images.length,
-                            (index) => Container(
-                              width: 8,
-                              height: 8,
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: currentPhotoIndex == index
-                                    ? locationType?.color ?? Colors.grey
-                                    : Colors.grey[300],
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            const SizedBox(height: 8),
+                            _buildPhotoVoting(photoId),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 60,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: _buildPageIndicator(images.length, currentPhotoIndices[locationId] ?? 0),
+                    ),
                   ),
                 ],
               ),
@@ -568,9 +626,7 @@ class _VotePageState extends State<VotePage> {
               ),
             ),
           ],
-
           const SizedBox(height: 16),
-
           // Accessibility features
           Text(
             'Accessibility Features',
@@ -593,128 +649,15 @@ class _VotePageState extends State<VotePage> {
           ? SingleChildScrollView(
               child: _buildLocationDetails(),
             )
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: TextField(
-                    controller: _controller,
-                    onChanged: (value) {
-                      Future.delayed(const Duration(milliseconds: 300), () {
-                        if (value == _controller.text) {
-                          searchLocations(value);
-                        }
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Search for a location...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _controller.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _controller.clear();
-                                searchLocations('');
-                              },
-                            )
-                          : null,
-                    ),
-                  ),
+          : Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Text(
+                  'Select a location from the map or bottom sheet to vote on its photos.',
+                  style: Theme.of(context).textTheme.titleMedium,
+                  textAlign: TextAlign.center,
                 ),
-                if (isLoading)
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: CircularProgressIndicator(),
-                  ),
-                Expanded(
-                  child: _controller.text.isEmpty
-                      ? ListView(
-                          children: [
-                            if (recentSearches.isNotEmpty)
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                child: Text(
-                                  'Recent Searches',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold, fontSize: 16),
-                                ),
-                              ),
-                            ...recentSearches.map((location) {
-                              return ListTile(
-                                leading: const Icon(Icons.history),
-                                title: Text(location['name']),
-                                onTap: () {
-                                  _controller.text = location['name'];
-                                  searchLocations(location['name']);
-                                },
-                              );
-                            })
-                          ],
-                        )
-                      : ListView(
-                          children: [
-                            if (localResults.isNotEmpty) ...[
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                child: Text(
-                                  'Stations & Suburbs',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold, fontSize: 16),
-                                ),
-                              ),
-                              ...localResults.map((location) => ListTile(
-                                    leading: Icon(
-                                      location['type'] == 'hospital' ? Icons.local_hospital :
-                                      location['type'] == 'pharmacy' ? Icons.local_pharmacy :
-                                      location['type'] == 'tram' ? Icons.tram :
-                                      Icons.health_and_safety_rounded,
-                                      color: location['type'] == 'hospital' ? Colors.blue :
-                                             location['type'] == 'pharmacy' ? Colors.blue :
-                                             location['type'] == 'tram' ? Colors.blue :
-                                             Colors.blue,
-                                    ),
-                                    title: Text(location['name']),
-                                    onTap: () {
-                                      _addToRecentSearches(location);
-                                      _showLocationDetails(location);
-                                    },
-                                  )),
-                            ],
-                            if (mapboxResults.isNotEmpty) ...[
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                child: Text(
-                                  'Other Locations',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold, fontSize: 16),
-                                ),
-                              ),
-                              ...mapboxResults.map((location) => ListTile(
-                                    leading: const Icon(Icons.location_on),
-                                    title: Text(location['name']),
-                                    onTap: () {
-                                      _addToRecentSearches(location);
-                                      _showLocationDetails(location);
-                                    },
-                                  )),
-                            ],
-                            if (localResults.isEmpty && mapboxResults.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.all(16),
-                                child: Center(
-                                  child: Text(
-                                    'No results found',
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                ),
-              ],
+              ),
             ),
     );
   }
@@ -722,6 +665,7 @@ class _VotePageState extends State<VotePage> {
   @override
   void dispose() {
     _controller.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 }
