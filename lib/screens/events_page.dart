@@ -73,12 +73,6 @@ class _EventsPageState extends State<EventsPage> {
           final dateB = DateTime.parse(b['dates']?['start']?['dateTime'] ?? '');
           return isAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
         });
-      } else if (sortBy == 'location') {
-        filteredEvents.sort((a, b) {
-          final venueA = a['_embedded']?['venues']?[0]?['name'] ?? '';
-          final venueB = b['_embedded']?['venues']?[0]?['name'] ?? '';
-          return isAscending ? venueA.compareTo(venueB) : venueB.compareTo(venueA);
-        });
       } else if (sortBy == 'distance' && currentPosition != null) {
         filteredEvents.sort((a, b) {
           final venueA = a['_embedded']?['venues']?[0];
@@ -152,7 +146,6 @@ class _EventsPageState extends State<EventsPage> {
           'Accept': 'application/json',
         },
         body: jsonEncode({
-          //"apikey": "QSJrHiQFNzBGD9iq7RYhgrnrbDuNqUCd",
           "postalcode": "3000",
           "radius": 80,
           "unit": "km",
@@ -551,41 +544,6 @@ class _EventsPageState extends State<EventsPage> {
                                       ),
                                       const SizedBox(width: 4),
                                       ElevatedButton.icon(
-                                        onPressed: () => _handleSort('location'),
-                                        icon: Icon(
-                                          Icons.location_on,
-                                          size: 16,
-                                          color: sortBy == 'location' 
-                                              ? Colors.white 
-                                              : Theme.of(context).primaryColor,
-                                        ),
-                                        label: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Text('Location'),
-                                            if (sortBy == 'location') ...[
-                                              const SizedBox(width: 4),
-                                              Icon(
-                                                isAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                                                size: 12,
-                                                color: Colors.white,
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: sortBy == 'location' 
-                                              ? Theme.of(context).primaryColor 
-                                              : Colors.white,
-                                          foregroundColor: sortBy == 'location' 
-                                              ? Colors.white 
-                                              : Theme.of(context).primaryColor,
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          minimumSize: const Size(0, 32),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      ElevatedButton.icon(
                                         onPressed: () {
                                           if (currentPosition != null) {
                                             _handleSort('distance');
@@ -607,7 +565,7 @@ class _EventsPageState extends State<EventsPage> {
                                         label: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            const Text('Distance'),
+                                            const Text('Distance from me'),
                                             if (sortBy == 'distance') ...[
                                               const SizedBox(width: 4),
                                               Icon(
