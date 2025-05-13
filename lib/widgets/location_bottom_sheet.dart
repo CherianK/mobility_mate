@@ -9,6 +9,7 @@ import '../utils/share_helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../screens/vote_page.dart';
 
 class LocationBottomSheet extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -493,6 +494,45 @@ class LocationBottomSheet extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              // Vote button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    // Normalize the data before passing it to VotePage
+                    final normalizedData = {
+                      'name': data['Metadata']?['name'] ?? data['Tags']?['name'] ?? 'Unknown Location',
+                      'id': data['id'] ?? data['Metadata']?['name'] ?? data['Tags']?['name'] ?? 'Unknown Location',
+                      'images': (data['Images'] as List<dynamic>? ?? [])
+                        .where((img) => img is Map && img['approved_status'] == true)
+                        .map((img) => img['image_url'] as String)
+                        .toList(),
+                      'tags': data['Tags'] ?? {},
+                      'Location_Lat': data['Location_Lat'],
+                      'Location_Lon': data['Location_Lon'],
+                    };
+                    
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => VotePage(initialLocation: normalizedData),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.thumbs_up_down_outlined),
+                  label: const Text('Vote on Photos'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                    side: const BorderSide(color: Color(0xFF007AFF)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    minimumSize: const Size(0, 48),
+                  ),
+                ),
               ),
             ],
           ),
