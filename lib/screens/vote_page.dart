@@ -642,8 +642,16 @@ class _VotePageState extends State<VotePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Vote',
+      appBar: AppBar(
+        title: const Text('Vote'),
+        leading: selectedLocation != null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              )
+            : null,
       ),
       body: selectedLocation != null
           ? SingleChildScrollView(
