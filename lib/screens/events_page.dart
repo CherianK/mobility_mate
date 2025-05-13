@@ -152,14 +152,15 @@ class _EventsPageState extends State<EventsPage> {
           'Accept': 'application/json',
         },
         body: jsonEncode({
-          "apikey": "QSJrHiQFNzBGD9iq7RYhgrnrbDuNqUCd",
+          //"apikey": "QSJrHiQFNzBGD9iq7RYhgrnrbDuNqUCd",
           "postalcode": "3000",
-          "radius": 15,
+          "radius": 80,
           "unit": "km",
           "countryCode": "AU",
           "stateCode": "VIC",
           "startDateTime": tomorrow.toIso8601String(),
-          "endDateTime": now.add(const Duration(days: 180)).toIso8601String()
+          "endDateTime": now.add(const Duration(days: 180)).toIso8601String(),
+          "size": 100
         }),
       ).timeout(
         const Duration(seconds: 30),
@@ -299,6 +300,11 @@ class _EventsPageState extends State<EventsPage> {
   }
 
   void _showAccessibilityInfo(BuildContext context, Map<String, dynamic> event) {
+    final venues = event['_embedded']?['venues'] as List<dynamic>?;
+    final accessibleSeatingDetail = venues != null && venues.isNotEmpty
+        ? (venues[0]['accessibleSeatingDetail'] ?? '')
+        : '';
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -372,7 +378,7 @@ class _EventsPageState extends State<EventsPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                if (event['accessibility']?['info'] != null) ...[
+                if ((event['accessibility']?['info'] ?? '').toString().trim().isNotEmpty) ...[
                   Text(
                     'General Information',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -386,7 +392,7 @@ class _EventsPageState extends State<EventsPage> {
                   ),
                   const SizedBox(height: 16),
                 ],
-                if (event['accessibility']?['adaCustomCopy'] != null) ...[
+                if ((event['accessibility']?['adaCustomCopy'] ?? '').toString().trim().isNotEmpty) ...[
                   Text(
                     'Additional Information',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -396,6 +402,20 @@ class _EventsPageState extends State<EventsPage> {
                   const SizedBox(height: 8),
                   Text(
                     event['accessibility']['adaCustomCopy'],
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                if (accessibleSeatingDetail.toString().trim().isNotEmpty) ...[
+                  Text(
+                    'Accessible Seating Details',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    accessibleSeatingDetail,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),

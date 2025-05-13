@@ -21,11 +21,12 @@ def get_events():
         params = {
             'apikey': TICKETMASTER_API_KEY,
             'postalcode': '3000',  # Melbourne CBD
-            'radius': 60,  # 60km radius
+            'radius': 100,  # 100km radius
             'unit': 'km',
             'countryCode': 'AU',
             'stateCode': 'VIC',
-            'startDateTime': f"{current_date}T00:00:00Z"  # Use current date
+            'startDateTime': f"{current_date}T00:00:00Z",  # Use current date
+            'size': 100  # Maximum allowed by Ticketmaster API
         }
 
         # Make request to Ticketmaster API
