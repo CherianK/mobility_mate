@@ -9,15 +9,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
 
   # Official Mapbox Maps SDK for Flutter (iOS & Android)
-  mapbox_maps_flutter: ^2.7.0  #  [oai_citation_attribution:0‡Dart packages](https://pub.dev/packages/mapbox_maps_flutter)
+  mapbox_maps_flutter: ^2.7.0
 
   # HTTP client
   http: ^1.1.0
-
-  # Local persistence
-  shared_preferences: ^2.2.2
 
   # iOS-style icons
   cupertino_icons: ^1.0.8
@@ -37,7 +36,7 @@ dev_dependencies:
   # Lints for better code quality
   flutter_lints: ^5.0.0
 
-  # For generating launcher icons (downgraded to avoid conflicts)
+  # For generating launcher icons
   flutter_launcher_icons: ^0.14.3
 
 flutter_icons:

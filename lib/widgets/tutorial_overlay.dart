@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:math';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class TutorialOverlay extends StatefulWidget {
   final Widget child;
@@ -181,6 +183,9 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final theme = Theme.of(context);
+    
     return Stack(
       children: [
         widget.child,
@@ -212,15 +217,15 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                           height: _steps[_currentStep].radius * 2,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.blue.withOpacity(0.1),
+                            color: isDark ? theme.primaryColor.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
                             border: Border.all(
-                              color: Colors.blue,
+                              color: isDark ? theme.primaryColor : Colors.blue,
                               width: 2,
                             ),
                           ),
                           child: Icon(
                             _steps[_currentStep].icon,
-                            color: Colors.blue,
+                            color: isDark ? theme.primaryColor : Colors.blue,
                             size: _steps[_currentStep].radius,
                           ),
                         ),
@@ -237,7 +242,7 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? theme.cardColor : Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
@@ -252,19 +257,19 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                         children: [
                           Text(
                             _steps[_currentStep].title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue,
+                              color: isDark ? theme.primaryColor : Colors.blue,
                             ),
                           ),
                           const SizedBox(height: 12),
                           Text(
                             _steps[_currentStep].description,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
-                              color: Colors.black87,
+                              color: isDark ? Colors.white70 : Colors.black87,
                               height: 1.4,
                             ),
                           ),
@@ -276,7 +281,7 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                               children: _steps[_currentStep].additionalIcons!.map((icon) {
                                 return Icon(
                                   icon,
-                                  color: Colors.blue,
+                                  color: isDark ? theme.primaryColor : Colors.blue,
                                   size: 28,
                                 );
                               }).toList(),
@@ -287,7 +292,7 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.05),
+                              color: isDark ? theme.primaryColor.withOpacity(0.05) : Colors.blue.withOpacity(0.05),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Column(
@@ -297,8 +302,8 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                                   children: [
                                     Text(
                                       'Step ${_currentStep + 1}',
-                                      style: const TextStyle(
-                                        color: Colors.blue,
+                                      style: TextStyle(
+                                        color: isDark ? theme.primaryColor : Colors.blue,
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -306,7 +311,7 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                                     Text(
                                       '${_steps.length} steps',
                                       style: TextStyle(
-                                        color: Colors.blue.withOpacity(0.7),
+                                        color: isDark ? theme.primaryColor.withOpacity(0.7) : Colors.blue.withOpacity(0.7),
                                         fontSize: 13,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -318,8 +323,8 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                                   borderRadius: BorderRadius.circular(6),
                                   child: LinearProgressIndicator(
                                     value: (_currentStep + 1) / _steps.length,
-                                    backgroundColor: Colors.blue.withOpacity(0.1),
-                                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                                    backgroundColor: isDark ? theme.primaryColor.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
+                                    valueColor: AlwaysStoppedAnimation<Color>(isDark ? theme.primaryColor : Colors.blue),
                                     minHeight: 6,
                                   ),
                                 ),
@@ -338,12 +343,12 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                                       _dontShowAgain = value ?? false;
                                     });
                                   },
-                                  activeColor: Colors.blue,
+                                  activeColor: isDark ? theme.primaryColor : Colors.blue,
                                 ),
-                                const Text(
+                                Text(
                                   'Don\'t show this again',
                                   style: TextStyle(
-                                    color: Colors.black87,
+                                    color: isDark ? Colors.white70 : Colors.black87,
                                     fontSize: 13,
                                   ),
                                 ),
@@ -357,6 +362,9 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                               if (_currentStep < _steps.length - 1)
                                 TextButton(
                                   onPressed: _skipTutorial,
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: isDark ? Colors.white70 : Colors.blue,
+                                  ),
                                   child: const Text('Skip Tutorial'),
                                 ),
                               if (_currentStep < _steps.length - 1)
@@ -367,13 +375,13 @@ class _TutorialOverlayState extends State<TutorialOverlay> with SingleTickerProv
                                   child: IconButton(
                                     onPressed: _previousStep,
                                     icon: const Icon(Icons.arrow_back),
-                                    color: Colors.blue,
+                                    color: isDark ? theme.primaryColor : Colors.blue,
                                   ),
                                 ),
                               ElevatedButton(
                                 onPressed: _nextStep,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue,
+                                  backgroundColor: isDark ? theme.primaryColor : Colors.blue,
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                                   shape: RoundedRectangleBorder(

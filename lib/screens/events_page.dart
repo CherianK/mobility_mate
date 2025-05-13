@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
+import '../widgets/custom_app_bar.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
@@ -431,19 +432,38 @@ class _EventsPageState extends State<EventsPage> {
     );
   }
 
+  Future<void> _refreshEvents() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+    
+    await _getCurrentLocation();
+    await _fetchEvents();
+    if (mounted) {
+      setState(() {
+        sortBy = 'date';
+        _sortEvents();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Browse Events'),
+      appBar: CustomAppBar(
+        title: 'Events',
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _fetchEvents,
+            onPressed: isLoading ? null : _refreshEvents,
+            tooltip: 'Refresh Events',
           ),
         ],
       ),
-      body: isLoading
+      body: RefreshIndicator(
+        onRefresh: _refreshEvents,
+        child: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
               ? Center(child: Text(errorMessage))
@@ -783,6 +803,7 @@ class _EventsPageState extends State<EventsPage> {
                           ),
                         ),
                       ],
+                      ),
                     ),
     );
   }

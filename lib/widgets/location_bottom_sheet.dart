@@ -7,6 +7,8 @@ import '../screens/upload_page.dart';
 import '../utils/location_helper.dart';
 import '../utils/share_helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class LocationBottomSheet extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -24,6 +26,9 @@ class LocationBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final theme = Theme.of(context);
+    
     return NotificationListener<DraggableScrollableNotification>(
       onNotification: (notification) {
         if (notification.extent <= 0.22) {
@@ -39,7 +44,7 @@ class LocationBottomSheet extends StatelessWidget {
         builder: (context, scrollController) {
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? theme.cardColor : Colors.white,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Column(
@@ -63,12 +68,12 @@ class LocationBottomSheet extends StatelessWidget {
                               child: Container(
                                 padding: EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.1),
+                                  color: isDark ? Colors.blue.shade700.withOpacity(0.2) : theme.primaryColor.withOpacity(0.1),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   Icons.keyboard_arrow_up,
-                                  color: Colors.blue,
+                                  color: isDark ? Colors.blue.shade300 : theme.primaryColor,
                                   size: 24,
                                 ),
                               ),
@@ -83,7 +88,7 @@ class LocationBottomSheet extends StatelessWidget {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE5E5EA),
+                        color: isDark ? Colors.grey[700] : const Color(0xFFE5E5EA),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -105,6 +110,8 @@ class LocationBottomSheet extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final theme = Theme.of(context);
     final Map<String, dynamic> tags = data['Tags'] ?? {};
     final List<MapEntry<String, dynamic>> allTags = tags.entries.toList();
     final List<String> images = (data['Images'] as List<dynamic>? ?? [])
@@ -142,15 +149,15 @@ class LocationBottomSheet extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: Icon(Icons.close, color: isDark ? Colors.white70 : Colors.black87),
                 onPressed: onClose,
                 tooltip: 'Close',
               ),
@@ -170,18 +177,20 @@ class LocationBottomSheet extends StatelessWidget {
                     final choice = await showDialog<String>(
                       context: context,
                       builder: (context) => AlertDialog(
+                        backgroundColor: isDark ? theme.cardColor : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         title: Row(
                           children: [
-                            Icon(Icons.directions, color: Colors.blue.shade700),
+                            Icon(Icons.directions, color: isDark ? Colors.white : theme.primaryColor),
                             const SizedBox(width: 12),
-                            const Text(
+                            Text(
                               'Select Mode of Travel',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black,
                               ),
                             ),
                           ],
@@ -189,11 +198,11 @@ class LocationBottomSheet extends StatelessWidget {
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
+                            Text(
                               'How would you like to reach the location?',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.black87,
+                                color: isDark ? Colors.white : Colors.black87,
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -205,7 +214,7 @@ class LocationBottomSheet extends StatelessWidget {
                                     'wheelchair',
                                     Icons.accessible,
                                     'Wheelchair',
-                                    Colors.blue.shade700,
+                                    isDark ? Colors.white : theme.primaryColor,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -215,7 +224,7 @@ class LocationBottomSheet extends StatelessWidget {
                                     'drive',
                                     Icons.directions_car,
                                     'Drive',
-                                    Colors.green.shade700,
+                                    isDark ? Colors.white : Colors.green,
                                   ),
                                 ),
                               ],
@@ -240,20 +249,22 @@ class LocationBottomSheet extends StatelessWidget {
                           child: Material(
                             color: Colors.transparent,
                             child: GestureDetector(
-                              onTap: () {}, // Prevent taps from propagating to the parent GestureDetector
+                              onTap: () {},
                               child: AlertDialog(
+                                backgroundColor: isDark ? theme.cardColor : Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 title: Row(
                                   children: [
-                                    Icon(Icons.info_outline, color: Colors.blue.shade700),
+                                    Icon(Icons.info_outline, color: isDark ? Colors.white : theme.primaryColor),
                                     const SizedBox(width: 12),
-                                    const Text(
+                                    Text(
                                       'Accessibility Tip',
                                       style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
+                                        color: isDark ? Colors.white : Colors.black,
                                       ),
                                     ),
                                   ],
@@ -264,18 +275,17 @@ class LocationBottomSheet extends StatelessWidget {
                                     Container(
                                       padding: const EdgeInsets.all(16),
                                       decoration: BoxDecoration(
-                                        color: Colors.blue.shade50,
+                                        color: isDark ? Colors.white.withOpacity(0.1) : Colors.blue.shade50,
                                         borderRadius: BorderRadius.circular(12),
                                         border: Border.all(
-                                          color: Colors.blue.shade100,
-                                          width: 1,
+                                          color: isDark ? Colors.white.withOpacity(0.2) : Colors.blue.shade100,
                                         ),
                                       ),
                                       child: Row(
                                         children: [
                                           Icon(
                                             Icons.accessibility_new,
-                                            color: Colors.blue.shade700,
+                                            color: isDark ? Colors.white : theme.primaryColor,
                                             size: 24,
                                           ),
                                           const SizedBox(width: 16),
@@ -284,7 +294,7 @@ class LocationBottomSheet extends StatelessWidget {
                                               'Enable "Wheelchair-accessible" under Trip Options in Google Maps for better routes!',
                                               style: TextStyle(
                                                 fontSize: 16,
-                                                color: Colors.blue.shade900,
+                                                color: isDark ? Colors.white : Colors.blue.shade900,
                                               ),
                                             ),
                                           ),
@@ -298,11 +308,10 @@ class LocationBottomSheet extends StatelessWidget {
                                     child: ElevatedButton(
                                       onPressed: () {
                                         Navigator.of(context).pop();
-                                        // Continue with Google Maps after Got it is pressed
                                         _launchGoogleMaps(context, destLat, destLon, originLat, originLon, choice);
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.blue.shade700,
+                                        backgroundColor: isDark ? Colors.blue.shade700 : theme.primaryColor,
                                         foregroundColor: Colors.white,
                                         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                                         shape: RoundedRectangleBorder(
@@ -324,19 +333,32 @@ class LocationBottomSheet extends StatelessWidget {
                           ),
                         ),
                       );
-                      return; // Return here to prevent the Google Maps call when dialog is dismissed by tapping outside
+                      return;
                     }
 
-                    // Move the Google Maps launch logic to a separate method
                     _launchGoogleMaps(context, destLat, destLon, originLat, originLon, choice);
                   },
-                  icon: const Icon(Icons.directions_outlined, color: Colors.white),
-                  label: const Text('Get Directions', style: TextStyle(color: Colors.white)),
+                  icon: Icon(
+                    Icons.directions_outlined,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  label: Text(
+                    'Get Directions',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF007AFF),
+                    backgroundColor: isDark ? Colors.blue.shade700 : theme.primaryColor,
+                    elevation: isDark ? 4 : 2,
+                    shadowColor: isDark ? Colors.blue.shade700.withOpacity(0.5) : null,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
@@ -348,33 +370,52 @@ class LocationBottomSheet extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => ReportIssueScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => UploadPage(venueData: data),
+                          ),
                         );
                       },
-                      icon: const Icon(Icons.report_problem_outlined),
-                      label: const Text('Report'),
+                      icon: Icon(
+                        Icons.upload_outlined,
+                        color: isDark ? Colors.white : theme.primaryColor,
+                        size: 22,
+                      ),
+                      label: Text(
+                        'Upload',
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.visible,
+                        style: TextStyle(
+                          color: isDark ? Colors.white : theme.primaryColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.black87,
-                        side: const BorderSide(color: Color(0xFFD1D1D6)),
+                        foregroundColor: isDark ? Colors.white : theme.primaryColor,
+                        side: BorderSide(
+                          color: isDark ? Colors.white.withOpacity(0.3) : theme.primaryColor.withOpacity(0.5),
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         minimumSize: const Size(0, 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        backgroundColor: isDark ? Colors.white.withOpacity(0.1) : theme.primaryColor.withOpacity(0.05),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {
-                        
                         final lat = double.tryParse(destLat);
                         final lon = double.tryParse(destLon);
                         final List<String> featureDescriptions = orderedTags
                           .map((entry) => formatTag(entry.key, entry.value))
                           .where((value) => value.trim().isNotEmpty)
                           .toList();
-                        
                         
                         if (lat != null && lon != null) {
                           ShareHelper.shareLocationWithDetails(
@@ -386,43 +427,68 @@ class LocationBottomSheet extends StatelessWidget {
                           );
                         }
                       },
-                      icon: const Icon(Icons.share_outlined),
-                      label: const Text('Share'),
+                      icon: Icon(
+                        Icons.share_outlined,
+                        color: isDark ? Colors.white : theme.primaryColor,
+                        size: 22,
+                      ),
+                      label: Text(
+                        'Share',
+                        style: TextStyle(
+                          color: isDark ? Colors.white : theme.primaryColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.black87,
-                        side: const BorderSide(color: Color(0xFFD1D1D6)),
+                        foregroundColor: isDark ? Colors.white : theme.primaryColor,
+                        side: BorderSide(
+                          color: isDark ? Colors.white.withOpacity(0.3) : theme.primaryColor.withOpacity(0.5),
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         minimumSize: const Size(0, 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        backgroundColor: isDark ? Colors.white.withOpacity(0.1) : theme.primaryColor.withOpacity(0.05),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => UploadPage(venueData: data),
-                          ),
+                          MaterialPageRoute(builder: (_) => ReportIssueScreen()),
                         );
                       },
-                      icon: const Icon(Icons.upload_outlined),
-                      label: const Text(
-                        'Upload',
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.visible,
+                      icon: Icon(
+                        Icons.report_problem_outlined,
+                        color: isDark ? Colors.white : theme.primaryColor,
+                        size: 22,
+                      ),
+                      label: Text(
+                        'Report',
+                        style: TextStyle(
+                          color: isDark ? Colors.white : theme.primaryColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.black87,
-                        side: const BorderSide(color: Color(0xFFD1D1D6)),
+                        foregroundColor: isDark ? Colors.white : theme.primaryColor,
+                        side: BorderSide(
+                          color: isDark ? Colors.white.withOpacity(0.3) : theme.primaryColor.withOpacity(0.5),
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         minimumSize: const Size(0, 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        backgroundColor: isDark ? Colors.white.withOpacity(0.1) : theme.primaryColor.withOpacity(0.05),
                       ),
                     ),
                   ),
@@ -433,18 +499,18 @@ class LocationBottomSheet extends StatelessWidget {
         ),
         // Images Section
         if (images.isNotEmpty) ...[
-          const Divider(height: 1, color: Color(0xFFE5E5EA)),
+          Divider(height: 1, color: isDark ? Colors.grey[800] : const Color(0xFFE5E5EA)),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Photos',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -463,6 +529,7 @@ class LocationBottomSheet extends StatelessWidget {
                             showDialog(
                               context: context,
                               builder: (context) => Dialog(
+                                backgroundColor: isDark ? theme.cardColor : Colors.white,
                                 child: Stack(
                                   children: [
                                     CachedNetworkImage(
@@ -478,9 +545,9 @@ class LocationBottomSheet extends StatelessWidget {
                                       right: 8,
                                       top: 8,
                                       child: IconButton(
-                                        icon: const Icon(
+                                        icon: Icon(
                                           Icons.close,
-                                          color: Colors.white,
+                                          color: isDark ? Colors.white : Colors.black,
                                         ),
                                         onPressed: () => Navigator.pop(context),
                                       ),
@@ -493,7 +560,7 @@ class LocationBottomSheet extends StatelessWidget {
                           child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: const Color(0xFFE0E0E0),
+                                color: isDark ? Colors.grey[800]! : const Color(0xFFE0E0E0),
                                 width: 1,
                               ),
                               borderRadius: BorderRadius.circular(8),
@@ -509,7 +576,7 @@ class LocationBottomSheet extends StatelessWidget {
                                 placeholder: (context, url) => Container(
                                   width: 200,
                                   height: 200,
-                                  color: Colors.grey[300],
+                                  color: isDark ? Colors.grey[800] : Colors.grey[300],
                                   child: const Center(
                                     child: CircularProgressIndicator(),
                                   ),
@@ -517,7 +584,7 @@ class LocationBottomSheet extends StatelessWidget {
                                 errorWidget: (context, url, error) => Container(
                                   width: 200,
                                   height: 200,
-                                  color: Colors.grey[300],
+                                  color: isDark ? Colors.grey[800] : Colors.grey[300],
                                   child: const Icon(Icons.error),
                                 ),
                               ),
@@ -532,25 +599,25 @@ class LocationBottomSheet extends StatelessWidget {
             ),
           ),
         ] else ...[
-          const Divider(height: 1, color: Color(0xFFE5E5EA)),
+          Divider(height: 1, color: isDark ? Colors.grey[800] : const Color(0xFFE5E5EA)),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Photos',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'No attached pictures',
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
                     fontSize: 15,
                   ),
                 ),
@@ -560,18 +627,18 @@ class LocationBottomSheet extends StatelessWidget {
         ],
         // Accessibility features
         if (orderedTags.isNotEmpty) ...[
-          const Divider(height: 1, color: Color(0xFFE5E5EA)),
+          Divider(height: 1, color: isDark ? Colors.grey[800] : const Color(0xFFE5E5EA)),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Accessibility Features',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -583,13 +650,13 @@ class LocationBottomSheet extends StatelessWidget {
                   String displayValue;
 
                   if (value == 'yes') {
-                    valueColor = Colors.green;
+                    valueColor = isDark ? Colors.green.shade300 : Colors.green;
                     displayValue = 'Available';
                   } else if (value == 'no') {
-                    valueColor = Colors.red;
+                    valueColor = isDark ? Colors.red.shade300 : Colors.red;
                     displayValue = 'Unavailable';
                   } else {
-                    valueColor = Colors.blue;
+                    valueColor = isDark ? Colors.blue.shade300 : theme.primaryColor;
                     displayValue = entry.value.toString();
                   }
 
@@ -603,11 +670,16 @@ class LocationBottomSheet extends StatelessWidget {
                             Icon(
                               iconGetter(entry.key, entry.value),
                               color: valueColor,
+                              size: 24,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               key,
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
                             ),
                           ],
                         ),
@@ -615,7 +687,11 @@ class LocationBottomSheet extends StatelessWidget {
                         Expanded(
                           child: Text(
                             displayValue,
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: valueColor),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: valueColor,
+                            ),
                             textAlign: TextAlign.right,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -640,6 +716,8 @@ class LocationBottomSheet extends StatelessWidget {
     String label,
     Color color,
   ) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -648,10 +726,10 @@ class LocationBottomSheet extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: isDark ? color.withOpacity(0.2) : color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: color.withOpacity(0.3),
+              color: isDark ? color.withOpacity(0.4) : color.withOpacity(0.3),
               width: 1,
             ),
           ),

@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart' as geo;
+import 'package:provider/provider.dart';
 import '../models/marker_type.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/location_bottom_sheet.dart';
 import '../utils/location_helper.dart'; // 
+import '../providers/theme_provider.dart';
 
 class MapHomePage extends StatefulWidget {
   const MapHomePage({super.key});
@@ -199,6 +201,8 @@ final Map<String, Map<String, dynamic>> _markerData = {};
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    
     return Scaffold(
       body: Stack(
         children: [
@@ -214,12 +218,48 @@ final Map<String, Map<String, dynamic>> _markerData = {};
           if (_isLoading)
             const Center(child: CircularProgressIndicator()),
           if (_mapReady) ...[
+            // Floating search bar with theme toggle
             Positioned(
               top: MediaQuery.of(context).padding.top + 16,
               left: 16,
               right: 16,
-              child: SearchBarWidget(mapboxMap: _mapboxMap),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SearchBarWidget(mapboxMap: _mapboxMap),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[900] : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        isDark ? Icons.light_mode : Icons.dark_mode,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                      onPressed: () {
+                        final themeProvider = context.read<ThemeProvider>();
+                        final newMode = themeProvider.themeMode == ThemeMode.dark
+                            ? ThemeMode.light
+                            : ThemeMode.dark;
+                        themeProvider.setThemeMode(newMode);
+                      },
+                      tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+                    ),
+                  ),
+                ],
+              ),
             ),
+            // Map controls
             Positioned(
               right: 16,
               bottom: MediaQuery.of(context).padding.bottom + 80,
