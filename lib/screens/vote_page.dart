@@ -7,6 +7,7 @@ import '../config/mapbox_config.dart';
 import '../models/marker_type.dart';
 import '../utils/icon_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../widgets/custom_app_bar.dart';
 
 class VotePage extends StatefulWidget {
   const VotePage({super.key});
@@ -585,18 +586,8 @@ class _VotePageState extends State<VotePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Vote'),
-        leading: selectedLocation != null
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  setState(() {
-                    selectedLocation = null;
-                  });
-                },
-              )
-            : null,
+      appBar: const CustomAppBar(
+        title: 'Vote',
       ),
       body: selectedLocation != null
           ? SingleChildScrollView(

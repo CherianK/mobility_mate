@@ -10,25 +10,44 @@ import 'screens/splash_screen.dart';
 import 'screens/vote_page.dart';
 import 'screens/events_page.dart';
 import 'widgets/spotlight_tutorial_overlay.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'providers/theme_provider.dart';
+import 'screens/report_issue_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // configure the SDK with your token:
+  
+  // Initialize SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
+  
+  // Configure Mapbox
   MapboxOptions.setAccessToken(MapboxConfig.accessToken);
-  runApp(const MyApp());
+  
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
     return MaterialApp(
       title: 'Mobility Mate',
       theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeProvider.themeMode,
       debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
       routes: {
         '/main': (context) => const MainScreen(),
+          },
+        );
       },
     );
   }
@@ -72,51 +91,51 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           // Bottom layer: Scaffold with map and navigation
           Scaffold(
-            body: IndexedStack(
-              index: _selectedIndex,
-              children: _pages,
-            ),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _pages,
+        ),
             bottomNavigationBar: RepaintBoundary(
               key: _navBarKey,
               child: NavigationBar(
-                selectedIndex: _selectedIndex,
-                onDestinationSelected: _onItemTapped,
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: _onItemTapped,
                 destinations: [
-                  NavigationDestination(
+            NavigationDestination(
                     key: _homeKey,
-                    icon: Icon(Icons.home_outlined),
-                    selectedIcon: Icon(Icons.home),
-                    label: 'Home',
-                  ),
-                  // NavigationDestination(
-                  //   icon: Icon(Icons.search_outlined),
-                  //   selectedIcon: Icon(Icons.search),
-                  //   label: 'Find Toilet',
-                  // ),
-                  // NavigationDestination(
-                  //   icon: Icon(Icons.upload_outlined),
-                  //   selectedIcon: Icon(Icons.upload),
-                  //   label: 'Upload',
-                  // ),
-                  // NavigationDestination(
-                  //   icon: Icon(Icons.share_outlined),
-                  //   selectedIcon: Icon(Icons.share),
-                  //   label: 'Share',
-                  // ),
-                  NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            // NavigationDestination(
+            //   icon: Icon(Icons.search_outlined),
+            //   selectedIcon: Icon(Icons.search),
+            //   label: 'Find Toilet',
+            // ),
+            // NavigationDestination(
+            //   icon: Icon(Icons.upload_outlined),
+            //   selectedIcon: Icon(Icons.upload),
+            //   label: 'Upload',
+            // ),
+            // NavigationDestination(
+            //   icon: Icon(Icons.share_outlined),
+            //   selectedIcon: Icon(Icons.share),
+            //   label: 'Share',
+            // ),
+            NavigationDestination(
                     key: _voteKey,
-                    icon: Icon(Icons.thumbs_up_down_outlined),
-                    selectedIcon: Icon(Icons.thumbs_up_down),
-                    label: 'Vote',
-                  ),
-                  NavigationDestination(
+              icon: Icon(Icons.thumbs_up_down_outlined),
+              selectedIcon: Icon(Icons.thumbs_up_down),
+              label: 'Vote',
+            ),
+            NavigationDestination(
                     key: _eventsKey,
-                    icon: Icon(Icons.event_outlined),
-                    selectedIcon: Icon(Icons.event),
-                    label: 'Events',
-                  ),
-                ],
-              ),
+              icon: Icon(Icons.event_outlined),
+              selectedIcon: Icon(Icons.event),
+              label: 'Events',
+            ),
+          ],
+        ),
             ),
           ),
           // Top layer: Spotlight overlay

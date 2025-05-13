@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:ui';
 import 'dart:math';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class SpotlightTutorialOverlay extends StatefulWidget {
   final Widget child;
@@ -65,6 +67,14 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
       position: const Offset(0.12, 0.10),
       radius: 40,
       icon: Icons.search,
+      isNavigationItem: false,
+    ),
+    TutorialStep(
+      title: 'Dark Mode',
+      description: 'Toggle between light and dark themes for comfortable viewing in any lighting condition.',
+      position: const Offset(0.88, 0.10),
+      radius: 40,
+      icon: Icons.dark_mode,
       isNavigationItem: false,
     ),
     TutorialStep(
@@ -250,6 +260,8 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final currentStep = _steps[_currentStep];
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final theme = Theme.of(context);
     
     // Update spotlight position when the widget is first built or step changes
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -288,7 +300,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
             top: size.height * 0.35,
             child: SingleChildScrollView(
               child: Material(
-                color: Colors.white,
+                color: isDark ? theme.cardColor : Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 elevation: 8,
                 child: Container(
@@ -296,7 +308,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.blue.shade100,
+                      color: isDark ? theme.primaryColor.withOpacity(0.5) : Colors.blue.shade100,
                       width: 1,
                     ),
                   ),
@@ -309,9 +321,9 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                           child: IconButton(
                             onPressed: _previousStep,
                             icon: const Icon(Icons.arrow_back),
-                            color: Colors.blue.shade700,
+                            color: isDark ? Colors.white : Colors.blue.shade700,
                             style: IconButton.styleFrom(
-                              backgroundColor: Colors.blue.shade50,
+                              backgroundColor: isDark ? theme.primaryColor.withOpacity(0.2) : Colors.blue.shade50,
                               padding: const EdgeInsets.all(8),
                             ),
                           ),
@@ -321,7 +333,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                         style: TextStyle(
                           fontSize: 26,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade900,
+                          color: isDark ? Colors.white : Colors.blue.shade900,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -332,7 +344,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                         style: TextStyle(
                           fontSize: 16,
                           height: 1.5,
-                          color: Colors.grey.shade800,
+                          color: isDark ? Colors.white : Colors.grey.shade800,
                         ),
                       ),
                       if (currentStep.additionalIcons != null) ...[
@@ -340,10 +352,10 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? theme.cardColor : Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: Colors.blue.shade100,
+                              color: isDark ? Colors.white.withOpacity(0.3) : Colors.blue.shade100,
                               width: 1,
                             ),
                           ),
@@ -355,13 +367,17 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                                 .map((icon) => Container(
                                       padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
-                                        color: Colors.blue.shade50,
+                                        color: isDark ? Colors.white.withOpacity(0.1) : Colors.blue.shade50,
                                         borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: isDark ? Colors.white.withOpacity(0.2) : Colors.blue.shade100,
+                                          width: 1,
+                                        ),
                                       ),
                                       child: Icon(
                                         icon,
                                         size: 28,
-                                        color: Colors.blue.shade700,
+                                        color: isDark ? Colors.white : Colors.blue.shade700,
                                       ),
                                     ))
                                 .toList(),
@@ -380,8 +396,8 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: index == _currentStep
-                                  ? Colors.blue.shade700
-                                  : Colors.blue.shade100,
+                                  ? (isDark ? Colors.white : Colors.blue.shade700)
+                                  : (isDark ? Colors.white.withOpacity(0.3) : Colors.blue.shade100),
                             ),
                           ),
                         ),
@@ -394,7 +410,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                             TextButton(
                               onPressed: _skipTutorial,
                               style: TextButton.styleFrom(
-                                foregroundColor: Colors.grey.shade600,
+                                foregroundColor: isDark ? Colors.white : Colors.grey.shade600,
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               ),
                               child: const Text('Skip'),
@@ -404,8 +420,8 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                           ElevatedButton(
                             onPressed: _nextStep,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue.shade700,
-                              foregroundColor: Colors.white,
+                              backgroundColor: isDark ? Colors.white : Colors.blue.shade700,
+                              foregroundColor: isDark ? theme.primaryColor : Colors.white,
                               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -422,7 +438,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                             title: Text(
                               'Don\'t show again',
                               style: TextStyle(
-                                color: Colors.grey.shade700,
+                                color: isDark ? Colors.white : Colors.grey.shade700,
                                 fontSize: 14,
                               ),
                             ),
@@ -434,7 +450,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                             },
                             controlAffinity: ListTileControlAffinity.leading,
                             contentPadding: EdgeInsets.zero,
-                            activeColor: Colors.blue.shade700,
+                            activeColor: isDark ? Colors.white : Colors.blue.shade700,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
