@@ -9,6 +9,7 @@ import 'screens/share_page.dart';
 import 'screens/splash_screen.dart';
 import 'screens/vote_page.dart';
 import 'screens/events_page.dart';
+import 'screens/game_page.dart';
 import 'widgets/spotlight_tutorial_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -74,7 +75,7 @@ class _MainScreenState extends State<MainScreen> {
     // FindToiletPage(),
     // UploadPage(venueData: {}),
     // SharePage(),
-    VotePage(),
+    GamePage(),
     EventsPage(),
   ];
 
