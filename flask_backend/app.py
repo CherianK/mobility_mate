@@ -16,7 +16,6 @@ from routes.vote_routes import vote_bp
 # Admin views and login
 from admin.views import ApprovalAdminView, AdminIndexView
 from admin.auth import init_login
-from services.db_service import init_db
 
 # Load environment variables
 load_dotenv()
