@@ -115,9 +115,12 @@ class LocationBottomSheet extends StatelessWidget {
     final theme = Theme.of(context);
     final Map<String, dynamic> tags = data['Tags'] ?? {};
     final List<MapEntry<String, dynamic>> allTags = tags.entries.toList();
-    final List<String> images = (data['Images'] as List<dynamic>? ?? [])
+    final List<Map<String, dynamic>> images = (data['Images'] as List<dynamic>? ?? [])
       .where((img) => img is Map && img['approved_status'] == true)
-      .map<String>((img) => img['image_url'] as String)
+      .map<Map<String, dynamic>>((img) => {
+        'url': img['image_url'] as String,
+        'upload_time': img['image_upload_time'] as String,
+      })
       .toList();
     final prioritizedKeys = [
       'wheelchair',
@@ -534,7 +537,7 @@ class LocationBottomSheet extends StatelessWidget {
                                 child: Stack(
                                   children: [
                                     CachedNetworkImage(
-                                      imageUrl: images[index],
+                                      imageUrl: images[index]['url'],
                                       fit: BoxFit.contain,
                                       placeholder: (context, url) => const Center(
                                         child: CircularProgressIndicator(),
@@ -567,28 +570,59 @@ class LocationBottomSheet extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             padding: const EdgeInsets.all(4),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: CachedNetworkImage(
-                                imageUrl: images[index],
-                                width: 200,
-                                height: 200,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Container(
-                                  width: 200,
-                                  height: 200,
-                                  color: isDark ? Colors.grey[800] : Colors.grey[300],
-                                  child: const Center(
-                                    child: CircularProgressIndicator(),
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: CachedNetworkImage(
+                                    imageUrl: images[index]['url'],
+                                    width: 200,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Container(
+                                      width: 200,
+                                      height: 200,
+                                      color: isDark ? Colors.grey[800] : Colors.grey[300],
+                                      child: const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) => Container(
+                                      width: 200,
+                                      height: 200,
+                                      color: isDark ? Colors.grey[800] : Colors.grey[300],
+                                      child: const Icon(Icons.error),
+                                    ),
                                   ),
                                 ),
-                                errorWidget: (context, url, error) => Container(
-                                  width: 200,
-                                  height: 200,
-                                  color: isDark ? Colors.grey[800] : Colors.grey[300],
-                                  child: const Icon(Icons.error),
+                                // Date overlay
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.bottomCenter,
+                                        end: Alignment.topCenter,
+                                        colors: [
+                                          Colors.black.withOpacity(0.7),
+                                          Colors.transparent,
+                                        ],
+                                      ),
+                                    ),
+                                    child: Text(
+                                      _formatDate(images[index]['upload_time']),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                         ),
@@ -838,6 +872,17 @@ class LocationBottomSheet extends StatelessWidget {
           ),
         );
       }
+    }
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return 'Date unknown';
+    
+    try {
+      final dateTime = DateTime.parse(dateStr);
+      return 'Uploaded ${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    } catch (e) {
+      return 'Date unknown';
     }
   }
 }
