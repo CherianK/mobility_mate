@@ -10,6 +10,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../screens/vote_page.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 
 class LocationBottomSheet extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -530,78 +532,90 @@ class LocationBottomSheet extends StatelessWidget {
                         ),
                         child: GestureDetector(
                           onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => _ImageGalleryDialog(
-                                images: images,
-                                initialIndex: index,
-                                isDark: isDark,
-                                theme: theme,
+                            Navigator.of(context).push(
+                              PageRouteBuilder(
+                                opaque: false,
+                                barrierColor: Colors.black.withOpacity(0.95),
+                                pageBuilder: (context, animation, secondaryAnimation) => _FullScreenGallery(
+                                  images: images,
+                                  initialIndex: index,
+                                  isDark: isDark,
+                                  theme: theme,
+                                ),
+                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
                               ),
                             );
                           },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: isDark ? Colors.grey[800]! : const Color(0xFFE0E0E0),
-                                width: 1,
+                          child: Hero(
+                            tag: images[index]['url'],
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: isDark ? Colors.grey[800]! : const Color(0xFFE0E0E0),
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: const EdgeInsets.all(4),
-                            child: Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: CachedNetworkImage(
-                                    imageUrl: images[index]['url'],
-                                    width: 200,
-                                    height: 200,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Container(
+                              padding: const EdgeInsets.all(4),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: CachedNetworkImage(
+                                      imageUrl: images[index]['url'],
                                       width: 200,
                                       height: 200,
-                                      color: isDark ? Colors.grey[800] : Colors.grey[300],
-                                      child: const Center(
-                                        child: CircularProgressIndicator(),
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(
+                                        width: 200,
+                                        height: 200,
+                                        color: isDark ? Colors.grey[800] : Colors.grey[300],
+                                        child: const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
                                       ),
-                                    ),
-                                    errorWidget: (context, url, error) => Container(
-                                      width: 200,
-                                      height: 200,
-                                      color: isDark ? Colors.grey[800] : Colors.grey[300],
-                                      child: const Icon(Icons.error),
-                                    ),
-                                  ),
-                                ),
-                                // Date overlay
-                                Positioned(
-                                  bottom: 0,
-                                  left: 0,
-                                  right: 0,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.bottomCenter,
-                                        end: Alignment.topCenter,
-                                        colors: [
-                                          Colors.black.withOpacity(0.7),
-                                          Colors.transparent,
-                                        ],
-                                      ),
-                                    ),
-                                    child: Text(
-                                      _formatDate(images[index]['upload_time']),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
+                                      errorWidget: (context, url, error) => Container(
+                                        width: 200,
+                                        height: 200,
+                                        color: isDark ? Colors.grey[800] : Colors.grey[300],
+                                        child: const Icon(Icons.error),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                  // Date overlay
+                                  Positioned(
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.bottomCenter,
+                                          end: Alignment.topCenter,
+                                          colors: [
+                                            Colors.black.withOpacity(0.7),
+                                            Colors.transparent,
+                                          ],
+                                        ),
+                                      ),
+                                      child: Text(
+                                        _formatDate(images[index]['upload_time']),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -853,26 +867,26 @@ class LocationBottomSheet extends StatelessWidget {
       }
     }
   }
+}
 
-  String _formatDate(String? dateStr) {
-    if (dateStr == null) return 'Date unknown';
-    
-    try {
-      final dateTime = DateTime.parse(dateStr);
-      return 'Uploaded ${dateTime.day}/${dateTime.month}/${dateTime.year}';
-    } catch (e) {
-      return 'Date unknown';
-    }
+// Move _formatDate here so it is accessible to all widgets in this file
+String _formatDate(String? dateStr) {
+  if (dateStr == null) return 'Date unknown';
+  try {
+    final dateTime = DateTime.parse(dateStr);
+    return 'Uploaded 	${dateTime.day}/${dateTime.month}/${dateTime.year}';
+  } catch (e) {
+    return 'Date unknown';
   }
 }
 
-class _ImageGalleryDialog extends StatefulWidget {
+class _FullScreenGallery extends StatefulWidget {
   final List<Map<String, dynamic>> images;
   final int initialIndex;
   final bool isDark;
   final ThemeData theme;
 
-  const _ImageGalleryDialog({
+  const _FullScreenGallery({
     required this.images,
     required this.initialIndex,
     required this.isDark,
@@ -880,12 +894,12 @@ class _ImageGalleryDialog extends StatefulWidget {
   });
 
   @override
-  State<_ImageGalleryDialog> createState() => _ImageGalleryDialogState();
+  State<_FullScreenGallery> createState() => _FullScreenGalleryState();
 }
 
-class _ImageGalleryDialogState extends State<_ImageGalleryDialog> {
-  late PageController _pageController;
+class _FullScreenGalleryState extends State<_FullScreenGallery> {
   late int _currentIndex;
+  late PageController _pageController;
 
   @override
   void initState() {
@@ -894,94 +908,90 @@ class _ImageGalleryDialogState extends State<_ImageGalleryDialog> {
     _pageController = PageController(initialPage: widget.initialIndex);
   }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  void _onPageChanged(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  void _onVerticalDragEnd(DragEndDetails details) {
+    if (details.primaryVelocity != null && details.primaryVelocity! > 300) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: widget.isDark ? widget.theme.cardColor : Colors.white,
-      insetPadding: const EdgeInsets.all(16),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.85,
-            height: MediaQuery.of(context).size.height * 0.65,
-            child: PageView.builder(
-              controller: _pageController,
+    return GestureDetector(
+      onVerticalDragEnd: _onVerticalDragEnd,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          alignment: Alignment.center,
+          children: [
+            PhotoViewGallery.builder(
+              pageController: _pageController,
               itemCount: widget.images.length,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              itemBuilder: (context, index) {
-                return CachedNetworkImage(
-                  imageUrl: widget.images[index]['url'],
-                  fit: BoxFit.contain,
-                  placeholder: (context, url) => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
+              onPageChanged: _onPageChanged,
+              builder: (context, index) {
+                return PhotoViewGalleryPageOptions(
+                  imageProvider: CachedNetworkImageProvider(widget.images[index]['url']),
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.covered * 2.5,
+                  heroAttributes: PhotoViewHeroAttributes(tag: widget.images[index]['url']),
                 );
               },
+              scrollPhysics: const BouncingScrollPhysics(),
+              backgroundDecoration: const BoxDecoration(color: Colors.black),
             ),
-          ),
-          // Left arrow
-          if (_currentIndex > 0)
+            // Close button
             Positioned(
-              left: 8,
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_ios, color: widget.isDark ? Colors.white : Colors.black),
-                onPressed: () {
-                  if (_currentIndex > 0) {
-                    _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-                  }
-                },
+              right: 16,
+              top: 40,
+              child: SafeArea(
+                child: IconButton(
+                  icon: Icon(Icons.close, color: Colors.white, size: 30),
+                  onPressed: () => Navigator.of(context).pop(),
+                  tooltip: 'Close',
+                ),
               ),
             ),
-          // Right arrow
-          if (_currentIndex < widget.images.length - 1)
+            // Image index indicator
             Positioned(
-              right: 8,
-              child: IconButton(
-                icon: Icon(Icons.arrow_forward_ios, color: widget.isDark ? Colors.white : Colors.black),
-                onPressed: () {
-                  if (_currentIndex < widget.images.length - 1) {
-                    _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-                  }
-                },
+              bottom: 60,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  '${_currentIndex + 1} / ${widget.images.length}',
+                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
-          // Close button
-          Positioned(
-            right: 8,
-            top: 8,
-            child: IconButton(
-              icon: Icon(Icons.close, color: widget.isDark ? Colors.white : Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-          // Image index indicator
-          Positioned(
-            bottom: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                '${_currentIndex + 1} / ${widget.images.length}',
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+            // Caption (upload date)
+            Positioned(
+              bottom: 24,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _formatDate(widget.images[_currentIndex]['upload_time']),
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
