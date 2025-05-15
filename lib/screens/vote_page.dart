@@ -40,6 +40,7 @@ class _VotePageState extends State<VotePage> {
     if (widget.initialLocation != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showLocationDetails(widget.initialLocation!);
+        _loadExistingVotes(widget.initialLocation!);
       });
     }
   }
@@ -219,28 +220,73 @@ class _VotePageState extends State<VotePage> {
     }
   }
 
-  void _voteOnPhoto(String photoId, bool isAccurate) {
+  void _voteOnPhoto(String photoId, bool isAccurate) async {
     if (selectedLocation == null) return;
 
     final locationId = selectedLocation!['id'] ?? selectedLocation!['name'];
     final currentVotes = locationPhotoVotes[locationId] ?? {};
     final photoVotes = currentVotes[photoId] ?? {'accurate': 0, 'inaccurate': 0};
 
-    setState(() {
-      // If the user clicks the same vote again, remove their vote
-      if (photoVotes[isAccurate ? 'accurate' : 'inaccurate']! > 0) {
-        photoVotes[isAccurate ? 'accurate' : 'inaccurate'] = 0;
-      } else {
-        // Remove any existing vote of the other type
-        photoVotes[isAccurate ? 'inaccurate' : 'accurate'] = 0;
-        // Add the new vote
-        photoVotes[isAccurate ? 'accurate' : 'inaccurate'] = 1;
-      }
+    try {
+      // Get device ID
+      final deviceId = await getOrCreateDeviceId();
+      
+      // Get image URL from the photo ID
+      final imageIndex = int.parse(photoId.split('_').last);
+      final imageUrl = selectedLocation!['images'][imageIndex];
 
-      // Update the votes for this photo
-      currentVotes[photoId] = photoVotes;
-      locationPhotoVotes[locationId] = currentVotes;
-    });
+      // Send vote to backend
+      final response = await http.post(
+        Uri.parse('https://mobility-mate.onrender.com/api/vote'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'device_id': deviceId,
+          'location_id': locationId,
+          'image_url': imageUrl,
+          'is_accurate': isAccurate,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        
+        setState(() {
+          // Update local vote counts with server response
+          photoVotes['accurate'] = data['accurate_count'];
+          photoVotes['inaccurate'] = data['inaccurate_count'];
+          
+          // Update the votes for this photo
+          currentVotes[photoId] = photoVotes;
+          locationPhotoVotes[locationId] = currentVotes;
+        });
+      } else if (response.statusCode == 400) {
+        // Handle case where user has already voted
+        final data = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['error'] ?? 'You have already voted on this image'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        
+        // Update vote counts from error response
+        setState(() {
+          photoVotes['accurate'] = data['accurate_count'];
+          photoVotes['inaccurate'] = data['inaccurate_count'];
+          currentVotes[photoId] = photoVotes;
+          locationPhotoVotes[locationId] = currentVotes;
+        });
+      } else {
+        throw Exception('Failed to submit vote');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error submitting vote: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _buildPhotoVoting(String photoId) {
@@ -257,7 +303,7 @@ class _VotePageState extends State<VotePage> {
             foregroundColor: Colors.white,
           ),
           icon: const Icon(Icons.thumb_up),
-          label: Text('Accurate ${photoVotes['accurate']}'),
+          label: Text('Accurate (${photoVotes['accurate']})'),
           onPressed: () => _voteOnPhoto(photoId, true),
         ),
         const SizedBox(width: 16),
@@ -267,7 +313,7 @@ class _VotePageState extends State<VotePage> {
             foregroundColor: Colors.white,
           ),
           icon: const Icon(Icons.thumb_down),
-          label: Text('Inaccurate ${photoVotes['inaccurate']}'),
+          label: Text('Inaccurate (${photoVotes['inaccurate']})'),
           onPressed: () => _voteOnPhoto(photoId, false),
         ),
       ],
@@ -675,5 +721,37 @@ class _VotePageState extends State<VotePage> {
     _controller.dispose();
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadExistingVotes(Map<String, dynamic> location) async {
+    try {
+      final images = location['images'] as List<dynamic>;
+      final locationId = location['id'] ?? location['name'];
+
+      for (var i = 0; i < images.length; i++) {
+        final imageUrl = images[i];
+        final photoId = '${locationId}_$i';
+
+        final response = await http.get(
+          Uri.parse('https://mobility-mate.onrender.com/api/votes/${Uri.encodeComponent(imageUrl)}'),
+        );
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          
+          setState(() {
+            if (!locationPhotoVotes.containsKey(locationId)) {
+              locationPhotoVotes[locationId] = {};
+            }
+            locationPhotoVotes[locationId]![photoId] = {
+              'accurate': data['accurate_count'],
+              'inaccurate': data['inaccurate_count'],
+            };
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading votes: $e');
+    }
   }
 }

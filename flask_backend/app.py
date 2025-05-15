@@ -4,16 +4,19 @@ from flask_pymongo import PyMongo
 from flask_admin import Admin
 from dotenv import load_dotenv
 import os
+from flask_login import LoginManager
 
 # Register routes
 from routes.report_routes import report_bp
 from routes.location_routes import location_bp
 from routes.upload_routes import upload_bp
 from routes.events import events_bp
+from routes.vote_routes import vote_bp
 
 # Admin views and login
 from admin.views import ApprovalAdminView, AdminIndexView
 from admin.auth import init_login
+from services.db_service import init_db
 
 # Load environment variables
 load_dotenv()
@@ -39,6 +42,7 @@ app.register_blueprint(location_bp)
 app.register_blueprint(report_bp)
 app.register_blueprint(upload_bp)
 app.register_blueprint(events_bp)
+app.register_blueprint(vote_bp)
 
 # Base route
 @app.route('/')
