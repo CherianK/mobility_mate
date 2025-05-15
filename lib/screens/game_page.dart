@@ -79,8 +79,6 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       final List<dynamic> trainsData = json.decode(response[2].body);
       final List<dynamic> tramsData = json.decode(response[3].body);
 
-      //debugPrint('Loaded: ${hospitalsData.length} hospitals, ${toiletsData.length} toilets, ${trainsData.length} trains, ${tramsData.length} trams');
-
       // Process images from all datasets
       List<Map<String, dynamic>> allImages = [];
 
@@ -88,7 +86,6 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       for (var hospital in hospitalsData) {
         final images = hospital['Images'];
         final name = hospital['name'] ?? hospital['Name'];
-        debugPrint('Hospital $name: Images = $images');
         if (images != null && images is List) {
           for (var image in images) {
             if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
@@ -102,13 +99,11 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
           }
         }
       }
-      debugPrint('Found ${allImages.length} hospital images');
 
       // Process toilet images
       for (var toilet in toiletsData) {
         final images = toilet['Images'];
         final name = toilet['name'] ?? toilet['Name'];
-        debugPrint('Toilet $name: Images = $images');
         if (images != null && images is List) {
           for (var image in images) {
             if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
@@ -122,13 +117,11 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
           }
         }
       }
-      debugPrint('Found ${allImages.length} total images after adding toilets');
 
       // Process train images
       for (var train in trainsData) {
         final images = train['Images'];
         final name = train['name'] ?? train['Name'];
-        debugPrint('Train Station $name: Images = $images');
         if (images != null && images is List) {
           for (var image in images) {
             if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
@@ -142,13 +135,11 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
           }
         }
       }
-      debugPrint('Found ${allImages.length} total images after adding trains');
 
       // Process tram images
       for (var tram in tramsData) {
         final images = tram['Images'];
         final name = tram['name'] ?? tram['Name'];
-        debugPrint('Tram Stop $name: Images = $images');
         if (images != null && images is List) {
           for (var image in images) {
             if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
@@ -172,20 +163,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         isLoading = false;
       });
       
-      debugPrint('Total images loaded: ${allImages.length}');
-      
-      if (allImages.isEmpty) {
-        //debugPrint('Warning: No images found in any dataset');
-      } else {
-        //ebugPrint('First image URL: ${allImages[0]['url']}');
-        // Print all image URLs for debugging
-        for (var i = 0; i < allImages.length; i++) {
-          //debugPrint('Image $i: ${allImages[i]['url']} from ${allImages[i]['locationName']} (${allImages[i]['locationType']})');
-        }
-      }
     } catch (e, stackTrace) {
-      debugPrint('Error loading images: $e');
-      debugPrint('Stack trace: $stackTrace');
       setState(() {
         isLoading = false;
       });
@@ -194,35 +172,26 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
 
   Future<List<Map<String, dynamic>>> _filterVotedImages(List<Map<String, dynamic>> images) async {
     if (deviceId == null) {
-      debugPrint('No device ID available for filtering votes');
       return images;
     }
 
     try {
-      debugPrint('Fetching votes for device: $deviceId');
-      // Get all votes for this device
       final response = await http.get(
         Uri.parse('https://mobility-mate.onrender.com/api/votes/device/$deviceId'),
       );
 
       if (response.statusCode == 200) {
         final List<dynamic> votedImages = json.decode(response.body);
-        debugPrint('Found ${votedImages.length} votes for this device');
         
         final votedUrls = votedImages.map((vote) => vote['image_url'] as String).toSet();
-        debugPrint('Voted URLs: $votedUrls');
         
-        // Filter out images the user has already voted on
         final filteredImages = images.where((image) => !votedUrls.contains(image['url'])).toList();
-        debugPrint('Filtered from ${images.length} to ${filteredImages.length} images');
         
         return filteredImages;
       } else {
-        debugPrint('Error fetching votes: ${response.statusCode}');
         return images;
       }
     } catch (e) {
-      debugPrint('Error filtering voted images: $e');
       return images;
     }
   }

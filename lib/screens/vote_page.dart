@@ -8,6 +8,7 @@ import '../models/marker_type.dart';
 import '../utils/icon_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../widgets/custom_app_bar.dart';
+import 'package:uuid/uuid.dart';
 
 class VotePage extends StatefulWidget {
   final Map<String, dynamic>? initialLocation;
@@ -29,6 +30,7 @@ class _VotePageState extends State<VotePage> {
   Map<String, Map<String, Map<String, int>>> locationPhotoVotes = {};
   Map<String, int> currentPhotoIndices = {};
   final PageController _pageController = PageController();
+  String? deviceId;
 
   static const _recentKey = 'vote_recent_searches';
 
@@ -37,12 +39,29 @@ class _VotePageState extends State<VotePage> {
     super.initState();
     loadRecentSearches();
     loadLocalData();
+    _initializeDeviceId();
     if (widget.initialLocation != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showLocationDetails(widget.initialLocation!);
         _loadExistingVotes(widget.initialLocation!);
       });
     }
+  }
+
+  Future<void> _initializeDeviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    deviceId = prefs.getString('device_id');
+    if (deviceId == null) {
+      deviceId = const Uuid().v4();
+      await prefs.setString('device_id', deviceId!);
+    }
+  }
+
+  Future<String> getOrCreateDeviceId() async {
+    if (deviceId == null) {
+      await _initializeDeviceId();
+    }
+    return deviceId!;
   }
 
   Future<void> loadLocalData() async {
@@ -87,11 +106,11 @@ class _VotePageState extends State<VotePage> {
         }),
       ];
 
-      debugPrint('First few entries in allLocations: ${allLocations.take(5).toList()}');
-      //debugPrint('Loaded ${allLocations.length} local locations');
-      //debugPrint('All locations data: ${allLocations.map((location) => location['name'] ?? location['Name']).toList()}');
+      // debugPrint('First few entries in allLocations: ${allLocations.take(5).toList()}');
+      // debugPrint('Loaded ${allLocations.length} local locations');
+      // debugPrint('All locations data: ${allLocations.map((location) => location['name'] ?? location['Name']).toList()}');
     } catch (e) {
-      debugPrint('Error loading local data: $e');
+      // debugPrint('Error loading local data: $e');
     }
   }
 
@@ -109,19 +128,19 @@ class _VotePageState extends State<VotePage> {
       isLoading = true;
     });
 
-    debugPrint('Search query: $query');
-    debugPrint('All locations: ${allLocations.length}');
+    // debugPrint('Search query: $query');
+    // debugPrint('All locations: ${allLocations.length}');
 
     // Ensure allLocations is populated correctly
     if (allLocations.isEmpty) {
-      debugPrint('Error: allLocations is empty. Ensure data is loaded correctly from APIs.');
+      // debugPrint('Error: allLocations is empty. Ensure data is loaded correctly from APIs.');
     }
 
     // Normalize search query and location names for better matching
     final normalizedQuery = query.toLowerCase().trim();
 
-    debugPrint('Normalized query: $normalizedQuery');
-    //debugPrint('Location names in allLocations: ${allLocations.map((location) => location['Name']?.toString().toLowerCase().trim() ?? location['name']?.toString().toLowerCase().trim() ?? '').toList()}');
+    // debugPrint('Normalized query: $normalizedQuery');
+    // debugPrint('Location names in allLocations: ${allLocations.map((location) => location['Name']?.toString().toLowerCase().trim() ?? location['name']?.toString().toLowerCase().trim() ?? '').toList()}');
 
     final filteredLocal = allLocations.where((location) {
       final name = location['Metadata']?['name']?.toString().toLowerCase().trim() ?? 
@@ -142,8 +161,8 @@ class _VotePageState extends State<VotePage> {
       };
     }).toList();
 
-    debugPrint('Filtered local results: ${filteredLocal.length}');
-    debugPrint('Filtered local results (names): ${filteredLocal.map((location) => location['name']).toList()}');
+    // debugPrint('Filtered local results: ${filteredLocal.length}');
+    // debugPrint('Filtered local results (names): ${filteredLocal.map((location) => location['name']).toList()}');
 
     setState(() {
       localResults = filteredLocal;
@@ -339,14 +358,14 @@ class _VotePageState extends State<VotePage> {
 
   MarkerType? _determineLocationType(Map<String, dynamic> location) {
     // Debug logging to see the location data
-    debugPrint('Location data: ${location.toString()}');
+    // debugPrint('Location data: ${location.toString()}');
     
     // Check if it's a local location
     if (location['isLocal'] == true) {
       final type = location['type']?.toString().toLowerCase() ?? '';
       
       if (type == 'hospital') {
-        debugPrint('Identified as hospital: ${location['name']}');
+        // debugPrint('Identified as hospital: ${location['name']}');
         return MarkerType.hospital;
       }
       
@@ -366,10 +385,10 @@ class _VotePageState extends State<VotePage> {
           RegExp(r'route\s+\d+:\s*stop\s+\d+').hasMatch(name) ||
           RegExp(r'route\s+\d+').hasMatch(name) ||
           RegExp(r'stop\s+\d+').hasMatch(name)) {
-        debugPrint('Identified as tram station: $name');
+        // debugPrint('Identified as tram station: $name');
         return MarkerType.tram;
       }
-      debugPrint('Identified as train station: $name');
+      // debugPrint('Identified as train station: $name');
       return MarkerType.train;
     }
     
@@ -403,11 +422,11 @@ class _VotePageState extends State<VotePage> {
                RegExp(r'route\s+\d+:\s*stop\s+\d+').hasMatch(name) ||
                RegExp(r'route\s+\d+').hasMatch(name) ||
                RegExp(r'stop\s+\d+').hasMatch(name)) {
-      debugPrint('Identified as tram station (Mapbox): $name');
+      // debugPrint('Identified as tram station (Mapbox): $name');
       return MarkerType.tram;
     }
     
-    debugPrint('Defaulting to train station: $name');
+    // debugPrint('Defaulting to train station: $name');
     return MarkerType.train;
   }
 
@@ -751,7 +770,7 @@ class _VotePageState extends State<VotePage> {
         }
       }
     } catch (e) {
-      debugPrint('Error loading votes: $e');
+      // debugPrint('Error loading votes: $e');
     }
   }
 }
