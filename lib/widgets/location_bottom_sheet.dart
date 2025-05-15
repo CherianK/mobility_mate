@@ -532,32 +532,11 @@ class LocationBottomSheet extends StatelessWidget {
                           onTap: () {
                             showDialog(
                               context: context,
-                              builder: (context) => Dialog(
-                                backgroundColor: isDark ? theme.cardColor : Colors.white,
-                                child: Stack(
-                                  children: [
-                                    CachedNetworkImage(
-                                      imageUrl: images[index]['url'],
-                                      fit: BoxFit.contain,
-                                      placeholder: (context, url) => const Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          const Icon(Icons.error),
-                                    ),
-                                    Positioned(
-                                      right: 8,
-                                      top: 8,
-                                      child: IconButton(
-                                        icon: Icon(
-                                          Icons.close,
-                                          color: isDark ? Colors.white : Colors.black,
-                                        ),
-                                        onPressed: () => Navigator.pop(context),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              builder: (context) => _ImageGalleryDialog(
+                                images: images,
+                                initialIndex: index,
+                                isDark: isDark,
+                                theme: theme,
                               ),
                             );
                           },
@@ -884,5 +863,126 @@ class LocationBottomSheet extends StatelessWidget {
     } catch (e) {
       return 'Date unknown';
     }
+  }
+}
+
+class _ImageGalleryDialog extends StatefulWidget {
+  final List<Map<String, dynamic>> images;
+  final int initialIndex;
+  final bool isDark;
+  final ThemeData theme;
+
+  const _ImageGalleryDialog({
+    required this.images,
+    required this.initialIndex,
+    required this.isDark,
+    required this.theme,
+  });
+
+  @override
+  State<_ImageGalleryDialog> createState() => _ImageGalleryDialogState();
+}
+
+class _ImageGalleryDialogState extends State<_ImageGalleryDialog> {
+  late PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: widget.isDark ? widget.theme.cardColor : Colors.white,
+      insetPadding: const EdgeInsets.all(16),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.85,
+            height: MediaQuery.of(context).size.height * 0.65,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: widget.images.length,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              itemBuilder: (context, index) {
+                return CachedNetworkImage(
+                  imageUrl: widget.images[index]['url'],
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                );
+              },
+            ),
+          ),
+          // Left arrow
+          if (_currentIndex > 0)
+            Positioned(
+              left: 8,
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_ios, color: widget.isDark ? Colors.white : Colors.black),
+                onPressed: () {
+                  if (_currentIndex > 0) {
+                    _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                  }
+                },
+              ),
+            ),
+          // Right arrow
+          if (_currentIndex < widget.images.length - 1)
+            Positioned(
+              right: 8,
+              child: IconButton(
+                icon: Icon(Icons.arrow_forward_ios, color: widget.isDark ? Colors.white : Colors.black),
+                onPressed: () {
+                  if (_currentIndex < widget.images.length - 1) {
+                    _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                  }
+                },
+              ),
+            ),
+          // Close button
+          Positioned(
+            right: 8,
+            top: 8,
+            child: IconButton(
+              icon: Icon(Icons.close, color: widget.isDark ? Colors.white : Colors.black),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          // Image index indicator
+          Positioned(
+            bottom: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                '${_currentIndex + 1} / ${widget.images.length}',
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

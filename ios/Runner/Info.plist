@@ -39,10 +39,10 @@
 	<string>Mobility Mate needs camera access to let you upload photos of locations for accessibility information.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app uses your location to enhance accessibility mapping features.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to your location to show your position on the map.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs access to location when in the background to show you nearby accessible locations.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to show your position on the map.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Mobility Mate needs photo library access to let you upload photos of locations for accessibility information.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
@@ -64,9 +64,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>io.flutter.embedded_views_preview</key>
-	<true/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 </dict>
 </plist>
