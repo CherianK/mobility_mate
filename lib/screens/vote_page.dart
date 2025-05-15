@@ -770,7 +770,6 @@ class _VotePageState extends State<VotePage> {
         }
       }
     } catch (e) {
-      // debugPrint('Error loading votes: $e');
     }
   }
 }
