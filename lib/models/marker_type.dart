@@ -35,7 +35,7 @@ enum MarkerType {
     color: Colors.purple,
     size: 1.5,
     minZoomLevel: 0.0,
-    displayName: 'Hospital Information',
+    displayName: 'Medical Information',
     iconGetter: getHospitalIcon,
   );
 

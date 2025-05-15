@@ -12,3 +12,21 @@ String formatTag(String key, dynamic value) {
   }
   return '$formattedKey: $formattedValue';
 }
+
+String? formatMarkerDisplayName({
+  required String? name,
+  required String markerType,
+}) {
+  if (name == null || name.isEmpty) return null;
+  String formattedName = name.trim().split(' ').map((w) => w.isNotEmpty ? w[0].toUpperCase() + w.substring(1) : '').join(' ');
+  switch (markerType) {
+    case 'trains':
+      return formattedName.endsWith('Station') ? formattedName : '$formattedName Station';
+    case 'trams':
+      return formattedName;
+    case 'medical':
+      return formattedName;
+    default:
+      return null;
+  }
+}

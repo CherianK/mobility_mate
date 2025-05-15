@@ -10,6 +10,8 @@ import '../widgets/search_bar.dart';
 import '../widgets/location_bottom_sheet.dart';
 import '../utils/location_helper.dart'; // 
 import '../providers/theme_provider.dart';
+import '../utils/tag_formatter.dart';
+
 
 class MapHomePage extends StatefulWidget {
   const MapHomePage({super.key});
@@ -428,13 +430,43 @@ final Map<String, Map<String, dynamic>> _markerData = {};
 
     final data = _markerData[id]!;
     final markerType = data['marker_type'] as MarkerType;
+    String title;
+    if (markerType == MarkerType.toilet) {
+      title = markerType.displayName;
+    } else {
+      // Try to get the name from Tags['name'], Tags['Name'], Metadata['name'], or Metadata['Name']
+      final tags = data['Tags'] as Map<String, dynamic>?;
+      final metadata = data['Metadata'] as Map<String, dynamic>?;
+      String? name =
+        (tags?['name'] ?? tags?['Name'] ?? metadata?['name'] ?? metadata?['Name'])?.toString().trim();
+      // Map MarkerType to expected string for formatter
+      String markerTypeString;
+      switch (markerType) {
+        case MarkerType.train:
+          markerTypeString = 'trains';
+          break;
+        case MarkerType.tram:
+          markerTypeString = 'trams';
+          break;
+        case MarkerType.hospital:
+          markerTypeString = 'medical';
+          break;
+        default:
+          markerTypeString = markerType.name;
+      }
+      title = formatMarkerDisplayName(
+        name: name,
+        markerType: markerTypeString,
+      ) ?? markerType.displayName;
+    }
+
     final sheetFuture = showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetCtx) => LocationBottomSheet(
         data: data,
-        title: markerType.displayName,
+        title: title,
         iconGetter: markerType.iconGetter,
         onClose: () => Navigator.of(sheetCtx).maybePop(),
       ),

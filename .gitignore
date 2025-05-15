@@ -85,3 +85,9 @@ windows/build/
 # Android (extra safety—Flutter already ignores `/build/`)
 android/.gradle/
 android/local.properties      # per-developer paths
+
+
+
+
+# ignore the temporary datafiles folder
+flask_backend/datafiles_temporary/
