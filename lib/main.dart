@@ -15,12 +15,14 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/theme_provider.dart';
 import 'screens/report_issue_screen.dart';
+import 'package:uuid/uuid.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize SharedPreferences
+  // Initialize SharedPreferences and get/create device ID
   final prefs = await SharedPreferences.getInstance();
+  final deviceId = await getOrCreateDeviceId();
   
   // Configure Mapbox
   MapboxOptions.setAccessToken(MapboxConfig.accessToken);
@@ -155,4 +157,14 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
+}
+
+Future<String> getOrCreateDeviceId() async {
+  final prefs = await SharedPreferences.getInstance();
+  String? deviceId = prefs.getString('device_id');
+  if (deviceId == null) {
+    deviceId = const Uuid().v4();
+    await prefs.setString('device_id', deviceId);
+  }
+  return deviceId;
 }

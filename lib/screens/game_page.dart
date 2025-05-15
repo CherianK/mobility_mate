@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/mapbox_config.dart';
 import '../models/marker_type.dart';
 import '../utils/icon_utils.dart';
+import 'package:uuid/uuid.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -17,6 +18,7 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> allImages = [];
+  List<Map<String, dynamic>> availableImages = [];  // Images user hasn't voted on
   bool isLoading = true;
   int currentImageIndex = 0;
   
@@ -27,13 +29,17 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
   double _dragPercentage = 0;
   
   // Constants for swipe
-  final double _swipeThreshold = 0.32; // 20% more sensitive (reduced from 0.4)
-  final double _maxAngle = 30 * (pi / 180); // maximum rotation angle in radians
+  final double _swipeThreshold = 0.32;
+  final double _maxAngle = 30 * (pi / 180);
+
+  String? deviceId;  // Tracks unique device identifier for voting
 
   @override
   void initState() {
     super.initState();
-    loadAllImages();
+    _initializeDeviceId().then((_) {
+      loadAllImages();
+    });
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -45,6 +51,15 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _initializeDeviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    deviceId = prefs.getString('device_id');
+    if (deviceId == null) {
+      deviceId = const Uuid().v4();
+      await prefs.setString('device_id', deviceId!);
+    }
   }
 
   Future<void> loadAllImages() async {
@@ -64,7 +79,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       final List<dynamic> trainsData = json.decode(response[2].body);
       final List<dynamic> tramsData = json.decode(response[3].body);
 
-      debugPrint('Loaded: ${hospitalsData.length} hospitals, ${toiletsData.length} toilets, ${trainsData.length} trains, ${tramsData.length} trams');
+      //debugPrint('Loaded: ${hospitalsData.length} hospitals, ${toiletsData.length} toilets, ${trainsData.length} trains, ${tramsData.length} trams');
 
       // Process images from all datasets
       List<Map<String, dynamic>> allImages = [];
@@ -74,17 +89,15 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         final images = hospital['Images'];
         final name = hospital['name'] ?? hospital['Name'];
         debugPrint('Hospital $name: Images = $images');
-        if (images != null) {
-          if (images is List) {
-            for (var image in images) {
-              if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
-                allImages.add({
-                  'url': image['image_url'],
-                  'locationName': name ?? 'Unknown Hospital',
-                  'locationType': 'hospital',
-                  'locationId': hospital['id'] ?? name ?? 'unknown',
-                });
-              }
+        if (images != null && images is List) {
+          for (var image in images) {
+            if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
+              allImages.add({
+                'url': image['image_url'],
+                'locationName': name ?? 'Unknown Hospital',
+                'locationType': 'hospital',
+                'locationId': hospital['id'] ?? name ?? 'unknown',
+              });
             }
           }
         }
@@ -96,17 +109,15 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         final images = toilet['Images'];
         final name = toilet['name'] ?? toilet['Name'];
         debugPrint('Toilet $name: Images = $images');
-        if (images != null) {
-          if (images is List) {
-            for (var image in images) {
-              if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
-                allImages.add({
-                  'url': image['image_url'],
-                  'locationName': name ?? 'Public Toilet',
-                  'locationType': 'toilet',
-                  'locationId': toilet['id'] ?? name ?? 'unknown',
-                });
-              }
+        if (images != null && images is List) {
+          for (var image in images) {
+            if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
+              allImages.add({
+                'url': image['image_url'],
+                'locationName': name ?? 'Public Toilet',
+                'locationType': 'toilet',
+                'locationId': toilet['id'] ?? name ?? 'unknown',
+              });
             }
           }
         }
@@ -118,17 +129,15 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         final images = train['Images'];
         final name = train['name'] ?? train['Name'];
         debugPrint('Train Station $name: Images = $images');
-        if (images != null) {
-          if (images is List) {
-            for (var image in images) {
-              if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
-                allImages.add({
-                  'url': image['image_url'],
-                  'locationName': name ?? 'Train Station',
-                  'locationType': 'train',
-                  'locationId': train['id'] ?? name ?? 'unknown',
-                });
-              }
+        if (images != null && images is List) {
+          for (var image in images) {
+            if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
+              allImages.add({
+                'url': image['image_url'],
+                'locationName': name ?? 'Train Station',
+                'locationType': 'train',
+                'locationId': train['id'] ?? name ?? 'unknown',
+              });
             }
           }
         }
@@ -140,36 +149,38 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         final images = tram['Images'];
         final name = tram['name'] ?? tram['Name'];
         debugPrint('Tram Stop $name: Images = $images');
-        if (images != null) {
-          if (images is List) {
-            for (var image in images) {
-              if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
-                allImages.add({
-                  'url': image['image_url'],
-                  'locationName': name ?? 'Tram Stop',
-                  'locationType': 'tram',
-                  'locationId': tram['id'] ?? name ?? 'unknown',
-                });
-              }
+        if (images != null && images is List) {
+          for (var image in images) {
+            if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
+              allImages.add({
+                'url': image['image_url'],
+                'locationName': name ?? 'Tram Stop',
+                'locationType': 'tram',
+                'locationId': tram['id'] ?? name ?? 'unknown',
+              });
             }
           }
         }
       }
 
+      // Filter out images the user has already voted on
+      final availableImages = await _filterVotedImages(allImages);
+
       setState(() {
         this.allImages = allImages;
+        this.availableImages = availableImages;
         isLoading = false;
       });
       
       debugPrint('Total images loaded: ${allImages.length}');
       
       if (allImages.isEmpty) {
-        debugPrint('Warning: No images found in any dataset');
+        //debugPrint('Warning: No images found in any dataset');
       } else {
-        debugPrint('First image URL: ${allImages[0]['url']}');
+        //ebugPrint('First image URL: ${allImages[0]['url']}');
         // Print all image URLs for debugging
         for (var i = 0; i < allImages.length; i++) {
-          debugPrint('Image $i: ${allImages[i]['url']} from ${allImages[i]['locationName']} (${allImages[i]['locationType']})');
+          //debugPrint('Image $i: ${allImages[i]['url']} from ${allImages[i]['locationName']} (${allImages[i]['locationType']})');
         }
       }
     } catch (e, stackTrace) {
@@ -178,6 +189,41 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _filterVotedImages(List<Map<String, dynamic>> images) async {
+    if (deviceId == null) {
+      debugPrint('No device ID available for filtering votes');
+      return images;
+    }
+
+    try {
+      debugPrint('Fetching votes for device: $deviceId');
+      // Get all votes for this device
+      final response = await http.get(
+        Uri.parse('https://mobility-mate.onrender.com/api/votes/device/$deviceId'),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> votedImages = json.decode(response.body);
+        debugPrint('Found ${votedImages.length} votes for this device');
+        
+        final votedUrls = votedImages.map((vote) => vote['image_url'] as String).toSet();
+        debugPrint('Voted URLs: $votedUrls');
+        
+        // Filter out images the user has already voted on
+        final filteredImages = images.where((image) => !votedUrls.contains(image['url'])).toList();
+        debugPrint('Filtered from ${images.length} to ${filteredImages.length} images');
+        
+        return filteredImages;
+      } else {
+        debugPrint('Error fetching votes: ${response.statusCode}');
+        return images;
+      }
+    } catch (e) {
+      debugPrint('Error filtering voted images: $e');
+      return images;
     }
   }
 
@@ -242,15 +288,25 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
     });
   }
 
-  void _vote(bool isAccessible) {
-    if (currentImageIndex < allImages.length - 1) {
+  void _vote(bool isAccessible) async {
+    if (currentImageIndex < availableImages.length) {
+      // Submit vote to backend
+      await _submitVote(availableImages[currentImageIndex]['url'], isAccessible);
+      
+      // Remove the voted image from availableImages
       setState(() {
-        currentImageIndex++;
+        availableImages.removeAt(currentImageIndex);
+        // If we've removed the last image, stay at the current index
+        if (currentImageIndex >= availableImages.length && availableImages.isNotEmpty) {
+          currentImageIndex = availableImages.length - 1;
+        }
       });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You have voted on all images!')),
-      );
+
+      if (availableImages.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You have voted on all available images!')),
+        );
+      }
     }
   }
 
@@ -261,7 +317,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       body: SafeArea(
         child: isLoading
             ? const Center(child: CircularProgressIndicator())
-            : allImages.isEmpty
+            : availableImages.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -275,7 +331,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                       ],
                     ),
                   )
-                : (currentImageIndex >= allImages.length)
+                : (currentImageIndex >= availableImages.length)
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -283,7 +339,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                             Icon(Icons.celebration, size: 64, color: Colors.green),
                             const SizedBox(height: 16),
                             Text(
-                              'You have voted on all images!',
+                              'You have voted on all available images!',
                               style: TextStyle(fontSize: 20, color: Colors.green[800], fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,
                             ),
@@ -404,9 +460,9 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                                   child: Container(
                                                     width: double.infinity,
                                                     color: Colors.grey[200],
-                                                    child: allImages[currentImageIndex]['url'] != null
+                                                    child: availableImages[currentImageIndex]['url'] != null
                                                         ? Image.network(
-                                                            allImages[currentImageIndex]['url'],
+                                                            availableImages[currentImageIndex]['url'],
                                                             fit: BoxFit.contain,
                                                             errorBuilder: (context, error, stackTrace) {
                                                               return Center(
@@ -426,11 +482,11 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                                     crossAxisAlignment: CrossAxisAlignment.center,
                                                     children: [
                                                       Text(
-                                                        allImages[currentImageIndex]['locationType'] == 'hospital'
+                                                        availableImages[currentImageIndex]['locationType'] == 'hospital'
                                                             ? 'Hospital'
-                                                            : allImages[currentImageIndex]['locationType'] == 'toilet'
+                                                            : availableImages[currentImageIndex]['locationType'] == 'toilet'
                                                                 ? 'Toilet'
-                                                                : allImages[currentImageIndex]['locationType'] == 'train'
+                                                                : availableImages[currentImageIndex]['locationType'] == 'train'
                                                                     ? 'Train Station'
                                                                     : 'Tram Stop',
                                                         style: const TextStyle(
@@ -440,9 +496,9 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                                         textAlign: TextAlign.center,
                                                       ),
                                                       Text(
-                                                        (allImages[currentImageIndex]['locationName'] != null &&
-                                                         (allImages[currentImageIndex]['locationName'] as String).trim().isNotEmpty)
-                                                          ? allImages[currentImageIndex]['locationName']
+                                                        (availableImages[currentImageIndex]['locationName'] != null &&
+                                                         (availableImages[currentImageIndex]['locationName'] as String).trim().isNotEmpty)
+                                                          ? availableImages[currentImageIndex]['locationName']
                                                           : 'Unknown Location',
                                                         style: const TextStyle(
                                                           fontSize: 17,
@@ -491,7 +547,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                 // Skip button
                                 ElevatedButton.icon(
                                   onPressed: () {
-                                    if (currentImageIndex < allImages.length - 1) {
+                                    if (currentImageIndex < availableImages.length - 1) {
                                       setState(() {
                                         currentImageIndex++;
                                       });
@@ -510,7 +566,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                 const SizedBox(height: 16),
                                 // Progress indicator
                                 LinearProgressIndicator(
-                                  value: (currentImageIndex + 1) / allImages.length,
+                                  value: (currentImageIndex + 1) / availableImages.length,
                                   backgroundColor: Colors.grey[200],
                                   valueColor: AlwaysStoppedAnimation<Color>(
                                     Theme.of(context).colorScheme.primary,
@@ -519,7 +575,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
-                                    '${currentImageIndex + 1} of ${allImages.length}',
+                                    '${currentImageIndex + 1} of ${availableImages.length}',
                                     style: const TextStyle(fontSize: 14),
                                   ),
                                 ),
@@ -530,5 +586,51 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                       ),
       ),
     );
+  }
+
+  Future<void> _submitVote(String imageUrl, bool isAccurate) async {
+    if (deviceId == null) {
+      await _initializeDeviceId();
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://mobility-mate.onrender.com/api/vote'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'device_id': deviceId,
+          'location_id': availableImages[currentImageIndex]['locationId'],
+          'image_url': imageUrl,
+          'is_accurate': isAccurate,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Vote recorded! ${data['accurate_count']} accurate, ${data['inaccurate_count']} inaccurate'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else if (response.statusCode == 400) {
+        final data = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['error'] ?? 'You have already voted on this image'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      } else {
+        throw Exception('Failed to submit vote');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error submitting vote: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 } 
