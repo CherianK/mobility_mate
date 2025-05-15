@@ -119,3 +119,38 @@ def get_device_votes(device_id):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500 
+    
+
+@vote_bp.route('/api/votes/devices/summary', methods=['GET'])
+def get_device_vote_summary():
+    try:
+        votes_collection = get_collection('votes')
+
+        # Aggregate vote count per device_id, sorted by count ascending
+        pipeline = [
+            {
+                '$group': {
+                    '_id': '$device_id',
+                    'vote_count': {'$sum': 1}
+                }
+            },
+            {
+                '$sort': {'vote_count': 1}
+            }
+        ]
+
+        result = list(votes_collection.aggregate(pipeline))
+
+        # Rename keys for clarity
+        summary = [
+            {
+                'device_id': entry['_id'],
+                'vote_count': entry['vote_count']
+            }
+            for entry in result
+        ]
+
+        return jsonify(summary), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
