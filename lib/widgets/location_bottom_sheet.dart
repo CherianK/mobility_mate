@@ -641,7 +641,10 @@ class LocationBottomSheet extends StatelessWidget {
                         'tags': data['Tags'] ?? {},
                         'Location_Lat': data['Location_Lat'],
                         'Location_Lon': data['Location_Lon'],
+                        'accessibility_type_name': data['Accessibility_Type_Name'],
                       };
+                      
+                      print('DEBUG - Sending data to VotePage: ${normalizedData['accessibility_type_name']}');
                       
                       Navigator.push(
                         context,
