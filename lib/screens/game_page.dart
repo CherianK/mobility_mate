@@ -10,6 +10,8 @@ import '../utils/icon_utils.dart';
 import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import 'profile_page.dart';
+import '../utils/vote_tracker.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -23,6 +25,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
   List<Map<String, dynamic>> availableImages = [];  // Images user hasn't voted on
   bool isLoading = true;
   int currentImageIndex = 0;
+  int remainingVotes = 30;
   
   // Swipe animation controllers
   late AnimationController _animationController;
@@ -41,6 +44,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
     super.initState();
     _initializeDeviceId().then((_) {
       loadAllImages();
+      _updateRemainingVotes();
     });
     _animationController = AnimationController(
       vsync: this,
@@ -259,10 +263,33 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
     });
   }
 
+  Future<void> _updateRemainingVotes() async {
+    final votes = await VoteTracker.getRemainingVotes();
+    setState(() {
+      remainingVotes = votes;
+    });
+  }
+
   void _vote(bool isAccessible) async {
     if (currentImageIndex < availableImages.length) {
+      // Check if user can vote
+      final canVote = await VoteTracker.canVote();
+      if (!canVote) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Daily vote limit reached. Please try again tomorrow!'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+
       // Submit vote to backend
       await _submitVote(availableImages[currentImageIndex]['url'], isAccessible);
+      
+      // Record the vote
+      await VoteTracker.recordVote();
+      await _updateRemainingVotes();
       
       // Remove the voted image from availableImages
       setState(() {
@@ -291,219 +318,218 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       body: SafeArea(
         child: isLoading
             ? const Center(child: CircularProgressIndicator())
-            : availableImages.isEmpty
-                ? Column(
-                    children: [
-                      // Header with theme toggle
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: isDark ? Colors.grey[800] : Colors.grey[200],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: IconButton(
-                                icon: Icon(
-                                  isDark ? Icons.light_mode : Icons.dark_mode,
-                                  color: isDark ? Colors.white : Colors.grey[700],
-                                  size: 22,
-                                ),
-                                onPressed: () {
-                                  final themeProvider = context.read<ThemeProvider>();
-                                  final newMode = themeProvider.themeMode == ThemeMode.dark
-                                      ? ThemeMode.light
-                                      : ThemeMode.dark;
-                                  themeProvider.setThemeMode(newMode);
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
+            : remainingVotes <= 0
+                ? Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      margin: const EdgeInsets.symmetric(horizontal: 32),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.grey[850] : Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      // No images content
-                      Expanded(
-                        child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.all(24),
-                            margin: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[850] : Colors.white,
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                              color: isDark ? Colors.orange[900]?.withOpacity(0.3) : Colors.orange[50],
+                              shape: BoxShape.circle,
                             ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
+                            child: Icon(
+                              Icons.timer,
+                              size: 48,
+                              color: isDark ? Colors.orange[300] : Colors.orange[700],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Daily Voting Limit Reached!',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.orange[300] : Colors.orange[700],
+                              letterSpacing: -0.5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'You\'ve reached your daily limit of 30 votes. Come back tomorrow to continue helping improve accessibility information!',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: isDark ? Colors.grey[300] : Colors.grey[600],
+                              height: 1.4,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 32),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ProfilePage(),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.person, color: Colors.white),
+                            label: const Text(
+                              'View Profile',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                              elevation: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : availableImages.isEmpty
+                    ? Column(
+                        children: [
+                          // Header with theme toggle
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: isDark ? Colors.blue[900]?.withOpacity(0.3) : Colors.blue[50],
-                                    shape: BoxShape.circle,
+                                    color: isDark ? Colors.grey[800] : Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Icon(
-                                    Icons.image_not_supported,
-                                    size: 48,
-                                    color: isDark ? Colors.blue[300] : Colors.blue[700],
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                                Text(
-                                  'No Images Available',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'We\'re currently out of images to vote on. Help us grow our database by uploading new images of accessible locations!',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: isDark ? Colors.grey[300] : Colors.grey[600],
-                                    height: 1.4,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 24),
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    setState(() {
-                                      loadAllImages();
-                                    });
-                                  },
-                                  icon: Icon(
-                                    Icons.refresh,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                  label: const Text(
-                                    'Refresh',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
+                                  child: IconButton(
+                                    icon: Icon(
+                                      isDark ? Icons.light_mode : Icons.dark_mode,
+                                      color: isDark ? Colors.white : Colors.grey[700],
+                                      size: 22,
                                     ),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                                    elevation: 2,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Check back later for more images!',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: isDark ? Colors.grey[400] : Colors.grey[500],
-                                    fontStyle: FontStyle.italic,
+                                    onPressed: () {
+                                      final themeProvider = context.read<ThemeProvider>();
+                                      final newMode = themeProvider.themeMode == ThemeMode.dark
+                                          ? ThemeMode.light
+                                          : ThemeMode.dark;
+                                      themeProvider.setThemeMode(newMode);
+                                    },
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ),
-                    ],
-                  )
-                : (currentImageIndex >= availableImages.length)
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: isDark ? Colors.grey[850] : Colors.white,
-                                borderRadius: BorderRadius.circular(24),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: isDark ? Colors.green[900]?.withOpacity(0.3) : Colors.green[50],
-                                      shape: BoxShape.circle,
+                          // No images content
+                          Expanded(
+                            child: Center(
+                              child: Container(
+                                padding: const EdgeInsets.all(24),
+                                margin: const EdgeInsets.symmetric(horizontal: 32),
+                                decoration: BoxDecoration(
+                                  color: isDark ? Colors.grey[850] : Colors.white,
+                                  borderRadius: BorderRadius.circular(24),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
                                     ),
-                                    child: Icon(
-                                      Icons.celebration,
-                                      size: 48,
-                                      color: isDark ? Colors.green[300] : Colors.green[700],
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? Colors.blue[900]?.withOpacity(0.3) : Colors.blue[50],
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        size: 48,
+                                        color: isDark ? Colors.blue[300] : Colors.blue[700],
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  Text(
-                                    'Great job!',
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark ? Colors.white : Colors.black87,
-                                      letterSpacing: -0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'You have voted on all\navailable images!',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: isDark ? Colors.grey[300] : Colors.grey[600],
-                                      height: 1.4,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 24),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      setState(() {
-                                        currentImageIndex = 0;
-                                        loadAllImages();
-                                      });
-                                    },
-                                    icon: const Icon(Icons.refresh, color: Colors.white),
-                                    label: const Text(
-                                      'Load More Images',
+                                    const SizedBox(height: 24),
+                                    Text(
+                                      'No Images Available',
                                       style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                        letterSpacing: -0.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'We\'re currently out of images to vote on. Help us grow our database by uploading new images of accessible locations!',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: isDark ? Colors.grey[300] : Colors.grey[600],
+                                        height: 1.4,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 24),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        setState(() {
+                                          loadAllImages();
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Icons.refresh,
                                         color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
+                                        size: 20,
+                                      ),
+                                      label: const Text(
+                                        'Refresh',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                                        elevation: 2,
                                       ),
                                     ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Check back later for more images!',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: isDark ? Colors.grey[400] : Colors.grey[500],
+                                        fontStyle: FontStyle.italic,
                                       ),
-                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                      elevation: 2,
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       )
                     : Column(
                         children: [
@@ -526,23 +552,33 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                             ),
                             child: Row(
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      colors: isDark 
-                                          ? [Colors.blue[900]!, Colors.blue[700]!]
-                                          : [Colors.blue.shade200, Colors.blue.shade100],
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const ProfilePage(),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: isDark 
+                                            ? [Colors.blue[900]!, Colors.blue[700]!]
+                                            : [Colors.blue.shade200, Colors.blue.shade100],
+                                      ),
                                     ),
-                                  ),
-                                  child: CircleAvatar(
-                                    radius: 24,
-                                    backgroundColor: isDark ? Colors.grey[850] : Colors.white,
-                                    child: Icon(
-                                      Icons.person,
-                                      color: isDark ? Colors.blue[100] : Colors.blue.shade700,
-                                      size: 28,
+                                    child: CircleAvatar(
+                                      radius: 24,
+                                      backgroundColor: isDark ? Colors.grey[850] : Colors.white,
+                                      child: Icon(
+                                        Icons.person,
+                                        color: isDark ? Colors.blue[100] : Colors.blue.shade700,
+                                        size: 28,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -571,10 +607,13 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                           ),
                                           const SizedBox(width: 6),
                                           Text(
-                                            'Swipe left or right to vote!',
+                                            'Remaining votes today: $remainingVotes',
                                             style: TextStyle(
                                               fontSize: 14,
-                                              color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                              color: remainingVotes < 5 
+                                                  ? Colors.orange 
+                                                  : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                                              fontWeight: remainingVotes < 5 ? FontWeight.bold : FontWeight.normal,
                                               letterSpacing: 0.3,
                                             ),
                                           ),
@@ -743,7 +782,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 32),
+                                const SizedBox(height: 24),
                                 // Skip button
                                 ElevatedButton.icon(
                                   onPressed: () {
@@ -753,48 +792,30 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                       });
                                     }
                                   },
-                                  icon: const Icon(Icons.skip_next, color: Colors.white, size: 20),
-                                  label: const Text(
-                                    'Skip',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
+                                  icon: const Icon(Icons.skip_next, color: Colors.white),
+                                  label: const Text('Skip', style: TextStyle(color: Colors.white)),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
+                                    backgroundColor: Colors.lightBlue,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(28),
+                                      borderRadius: BorderRadius.circular(24),
                                     ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                                    elevation: 2,
+                                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                                   ),
                                 ),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 16),
                                 // Progress indicator
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                                  child: LinearProgressIndicator(
-                                    value: (currentImageIndex + 1) / availableImages.length,
-                                    backgroundColor: isDark ? Colors.grey[700] : Colors.grey[200],
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Theme.of(context).colorScheme.primary,
-                                    ),
-                                    minHeight: 6,
-                                    borderRadius: BorderRadius.circular(3),
+                                LinearProgressIndicator(
+                                  value: (currentImageIndex + 1) / availableImages.length,
+                                  backgroundColor: Colors.grey[200],
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 12),
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Text(
                                     '${currentImageIndex + 1} of ${availableImages.length}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: isDark ? Colors.grey[300] : Colors.black87,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: const TextStyle(fontSize: 14),
                                   ),
                                 ),
                               ],
