@@ -8,6 +8,8 @@ import '../config/mapbox_config.dart';
 import '../models/marker_type.dart';
 import '../utils/icon_utils.dart';
 import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -281,36 +283,224 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final theme = Theme.of(context);
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? Colors.grey[900] : Colors.white,
       body: SafeArea(
         child: isLoading
             ? const Center(child: CircularProgressIndicator())
             : availableImages.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.image_not_supported, size: 64, color: Colors.grey.shade300),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No images available for voting',
-                          style: TextStyle(color: Colors.grey.shade600),
+                ? Column(
+                    children: [
+                      // Header with theme toggle
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: isDark ? Colors.grey[800] : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: IconButton(
+                                icon: Icon(
+                                  isDark ? Icons.light_mode : Icons.dark_mode,
+                                  color: isDark ? Colors.white : Colors.grey[700],
+                                  size: 22,
+                                ),
+                                onPressed: () {
+                                  final themeProvider = context.read<ThemeProvider>();
+                                  final newMode = themeProvider.themeMode == ThemeMode.dark
+                                      ? ThemeMode.light
+                                      : ThemeMode.dark;
+                                  themeProvider.setThemeMode(newMode);
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      // No images content
+                      Expanded(
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(24),
+                            margin: const EdgeInsets.symmetric(horizontal: 32),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.grey[850] : Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.blue[900]?.withOpacity(0.3) : Colors.blue[50],
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.image_not_supported,
+                                    size: 48,
+                                    color: isDark ? Colors.blue[300] : Colors.blue[700],
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Text(
+                                  'No Images Available',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'We\'re currently out of images to vote on. Help us grow our database by uploading new images of accessible locations!',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: isDark ? Colors.grey[300] : Colors.grey[600],
+                                    height: 1.4,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 24),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    setState(() {
+                                      loadAllImages();
+                                    });
+                                  },
+                                  icon: Icon(
+                                    Icons.refresh,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  label: const Text(
+                                    'Refresh',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                                    elevation: 2,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Check back later for more images!',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: isDark ? Colors.grey[400] : Colors.grey[500],
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   )
                 : (currentImageIndex >= availableImages.length)
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.celebration, size: 64, color: Colors.green),
-                            const SizedBox(height: 16),
-                            Text(
-                              'You have voted on all available images!',
-                              style: TextStyle(fontSize: 20, color: Colors.green[800], fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.center,
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: isDark ? Colors.grey[850] : Colors.white,
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? Colors.green[900]?.withOpacity(0.3) : Colors.green[50],
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.celebration,
+                                      size: 48,
+                                      color: isDark ? Colors.green[300] : Colors.green[700],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Text(
+                                    'Great job!',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'You have voted on all\navailable images!',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: isDark ? Colors.grey[300] : Colors.grey[600],
+                                      height: 1.4,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 24),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      setState(() {
+                                        currentImageIndex = 0;
+                                        loadAllImages();
+                                      });
+                                    },
+                                    icon: const Icon(Icons.refresh, color: Colors.white),
+                                    label: const Text(
+                                      'Load More Images',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                      elevation: 2,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -318,41 +508,101 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                     : Column(
                         children: [
                           // Header row with avatar and title
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.grey[850] : Colors.grey[50],
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(24),
+                                bottomRight: Radius.circular(24),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
                             child: Row(
                               children: [
-                                CircleAvatar(
-                                  backgroundColor: Colors.blue.shade100,
-                                  child: Icon(Icons.person, color: Colors.blue.shade700),
+                                Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      colors: isDark 
+                                          ? [Colors.blue[900]!, Colors.blue[700]!]
+                                          : [Colors.blue.shade200, Colors.blue.shade100],
+                                    ),
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 24,
+                                    backgroundColor: isDark ? Colors.grey[850] : Colors.white,
+                                    child: Icon(
+                                      Icons.person,
+                                      color: isDark ? Colors.blue[100] : Colors.blue.shade700,
+                                      size: 28,
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Is the photo\nwheelchair accessible?',
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      const Text(
-                                        'Swipe left or right to vote!',
+                                        'Can a wheelchair\nuser access this?',
                                         style: TextStyle(
-                                          fontSize: 15,
-                                          color: Colors.black87,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : Colors.black,
+                                          height: 1.2,
+                                          letterSpacing: -0.5,
                                         ),
-                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.swipe,
+                                            size: 16,
+                                            color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            'Swipe left or right to vote!',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                              letterSpacing: 0.3,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 40), // To balance avatar space
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.grey[800] : Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      isDark ? Icons.light_mode : Icons.dark_mode,
+                                      color: isDark ? Colors.white : Colors.grey[700],
+                                      size: 22,
+                                    ),
+                                    onPressed: () {
+                                      final themeProvider = context.read<ThemeProvider>();
+                                      final newMode = themeProvider.themeMode == ThemeMode.dark
+                                          ? ThemeMode.light
+                                          : ThemeMode.dark;
+                                      themeProvider.setThemeMode(newMode);
+                                    },
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -363,37 +613,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                 GestureDetector(
                                   onPanStart: _onPanStart,
                                   onPanUpdate: _onPanUpdate,
-                                  onPanEnd: (details) {
-                                    final velocity = details.velocity.pixelsPerSecond.dx;
-                                    final percentage = _dragPosition / context.size!.width;
-                                    if (percentage.abs() > _swipeThreshold || velocity.abs() > 1000) {
-                                      final isRight = percentage > 0;
-                                      // Animate card off-screen
-                                      _animation = Tween<double>(
-                                        begin: _dragPosition,
-                                        end: context.size!.width * (isRight ? 1 : -1),
-                                      ).animate(CurvedAnimation(
-                                        parent: _animationController,
-                                        curve: Curves.easeOut,
-                                      ));
-                                      _animation!.addListener(_onAnimationUpdate);
-                                      _animationController.forward(from: 0).then((_) {
-                                        _vote(isRight);
-                                        _resetPosition();
-                                      });
-                                    } else {
-                                      // Animate card back to center
-                                      _animation = Tween<double>(
-                                        begin: _dragPosition,
-                                        end: 0,
-                                      ).animate(CurvedAnimation(
-                                        parent: _animationController,
-                                        curve: Curves.easeOut,
-                                      ));
-                                      _animation!.addListener(_onAnimationUpdate);
-                                      _animationController.forward(from: 0);
-                                    }
-                                  },
+                                  onPanEnd: _onPanEnd,
                                   child: Transform.translate(
                                     offset: Offset(_dragPosition, 0),
                                     child: Transform.rotate(
@@ -405,12 +625,15 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                           Container(
                                             width: MediaQuery.of(context).size.width * 0.88,
                                             decoration: BoxDecoration(
-                                              color: Colors.white,
+                                              color: isDark ? Colors.grey[800] : Colors.white,
                                               borderRadius: BorderRadius.circular(20),
-                                              border: Border.all(color: Colors.grey.shade300, width: 1),
+                                              border: Border.all(
+                                                color: isDark ? Colors.grey[700]! : Colors.grey.shade300,
+                                                width: 1
+                                              ),
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.black.withOpacity(0.05),
+                                                  color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
                                                   blurRadius: 12,
                                                   offset: const Offset(0, 4),
                                                 ),
@@ -428,19 +651,27 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                                   ),
                                                   child: Container(
                                                     width: double.infinity,
-                                                    color: Colors.grey[200],
+                                                    color: isDark ? Colors.grey[900] : Colors.grey[200],
                                                     child: availableImages[currentImageIndex]['url'] != null
                                                         ? Image.network(
                                                             availableImages[currentImageIndex]['url'],
                                                             fit: BoxFit.contain,
                                                             errorBuilder: (context, error, stackTrace) {
                                                               return Center(
-                                                                child: Icon(Icons.broken_image, size: 48, color: Colors.grey.shade300),
+                                                                child: Icon(
+                                                                  Icons.broken_image,
+                                                                  size: 48,
+                                                                  color: isDark ? Colors.grey[600] : Colors.grey.shade300
+                                                                ),
                                                               );
                                                             },
                                                           )
                                                         : Center(
-                                                            child: Icon(Icons.image, size: 64, color: Colors.grey.shade300),
+                                                            child: Icon(
+                                                              Icons.image,
+                                                              size: 64,
+                                                              color: isDark ? Colors.grey[600] : Colors.grey.shade300
+                                                            ),
                                                           ),
                                                   ),
                                                 ),
@@ -458,9 +689,9 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                                                 : availableImages[currentImageIndex]['locationType'] == 'train'
                                                                     ? 'Train Station'
                                                                     : 'Tram Stop',
-                                                        style: const TextStyle(
+                                                        style: TextStyle(
                                                           fontSize: 15,
-                                                          color: Colors.black87,
+                                                          color: isDark ? Colors.grey[300] : Colors.black87,
                                                         ),
                                                         textAlign: TextAlign.center,
                                                       ),
@@ -469,10 +700,10 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                                          (availableImages[currentImageIndex]['locationName'] as String).trim().isNotEmpty)
                                                           ? availableImages[currentImageIndex]['locationName']
                                                           : 'Unknown Location',
-                                                        style: const TextStyle(
+                                                        style: TextStyle(
                                                           fontSize: 17,
                                                           fontWeight: FontWeight.bold,
-                                                          color: Colors.black,
+                                                          color: isDark ? Colors.white : Colors.black,
                                                         ),
                                                         textAlign: TextAlign.left,
                                                       ),
@@ -512,7 +743,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 32),
                                 // Skip button
                                 ElevatedButton.icon(
                                   onPressed: () {
@@ -522,30 +753,48 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                       });
                                     }
                                   },
-                                  icon: const Icon(Icons.skip_next, color: Colors.white),
-                                  label: const Text('Skip', style: TextStyle(color: Colors.white)),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.lightBlue,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(24),
+                                  icon: const Icon(Icons.skip_next, color: Colors.white, size: 20),
+                                  label: const Text(
+                                    'Skip',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.5,
                                     ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(28),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                                    elevation: 2,
                                   ),
                                 ),
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 24),
                                 // Progress indicator
-                                LinearProgressIndicator(
-                                  value: (currentImageIndex + 1) / availableImages.length,
-                                  backgroundColor: Colors.grey[200],
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Theme.of(context).colorScheme.primary,
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                                  child: LinearProgressIndicator(
+                                    value: (currentImageIndex + 1) / availableImages.length,
+                                    backgroundColor: isDark ? Colors.grey[700] : Colors.grey[200],
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Theme.of(context).colorScheme.primary,
+                                    ),
+                                    minHeight: 6,
+                                    borderRadius: BorderRadius.circular(3),
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.only(top: 12),
                                   child: Text(
                                     '${currentImageIndex + 1} of ${availableImages.length}',
-                                    style: const TextStyle(fontSize: 14),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: isDark ? Colors.grey[300] : Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
                               ],

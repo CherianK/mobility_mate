@@ -5,7 +5,9 @@ import 'dart:io';
 import 'dart:async';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 import '../widgets/custom_app_bar.dart';
+import '../providers/theme_provider.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
@@ -450,6 +452,7 @@ class _EventsPageState extends State<EventsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Events',
@@ -498,313 +501,437 @@ class _EventsPageState extends State<EventsPage> {
                   : CustomScrollView(
                       slivers: [
                         SliverAppBar(
-                          expandedHeight: 120,
+                          expandedHeight: 160,
                           floating: true,
-                          pinned: false,
-                          backgroundColor: const Color(0xFFE6F3FF),
+                          pinned: true,
+                          backgroundColor: isDark ? Colors.grey[900] : const Color(0xFFE6F3FF),
                           flexibleSpace: FlexibleSpaceBar(
-                            background: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Wheelchair Accessible Events in Melbourne',
-                                    textAlign: TextAlign.center,
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).primaryColor,
+                            background: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: isDark 
+                                    ? [Colors.grey[900]!, Colors.grey[800]!]
+                                    : [const Color(0xFFE6F3FF), Colors.white],
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Wheelchair Accessible Events',
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? Colors.white : Theme.of(context).primaryColor,
+                                        letterSpacing: -0.5,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'Sort By:',
-                                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                          color: Theme.of(context).primaryColor,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    Text(
+                                      'in Melbourne',
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        color: isDark ? Colors.white70 : Theme.of(context).primaryColor.withOpacity(0.8),
                                       ),
-                                      const SizedBox(width: 8),
-                                      ElevatedButton.icon(
-                                        onPressed: () => _handleSort('date'),
-                                        icon: Icon(
-                                          Icons.calendar_today,
-                                          size: 16,
-                                          color: sortBy == 'date' 
-                                              ? Colors.white 
-                                              : Theme.of(context).primaryColor,
-                                        ),
-                                        label: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Text('Date'),
-                                            if (sortBy == 'date') ...[
-                                              const SizedBox(width: 4),
-                                              Icon(
-                                                isAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                                                size: 12,
-                                                color: Colors.white,
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: sortBy == 'date' 
-                                              ? Theme.of(context).primaryColor 
-                                              : Colors.white,
-                                          foregroundColor: sortBy == 'date' 
-                                              ? Colors.white 
-                                              : Theme.of(context).primaryColor,
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          minimumSize: const Size(0, 32),
-                                        ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? Colors.grey[800] : Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.05),
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(width: 4),
-                                      ElevatedButton.icon(
-                                        onPressed: () {
-                                          if (currentPosition != null) {
-                                            _handleSort('distance');
-                                          } else {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text('Please enable location services to sort by distance'),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                        icon: Icon(
-                                          Icons.near_me,
-                                          size: 16,
-                                          color: sortBy == 'distance' 
-                                              ? Colors.white 
-                                              : Theme.of(context).primaryColor,
-                                        ),
-                                        label: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Text('Distance from me'),
-                                            if (sortBy == 'distance') ...[
-                                              const SizedBox(width: 4),
-                                              Icon(
-                                                isAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                                                size: 12,
-                                                color: Colors.white,
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: sortBy == 'distance' 
-                                              ? Theme.of(context).primaryColor 
-                                              : Colors.white,
-                                          foregroundColor: sortBy == 'distance' 
-                                              ? Colors.white 
-                                              : Theme.of(context).primaryColor,
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          minimumSize: const Size(0, 32),
-                                        ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Sort By:',
+                                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                              color: isDark ? Colors.white : Theme.of(context).primaryColor,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          _buildSortButton(
+                                            context,
+                                            'date',
+                                            Icons.calendar_today,
+                                            'Date',
+                                            isDark,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          _buildSortButton(
+                                            context,
+                                            'distance',
+                                            Icons.near_me,
+                                            'Distance',
+                                            isDark,
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              if (index >= filteredEvents.length) return null;
-                              final event = filteredEvents[index];
-                              final venue = event['_embedded']?['venues']?[0] ?? {};
-                              final images = event['images'] ?? [];
-                              
-                              return Card(
-                                margin: const EdgeInsets.all(8),
-                                elevation: 4,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Event images
-                                    if (images != null && images.isNotEmpty && images[0] != null && images[0]['url'] != null)
-                                      Image.network(
-                                        images[0]['url'],
-                                        width: double.infinity,
-                                        height: 200,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Container(
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                if (index >= filteredEvents.length) return null;
+                                final event = filteredEvents[index];
+                                final venue = event['_embedded']?['venues']?[0] ?? {};
+                                final images = event['images'] ?? [];
+                                
+                                return Card(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  elevation: 2,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Event images
+                                      if (images != null && images.isNotEmpty && images[0] != null && images[0]['url'] != null)
+                                        ClipRRect(
+                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                          child: Image.network(
+                                            images[0]['url'],
+                                            width: double.infinity,
                                             height: 200,
-                                            color: Colors.grey[300],
-                                            child: const Center(
-                                              child: Icon(Icons.image_not_supported, size: 50),
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return Container(
+                                                height: 200,
+                                                decoration: BoxDecoration(
+                                                  color: isDark ? Colors.grey[800] : Colors.grey[200],
+                                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                                ),
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons.image_not_supported,
+                                                    size: 50,
+                                                    color: isDark ? Colors.grey[600] : Colors.grey[400],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        )
+                                      else
+                                        Container(
+                                          height: 200,
+                                          decoration: BoxDecoration(
+                                            color: isDark ? Colors.grey[800] : Colors.grey[200],
+                                            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                          ),
+                                          child: Center(
+                                            child: Icon(
+                                              Icons.image_not_supported,
+                                              size: 50,
+                                              color: isDark ? Colors.grey[600] : Colors.grey[400],
                                             ),
-                                          );
-                                        },
-                                      )
-                                    else
-                                      Container(
-                                        height: 200,
-                                        color: Colors.grey[300],
-                                        child: const Center(
-                                          child: Icon(Icons.image_not_supported, size: 50),
+                                          ),
                                         ),
-                                      ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          // Event name
-                                          Text(
-                                            event['name'] ?? 'Untitled Event',
-                                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 12),
-                                          
-                                          // Segment type
-                                          if (event['segment']?['name'] != null)
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 4,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: Colors.purple.withOpacity(0.1),
-                                                borderRadius: BorderRadius.circular(4),
-                                              ),
-                                              child: Text(
-                                                event['segment']['name'],
-                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                  color: Colors.purple,
-                                                ),
-                                              ),
-                                            ),
-                                          const SizedBox(height: 12),
-                                          
-                                          // Venue
-                                          Row(
-                                            children: [
-                                              const Icon(Icons.location_on, size: 20, color: Colors.grey),
-                                              const SizedBox(width: 8),
-                                              Expanded(
-                                                child: Text(
-                                                  venue['name'] ?? 'Venue not specified',
-                                                  style: Theme.of(context).textTheme.bodyMedium,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 8),
-                                          
-                                          // Date and Time
-                                          Row(
-                                            children: [
-                                              const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                _getLocalDate(event['dates']),
-                                                style: Theme.of(context).textTheme.bodyMedium,
-                                              ),
-                                              const SizedBox(width: 16),
-                                              const Icon(Icons.access_time, size: 20, color: Colors.grey),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                _getLocalTime(event['dates']),
-                                                style: Theme.of(context).textTheme.bodyMedium,
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 12),
-                                          
-                                          // Event info
-                                          if (event['info'] != null) ...[
+                                      Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            // Event name
                                             Text(
-                                              'About',
-                                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                              event['name'] ?? 'Untitled Event',
+                                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                                 fontWeight: FontWeight.bold,
+                                                letterSpacing: -0.5,
                                               ),
                                             ),
-                                            const SizedBox(height: 4),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  _cleanEventInfo(event['info']),
-                                                  style: Theme.of(context).textTheme.bodyMedium,
-                                                  maxLines: expandedDescriptions.contains(index) ? null : 3,
-                                                  overflow: expandedDescriptions.contains(index) ? null : TextOverflow.ellipsis,
+                                            const SizedBox(height: 12),
+                                            
+                                            // Segment type
+                                            if (event['segment']?['name'] != null)
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 12,
+                                                  vertical: 6,
                                                 ),
-                                                const SizedBox(height: 4),
-                                                TextButton(
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      if (expandedDescriptions.contains(index)) {
-                                                        expandedDescriptions.remove(index);
-                                                      } else {
-                                                        expandedDescriptions.add(index);
-                                                      }
-                                                    });
-                                                  },
+                                                decoration: BoxDecoration(
+                                                  color: Colors.purple.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  border: Border.all(
+                                                    color: Colors.purple.withOpacity(0.3),
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  event['segment']['name'],
+                                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                    color: Colors.purple,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            const SizedBox(height: 16),
+                                            
+                                            // Venue
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: isDark ? Colors.grey[800] : Colors.grey[100],
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.location_on,
+                                                    size: 20,
+                                                    color: isDark ? Colors.grey[400] : Colors.grey[700],
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Expanded(
                                                   child: Text(
-                                                    expandedDescriptions.contains(index) ? 'See less' : 'See more',
-                                                    style: TextStyle(
-                                                      color: Theme.of(context).primaryColor,
+                                                    venue['name'] ?? 'Venue not specified',
+                                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                      color: isDark ? Colors.white : Colors.grey[800],
                                                     ),
                                                   ),
                                                 ),
                                               ],
                                             ),
+                                            const SizedBox(height: 12),
+                                            
+                                            // Date and Time
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: isDark ? Colors.grey[800] : Colors.grey[100],
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.calendar_today,
+                                                    size: 20,
+                                                    color: isDark ? Colors.grey[400] : Colors.grey[700],
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Text(
+                                                  _getLocalDate(event['dates']),
+                                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                    color: isDark ? Colors.white : Colors.grey[800],
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 16),
+                                                Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: isDark ? Colors.grey[800] : Colors.grey[100],
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.access_time,
+                                                    size: 20,
+                                                    color: isDark ? Colors.grey[400] : Colors.grey[700],
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Text(
+                                                  _getLocalTime(event['dates']),
+                                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                    color: isDark ? Colors.white : Colors.grey[800],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                             const SizedBox(height: 16),
+                                            
+                                            // Event info
+                                            if (event['info'] != null) ...[
+                                              Text(
+                                                'About',
+                                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  letterSpacing: -0.5,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Container(
+                                                padding: const EdgeInsets.all(12),
+                                                decoration: BoxDecoration(
+                                                  color: isDark ? Colors.grey[800] : Colors.grey[50],
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: isDark ? Colors.grey[700]! : Colors.grey[200]!,
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      _cleanEventInfo(event['info']),
+                                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                        color: isDark ? Colors.white70 : Colors.grey[800],
+                                                        height: 1.5,
+                                                      ),
+                                                      maxLines: expandedDescriptions.contains(index) ? null : 3,
+                                                      overflow: expandedDescriptions.contains(index) ? null : TextOverflow.ellipsis,
+                                                    ),
+                                                    if (_cleanEventInfo(event['info']).length > 150) ...[
+                                                      const SizedBox(height: 8),
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            if (expandedDescriptions.contains(index)) {
+                                                              expandedDescriptions.remove(index);
+                                                            } else {
+                                                              expandedDescriptions.add(index);
+                                                            }
+                                                          });
+                                                        },
+                                                        style: TextButton.styleFrom(
+                                                          padding: EdgeInsets.zero,
+                                                          minimumSize: const Size(0, 0),
+                                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                        ),
+                                                        child: Text(
+                                                          expandedDescriptions.contains(index) ? 'Show less' : 'Read more',
+                                                          style: TextStyle(
+                                                            color: Theme.of(context).primaryColor,
+                                                            fontWeight: FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                            const SizedBox(height: 16),
+                                            
+                                            // Action buttons
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: ElevatedButton.icon(
+                                                    onPressed: () => _showAccessibilityInfo(context, event),
+                                                    icon: const Icon(Icons.info_outline),
+                                                    label: const Text('Accessibility Info'),
+                                                    style: ElevatedButton.styleFrom(
+                                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(12),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                if (event['url'] != null)
+                                                  Expanded(
+                                                    child: ElevatedButton.icon(
+                                                      onPressed: () => _launchUrl(event['url']),
+                                                      icon: const Icon(Icons.open_in_new),
+                                                      label: const Text('Book Tickets'),
+                                                      style: ElevatedButton.styleFrom(
+                                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.circular(12),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
                                           ],
-                                          
-                                          // Accessibility info button
-                                          if (event['accessibility'] != null)
-                                            SizedBox(
-                                              width: double.infinity,
-                                              child: OutlinedButton.icon(
-                                                onPressed: () => _showAccessibilityInfo(context, event),
-                                                icon: const Icon(Icons.accessible),
-                                                label: const Text('View Accessibility Information'),
-                                                style: OutlinedButton.styleFrom(
-                                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                                ),
-                                              ),
-                                            ),
-                                          const SizedBox(height: 8),
-                                          
-                                          // Ticketmaster button
-                                          if (event['url'] != null)
-                                            SizedBox(
-                                              width: double.infinity,
-                                              child: ElevatedButton.icon(
-                                                onPressed: () => _launchUrl(event['url']),
-                                                icon: const Icon(Icons.shopping_cart),
-                                                label: const Text('View on Ticketmaster'),
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Theme.of(context).primaryColor,
-                                                  foregroundColor: Colors.white,
-                                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                                ),
-                                              ),
-                                            ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                                    ],
+                                  ),
+                                );
+                              },
+                              childCount: filteredEvents.length,
+                            ),
                           ),
                         ),
                       ],
-                      ),
                     ),
+      ),
+    );
+  }
+
+  Widget _buildSortButton(
+    BuildContext context,
+    String type,
+    IconData icon,
+    String label,
+    bool isDark,
+  ) {
+    final isSelected = sortBy == type;
+    return ElevatedButton.icon(
+      onPressed: () {
+        if (type == 'distance' && currentPosition == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please enable location services to sort by distance'),
+            ),
+          );
+          return;
+        }
+        _handleSort(type);
+      },
+      icon: Icon(
+        icon,
+        size: 16,
+        color: isSelected 
+            ? Colors.white 
+            : (isDark ? Colors.white70 : Theme.of(context).primaryColor),
+      ),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          if (isSelected) ...[
+            const SizedBox(width: 4),
+            Icon(
+              isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+              size: 12,
+              color: Colors.white,
+            ),
+          ],
+        ],
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSelected 
+            ? Theme.of(context).primaryColor 
+            : (isDark ? Colors.grey[800] : Colors.white),
+        foregroundColor: isSelected 
+            ? Colors.white 
+            : (isDark ? Colors.white70 : Theme.of(context).primaryColor),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        minimumSize: const Size(0, 32),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        elevation: isSelected ? 2 : 0,
+      ),
     );
   }
 }
