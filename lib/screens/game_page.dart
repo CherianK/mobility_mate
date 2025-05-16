@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import 'profile_page.dart';
 import '../utils/vote_tracker.dart';
+import '../utils/badge_manager.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -287,8 +288,9 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       // Submit vote to backend
       await _submitVote(availableImages[currentImageIndex]['url'], isAccessible);
       
-      // Record the vote
+      // Record the vote and update streak
       await VoteTracker.recordVote();
+      await BadgeManager.updateStreak();
       await _updateRemainingVotes();
       
       // Remove the voted image from availableImages
