@@ -44,12 +44,12 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
       isNavigationItem: true,
     ),
     TutorialStep(
-      title: 'Vote',
-      description: 'Vote to help improve information for the community. Your input makes a difference!',
+      title: 'Game',
+      description: 'Play a fun game to help improve accessibility information. Swipe left or right to vote on images! Earn badges & climb the leaderboard!',
       position: const Offset(0.5, 0.70),
       elementKey: 'vote',
       radius: 30,
-      icon: Icons.thumbs_up_down,
+      icon: Icons.sports_esports,
       isNavigationItem: true,
     ),
     TutorialStep(

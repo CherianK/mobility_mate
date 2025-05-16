@@ -152,13 +152,13 @@ class ReportIssueScreenState extends State<ReportIssueScreen> with SingleTickerP
                 shape: isMultiple ? BoxShape.rectangle : BoxShape.circle,
                 border: Border.all(
                   color: isSelected 
-                      ? theme.primaryColor 
+                      ? (isDark ? Colors.white : theme.primaryColor)
                       : (isDark ? Colors.grey[400]! : Colors.grey.shade400),
                   width: 2,
                 ),
                 borderRadius: isMultiple ? BorderRadius.circular(4) : null,
                 color: isSelected 
-                    ? (isDark ? theme.primaryColor.withOpacity(0.3) : theme.primaryColor.withOpacity(0.1))
+                    ? (isDark ? Colors.white.withOpacity(0.2) : theme.primaryColor.withOpacity(0.1))
                     : (isDark ? Colors.grey[800]!.withOpacity(0.5) : Colors.transparent),
               ),
               child: isSelected

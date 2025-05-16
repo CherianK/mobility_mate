@@ -127,9 +127,9 @@ class _MainScreenState extends State<MainScreen> {
             // ),
             NavigationDestination(
                     key: _voteKey,
-              icon: Icon(Icons.thumbs_up_down_outlined),
-              selectedIcon: Icon(Icons.thumbs_up_down),
-              label: 'Vote',
+              icon: Icon(Icons.sports_esports_outlined),
+              selectedIcon: Icon(Icons.sports_esports),
+              label: 'Game',
             ),
             NavigationDestination(
                     key: _eventsKey,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../screens/search_page.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class SearchBarWidget extends StatelessWidget {
   final MapboxMap mapboxMap;
@@ -9,6 +11,8 @@ class SearchBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    
     return GestureDetector(
       onTap: () async {
         final result = await Navigator.push(
@@ -52,23 +56,28 @@ class SearchBarWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? Colors.grey[900] : Colors.white,
           borderRadius: BorderRadius.circular(30),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.1),
+              color: Colors.black.withOpacity(0.1),
               blurRadius: 6,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Row(
-          children: const [
-            Icon(Icons.search, color: Colors.grey),
-            SizedBox(width: 8),
+          children: [
+            Icon(
+              Icons.search,
+              color: isDark ? Colors.grey[400] : Colors.grey,
+            ),
+            const SizedBox(width: 8),
             Text(
               "Search for a location...",
-              style: TextStyle(color: Colors.black54),
+              style: TextStyle(
+                color: isDark ? Colors.grey[400] : Colors.black54,
+              ),
             ),
           ],
         ),

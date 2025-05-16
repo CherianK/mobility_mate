@@ -205,12 +205,17 @@ final Map<String, Map<String, dynamic>> _markerData = {};
   Widget build(BuildContext context) {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
     
+    // Update map style when theme changes
+    if (_mapReady) {
+      _updateMapStyle(isDark);
+    }
+    
     return Scaffold(
       body: Stack(
         children: [
           MapWidget(
             key: const ValueKey('map'),
-            styleUri: MapboxStyles.MAPBOX_STREETS,
+            styleUri: isDark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS,
             cameraOptions: CameraOptions(
               center: _initialCameraCenter,
               zoom: 13.0,
@@ -475,6 +480,17 @@ final Map<String, Map<String, dynamic>> _markerData = {};
     _activeSheet = sheetFuture;
     await sheetFuture;
     _activeSheet = null;
+  }
+
+  Future<void> _updateMapStyle(bool isDark) async {
+    try {
+      await _mapboxMap.style.setStyleURI(isDark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS);
+      // Re-add markers after style change
+      final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
+      await _updateVisibility(zoom);
+    } catch (e) {
+      debugPrint('Error updating map style: $e');
+    }
   }
 }
 
