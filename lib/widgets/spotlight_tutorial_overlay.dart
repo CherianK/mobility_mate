@@ -32,11 +32,12 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
   bool _dontShowAgain = false;
   late ConfettiController _confettiController;
   Offset? _currentSpotlightPosition;
+  late PageController _pageController;
 
   final List<TutorialStep> _steps = [
     TutorialStep(
       title: 'Home',
-      description: 'Explore accessible locations and features around you.',
+      description: 'Welcome to Mobility Mate! Find nearby toilets, wheelchair-accessible locations and features around you — all on the map.',
       position: const Offset(0.17, 0.70),
       elementKey: 'home',
       radius: 30,
@@ -93,7 +94,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
     ),
     TutorialStep(
       title: 'Contribute & Share',
-      description: 'Help improve our database by uploading photos, reporting issues & sharing accessible locations with others.',
+      description: 'Help improve our database by uploading photos, reporting issues & sharing accessible locations.',
       position: const Offset(0.5, 0.5),
       radius: 40,
       icon: Icons.more_horiz,
@@ -150,6 +151,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
     super.initState();
     _checkTutorialPreference();
     _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+    _pageController = PageController();
   }
 
   @override
@@ -185,6 +187,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
   @override
   void dispose() {
     _confettiController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -216,9 +219,13 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
 
   void _nextStep() {
     if (_currentStep < _steps.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
       setState(() {
         _currentStep++;
-        _currentSpotlightPosition = null; // Reset position to trigger recalculation
+        _currentSpotlightPosition = null;
       });
       _updateSpotlightPosition();
     } else {
@@ -241,9 +248,13 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
 
   void _previousStep() {
     if (_currentStep > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
       setState(() {
         _currentStep--;
-        _currentSpotlightPosition = null; // Reset position to trigger recalculation
+        _currentSpotlightPosition = null;
       });
       _updateSpotlightPosition();
     }
@@ -297,167 +308,193 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
           Positioned(
             left: 20,
             right: 20,
-            top: size.height * 0.35,
-            child: SingleChildScrollView(
-              child: Material(
-                color: isDark ? theme.cardColor : Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                elevation: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isDark ? theme.primaryColor.withOpacity(0.5) : Colors.blue.shade100,
-                      width: 1,
-                    ),
+            top: size.height * 0.30,
+            child: Material(
+              color: isDark ? theme.cardColor : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              elevation: 8,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isDark ? theme.primaryColor.withOpacity(0.5) : Colors.blue.shade100,
+                    width: 1,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_currentStep > 0)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: IconButton(
-                            onPressed: _previousStep,
-                            icon: const Icon(Icons.arrow_back),
-                            color: isDark ? Colors.white : Colors.blue.shade700,
-                            style: IconButton.styleFrom(
-                              backgroundColor: isDark ? theme.primaryColor.withOpacity(0.2) : Colors.blue.shade50,
-                              padding: const EdgeInsets.all(8),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 32,
+                      child: _currentStep > 0
+                          ? Align(
+                              alignment: Alignment.centerLeft,
+                              child: IconButton(
+                                onPressed: _previousStep,
+                                icon: const Icon(Icons.arrow_back),
+                                color: isDark ? Colors.white : Colors.blue.shade700,
+                                style: IconButton.styleFrom(
+                                  backgroundColor: isDark ? theme.primaryColor.withOpacity(0.2) : Colors.blue.shade50,
+                                  padding: const EdgeInsets.all(6),
+                                ),
+                              ),
+                            )
+                          : null,
+                    ),
+                    SizedBox(
+                      height: 220,
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: _steps.length,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentStep = index;
+                            _currentSpotlightPosition = null;
+                          });
+                          _updateSpotlightPosition();
+                        },
+                        itemBuilder: (context, index) {
+                          final step = _steps[index];
+                          return SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  step.title,
+                                  style: TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.blue.shade900,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  step.description,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    height: 1.5,
+                                    color: isDark ? Colors.white : Colors.grey.shade800,
+                                  ),
+                                ),
+                                if (step.additionalIcons != null) ...[
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? theme.cardColor : Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: isDark ? Colors.white.withOpacity(0.3) : Colors.blue.shade100,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Wrap(
+                                      spacing: 12,
+                                      runSpacing: 12,
+                                      alignment: WrapAlignment.center,
+                                      children: step.additionalIcons!
+                                          .map((icon) => Container(
+                                                padding: const EdgeInsets.all(8),
+                                                decoration: BoxDecoration(
+                                                  color: isDark ? Colors.white.withOpacity(0.1) : Colors.blue.shade50,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: isDark ? Colors.white.withOpacity(0.2) : Colors.blue.shade100,
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                                child: Icon(
+                                                  icon,
+                                                  size: step.title == 'Tap the Markers' || step.title == 'Contribute & Share' ? 32 : 24,
+                                                  color: isDark ? Colors.white : Colors.blue.shade700,
+                                                ),
+                                              ))
+                                          .toList(),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                          ),
-                        ),
-                      Text(
-                        currentStep.title,
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.blue.shade900,
-                          letterSpacing: -0.5,
-                        ),
+                          );
+                        },
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        currentStep.description,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          height: 1.5,
-                          color: isDark ? Colors.white : Colors.grey.shade800,
-                        ),
-                      ),
-                      if (currentStep.additionalIcons != null) ...[
-                        const SizedBox(height: 24),
-                        Container(
-                          padding: const EdgeInsets.all(16),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        _steps.length,
+                        (index) => Container(
+                          width: 8,
+                          height: 8,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
                           decoration: BoxDecoration(
-                            color: isDark ? theme.cardColor : Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: isDark ? Colors.white.withOpacity(0.3) : Colors.blue.shade100,
-                              width: 1,
+                            shape: BoxShape.circle,
+                            color: index == _currentStep
+                                ? (isDark ? Colors.white : Colors.blue.shade700)
+                                : (isDark ? Colors.white.withOpacity(0.3) : Colors.blue.shade100),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (_currentStep < _steps.length - 1)
+                          TextButton(
+                            onPressed: _skipTutorial,
+                            style: TextButton.styleFrom(
+                              foregroundColor: isDark ? Colors.white : Colors.grey.shade600,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            ),
+                            child: const Text('Skip'),
+                          ),
+                        if (_currentStep == _steps.length - 1)
+                          const SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed: _nextStep,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isDark ? Colors.white : Colors.blue.shade700,
+                            foregroundColor: isDark ? theme.primaryColor : Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: Wrap(
-                            spacing: 20,
-                            runSpacing: 20,
-                            alignment: WrapAlignment.center,
-                            children: currentStep.additionalIcons!
-                                .map((icon) => Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: isDark ? Colors.white.withOpacity(0.1) : Colors.blue.shade50,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: isDark ? Colors.white.withOpacity(0.2) : Colors.blue.shade100,
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        icon,
-                                        size: 28,
-                                        color: isDark ? Colors.white : Colors.blue.shade700,
-                                      ),
-                                    ))
-                                .toList(),
-                          ),
+                          child: Text(_currentStep < _steps.length - 1 ? 'Next' : 'Finish'),
                         ),
                       ],
-                      const SizedBox(height: 32),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          _steps.length,
-                          (index) => Container(
-                            width: 8,
-                            height: 8,
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: index == _currentStep
-                                  ? (isDark ? Colors.white : Colors.blue.shade700)
-                                  : (isDark ? Colors.white.withOpacity(0.3) : Colors.blue.shade100),
+                    ),
+                    if (_currentStep == _steps.length - 1)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: CheckboxListTile(
+                          title: Text(
+                            'Don\'t show again',
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.grey.shade700,
+                              fontSize: 14,
                             ),
+                          ),
+                          value: _dontShowAgain,
+                          onChanged: (value) {
+                            setState(() {
+                              _dontShowAgain = value ?? false;
+                            });
+                          },
+                          controlAffinity: ListTileControlAffinity.leading,
+                          contentPadding: EdgeInsets.zero,
+                          activeColor: isDark ? Colors.white : Colors.blue.shade700,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (_currentStep < _steps.length - 1)
-                            TextButton(
-                              onPressed: _skipTutorial,
-                              style: TextButton.styleFrom(
-                                foregroundColor: isDark ? Colors.white : Colors.grey.shade600,
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              ),
-                              child: const Text('Skip'),
-                            ),
-                          if (_currentStep == _steps.length - 1)
-                            const SizedBox(width: 16), // Add spacing when Skip is hidden
-                          ElevatedButton(
-                            onPressed: _nextStep,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isDark ? Colors.white : Colors.blue.shade700,
-                              foregroundColor: isDark ? theme.primaryColor : Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(_currentStep < _steps.length - 1 ? 'Next' : 'Finish'),
-                          ),
-                        ],
-                      ),
-                      if (_currentStep == _steps.length - 1)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: CheckboxListTile(
-                            title: Text(
-                              'Don\'t show again',
-                              style: TextStyle(
-                                color: isDark ? Colors.white : Colors.grey.shade700,
-                                fontSize: 14,
-                              ),
-                            ),
-                            value: _dontShowAgain,
-                            onChanged: (value) {
-                              setState(() {
-                                _dontShowAgain = value ?? false;
-                              });
-                            },
-                            controlAffinity: ListTileControlAffinity.leading,
-                            contentPadding: EdgeInsets.zero,
-                            activeColor: isDark ? Colors.white : Colors.blue.shade700,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ),
