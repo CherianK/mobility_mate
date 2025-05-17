@@ -83,3 +83,24 @@ class ApprovalAdminView(BaseView):
             flash("⚠️ Failed to approve image", "danger")
 
         return redirect(url_for(f'{request.endpoint.split(".")[0]}.index'))
+
+    @expose('/reject/<location_id>/<int:image_index>/', methods=['POST'])
+    def reject_image(self, location_id, image_index):
+        if not current_user.is_authenticated:
+            return redirect(url_for('admin.login_view'))
+
+        # Simply mark as not approved
+        update_result = self.collection.update_one(
+            {"_id": ObjectId(location_id)},
+            {"$set": {
+                f"Images.{image_index}.approved_status": False,
+                f"Images.{image_index}.image_approved_time": datetime.utcnow().isoformat() + "Z"
+            }}
+        )
+
+        if update_result.modified_count > 0:
+            flash("❌ Image rejected successfully", "warning")
+        else:
+            flash("⚠️ Failed to reject image", "danger")
+
+        return redirect(url_for(f'{request.endpoint.split(".")[0]}.index'))
