@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../utils/venue_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UploadPage extends StatefulWidget {
   final Map<String, dynamic> venueData;
@@ -65,6 +66,15 @@ class _UploadPageState extends State<UploadPage> {
     setState(() => _isUploading = true);
 
     try {
+      // Get device ID and username from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final deviceId = prefs.getString('device_id');
+      final username = prefs.getString('username_$deviceId');
+
+      if (deviceId == null) {
+        throw Exception('Device ID not found');
+      }
+
       final accessibilityType = _normalizeAccessibilityType(widget.venueData['Accessibility_Type_Name']);
       final response = await http.post(
         Uri.parse('https://mobility-mate.onrender.com/generate-upload-url'),
@@ -75,6 +85,8 @@ class _UploadPageState extends State<UploadPage> {
           'longitude': widget.venueData['Location_Lon'],
           'accessibility_type': accessibilityType,
           'content_type': 'image/jpeg',
+          'device_id': deviceId,
+          'username': username,
         }),
       );
 

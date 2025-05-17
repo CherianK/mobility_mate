@@ -114,6 +114,10 @@ class _VotePageState extends State<VotePage> {
       // Get device ID
       final deviceId = await getOrCreateDeviceId();
       
+      // Get username from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final username = prefs.getString('username_$deviceId');
+      
       // Get image URL from the photo ID
       final imageIndex = int.parse(photoId.split('_').last);
       final imageUrl = selectedLocation!['images'][imageIndex];
@@ -124,6 +128,7 @@ class _VotePageState extends State<VotePage> {
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'device_id': deviceId,
+          'username': username,
           'location_id': locationId,
           'image_url': imageUrl,
           'is_accurate': isAccurate,

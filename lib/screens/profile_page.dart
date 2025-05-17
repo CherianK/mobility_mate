@@ -7,6 +7,7 @@ import '../utils/username_generator.dart';
 import '../utils/badge_manager.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import 'leaderboard_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -518,6 +519,52 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                         const SizedBox(height: 24),
+                        // Community Section
+                        const Text(
+                          'Community',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 2,
+                          child: Column(
+                            children: [
+                              // Leaderboard Button
+                              ListTile(
+                                leading: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.emoji_events,
+                                    color: Colors.amber,
+                                  ),
+                                ),
+                                title: const Text('Leaderboard'),
+                                subtitle: const Text('See top contributors'),
+                                trailing: const Icon(Icons.chevron_right),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const LeaderboardPage(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const Divider(),
+                              // ... existing ListTiles ...
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),

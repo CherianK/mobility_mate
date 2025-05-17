@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/custom_app_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ReportIssueScreen extends StatefulWidget {
   const ReportIssueScreen({super.key});
@@ -87,30 +90,74 @@ class ReportIssueScreenState extends State<ReportIssueScreen> with SingleTickerP
     setState(() => isSubmitting = true);
     await _animationController.forward();
 
-    // Show a brief success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(Icons.check_circle_outline, color: Colors.white),
-            SizedBox(width: 8),
-            Text('Report submitted successfully!'),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
+    try {
+      // Get device ID and username from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final deviceId = prefs.getString('device_id');
+      final username = prefs.getString('username_$deviceId');
 
-    // Wait briefly then pop back to previous screen
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) {
-        Navigator.of(context).pop();
+      // Prepare report data
+      final reportData = {
+        'device_id': deviceId,
+        'username': username,
+        'issue_type': issueType,
+        'knowledge_source': knowledgeSource,
+        'issues': issueToggles.entries
+            .where((entry) => entry.value)
+            .map((entry) => entry.key)
+            .toList(),
+      };
+
+      // Send report to server
+      final response = await http.post(
+        Uri.parse('https://mobility-mate.onrender.com/report-issue'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(reportData),
+      );
+
+      if (response.statusCode != 201) {
+        throw Exception('Failed to submit report: ${response.body}');
       }
-    });
+
+      // Show a brief success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle_outline, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Report submitted successfully!'),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+
+      // Wait briefly then pop back to previous screen
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      });
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error submitting report: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+      setState(() => isSubmitting = false);
+      _animationController.reverse();
+    }
   }
 
   void _toggleTheme() {
