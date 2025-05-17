@@ -8,6 +8,8 @@ import '../utils/icon_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../widgets/custom_app_bar.dart';
 import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class VotePage extends StatefulWidget {
   final Map<String, dynamic>? initialLocation;
@@ -248,7 +250,7 @@ class _VotePageState extends State<VotePage> {
         valueColor = Colors.green;
         displayValue = 'Available';
       } else if (value == 'no') {
-        valueColor = Colors.red;
+        valueColor = Colors.grey;
         displayValue = 'Unavailable';
       } else {
         valueColor = Colors.blue;
@@ -261,8 +263,8 @@ class _VotePageState extends State<VotePage> {
           Row(
             children: [
               Icon(
-                getTrainIcon(entry.key, 'yes'), // Use the icon logic for "yes" values regardless of availability
-                color: valueColor, // Match the icon color to the value color
+                getTrainIcon(entry.key, 'yes'),
+                color: valueColor,
               ),
               const SizedBox(width: 8),
               Text(
@@ -519,6 +521,8 @@ class _VotePageState extends State<VotePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Vote'),
@@ -530,6 +534,36 @@ class _VotePageState extends State<VotePage> {
                 },
               )
             : null,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[900] : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: Icon(
+                isDark ? Icons.light_mode : Icons.dark_mode,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+              onPressed: () {
+                final themeProvider = context.read<ThemeProvider>();
+                final newMode = themeProvider.themeMode == ThemeMode.dark
+                    ? ThemeMode.light
+                    : ThemeMode.dark;
+                themeProvider.setThemeMode(newMode);
+              },
+              tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+            ),
+          ),
+        ],
       ),
       body: selectedLocation != null
           ? SingleChildScrollView(

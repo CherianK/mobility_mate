@@ -316,515 +316,607 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
     final theme = Theme.of(context);
     
     return Scaffold(
-      backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+      backgroundColor: Colors.blue,
       body: SafeArea(
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : remainingVotes <= 0
-                ? Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(24),
-                      margin: const EdgeInsets.symmetric(horizontal: 32),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[850] : Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: isDark ? Colors.orange[900]?.withOpacity(0.3) : Colors.orange[50],
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.timer,
-                              size: 48,
-                              color: isDark ? Colors.orange[300] : Colors.orange[700],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            'Daily Voting Limit Reached!',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.orange[300] : Colors.orange[700],
-                              letterSpacing: -0.5,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'You\'ve reached your daily limit of 30 votes. Come back tomorrow to continue helping improve accessibility information!',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: isDark ? Colors.grey[300] : Colors.grey[600],
-                              height: 1.4,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 32),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ProfilePage(),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.person, color: Colors.white),
-                            label: const Text(
-                              'View Profile',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                              elevation: 2,
-                            ),
-                          ),
-                        ],
+        child: Container(
+          color: isDark ? Colors.grey[900] : Colors.white,
+          child: Column(
+            children: [
+              // Blue header
+              Container(
+                width: double.infinity,
+                color: Colors.blue,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: Stack(
+                  children: [
+                    // Gaming-style background pattern
+                    Positioned.fill(
+                      child: Opacity(
+                        opacity: 0.1,
+                        child: CustomPaint(
+                          painter: HexagonPatternPainter(),
+                        ),
                       ),
                     ),
-                  )
-                : availableImages.isEmpty
-                    ? Column(
-                        children: [
-                          // Header with theme toggle
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Accessibility Game',
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                      letterSpacing: -0.5,
+                                    ),
                                   ),
-                                  child: IconButton(
-                                    icon: Icon(
-                                      isDark ? Icons.light_mode : Icons.dark_mode,
-                                      color: isDark ? Colors.white : Colors.grey[700],
-                                      size: 22,
-                                    ),
-                                    onPressed: () {
-                                      final themeProvider = context.read<ThemeProvider>();
-                                      final newMode = themeProvider.themeMode == ThemeMode.dark
-                                          ? ThemeMode.light
-                                          : ThemeMode.dark;
-                                      themeProvider.setThemeMode(newMode);
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // No images content
-                          Expanded(
-                            child: Center(
-                              child: Container(
-                                padding: const EdgeInsets.all(24),
-                                margin: const EdgeInsets.symmetric(horizontal: 32),
-                                decoration: BoxDecoration(
-                                  color: isDark ? Colors.grey[850] : Colors.white,
-                                  borderRadius: BorderRadius.circular(24),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        color: isDark ? Colors.blue[900]?.withOpacity(0.3) : Colors.blue[50],
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.image_not_supported,
-                                        size: 48,
-                                        color: isDark ? Colors.blue[300] : Colors.blue[700],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 24),
-                                    Text(
-                                      'No Images Available',
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : Colors.black87,
-                                        letterSpacing: -0.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      'We\'re currently out of images to vote on. Help us grow our database by uploading new images of accessible locations!',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: isDark ? Colors.grey[300] : Colors.grey[600],
-                                        height: 1.4,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 24),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        setState(() {
-                                          loadAllImages();
-                                        });
-                                      },
-                                      icon: Icon(
-                                        Icons.refresh,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                      label: const Text(
-                                        'Refresh',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(16),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                                        elevation: 2,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      'Check back later for more images!',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: isDark ? Colors.grey[400] : Colors.grey[500],
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Column(
-                        children: [
-                          // Header row with avatar and title
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                            decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[850] : Colors.grey[50],
-                              borderRadius: const BorderRadius.only(
-                                bottomLeft: Radius.circular(24),
-                                bottomRight: Radius.circular(24),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => const ProfilePage(),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
+                                  const SizedBox(height: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: LinearGradient(
-                                        colors: isDark 
-                                            ? [Colors.blue[900]!, Colors.blue[700]!]
-                                            : [Colors.blue.shade200, Colors.blue.shade100],
+                                      color: Colors.white.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.2),
+                                        width: 1,
                                       ),
-                                    ),
-                                    child: CircleAvatar(
-                                      radius: 24,
-                                      backgroundColor: isDark ? Colors.grey[850] : Colors.white,
-                                      child: Icon(
-                                        Icons.person,
-                                        color: isDark ? Colors.blue[100] : Colors.blue.shade700,
-                                        size: 28,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Can a wheelchair\nuser access this?',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: isDark ? Colors.white : Colors.black,
-                                          height: 1.2,
-                                          letterSpacing: -0.5,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 8,
+                                          spreadRadius: 1,
                                         ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.swipe,
-                                            size: 16,
-                                            color: isDark ? Colors.grey[400] : Colors.grey[600],
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'Remaining votes today: $remainingVotes',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: remainingVotes < 5 
-                                                  ? Colors.orange 
-                                                  : (isDark ? Colors.grey[400] : Colors.grey[600]),
-                                              fontWeight: remainingVotes < 5 ? FontWeight.bold : FontWeight.normal,
-                                              letterSpacing: 0.3,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: IconButton(
-                                    icon: Icon(
-                                      isDark ? Icons.light_mode : Icons.dark_mode,
-                                      color: isDark ? Colors.white : Colors.grey[700],
-                                      size: 22,
+                                      ],
                                     ),
-                                    onPressed: () {
-                                      final themeProvider = context.read<ThemeProvider>();
-                                      final newMode = themeProvider.themeMode == ThemeMode.dark
-                                          ? ThemeMode.light
-                                          : ThemeMode.dark;
-                                      themeProvider.setThemeMode(newMode);
-                                    },
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.local_fire_department,
+                                          size: 16,
+                                          color: Colors.orange[300],
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '$remainingVotes votes remaining',
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w500,
+                                            letterSpacing: 0.2,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.2),
+                                  width: 1,
                                 ),
-                              ],
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.person,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const ProfilePage(),
+                                    ),
+                                  );
+                                },
+                                tooltip: 'View Profile',
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
+                              child: IconButton(
+                                icon: Icon(
+                                  isDark ? Icons.light_mode : Icons.dark_mode,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                                onPressed: () {
+                                  final themeProvider = context.read<ThemeProvider>();
+                                  final newMode = themeProvider.themeMode == ThemeMode.dark
+                                      ? ThemeMode.light
+                                      : ThemeMode.dark;
+                                  themeProvider.setThemeMode(newMode);
+                                },
+                                tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        // Swipe instructions
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.2),
+                              width: 1,
                             ),
                           ),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onPanStart: _onPanStart,
-                                  onPanUpdate: _onPanUpdate,
-                                  onPanEnd: _onPanEnd,
-                                  child: Transform.translate(
-                                    offset: Offset(_dragPosition, 0),
-                                    child: Transform.rotate(
-                                      angle: _maxAngle * _dragPercentage,
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          // Card with image and location info
-                                          Container(
-                                            width: MediaQuery.of(context).size.width * 0.88,
-                                            decoration: BoxDecoration(
-                                              color: isDark ? Colors.grey[800] : Colors.white,
-                                              borderRadius: BorderRadius.circular(20),
-                                              border: Border.all(
-                                                color: isDark ? Colors.grey[700]! : Colors.grey.shade300,
-                                                width: 1
-                                              ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
-                                                  blurRadius: 12,
-                                                  offset: const Offset(0, 4),
-                                                ),
-                                              ],
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.touch_app,
+                                size: 20,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Swipe right if the image shows good accessibility, left if it doesn\'t',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Main content
+              Expanded(
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : remainingVotes <= 0
+                        ? Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(24),
+                              margin: const EdgeInsets.symmetric(horizontal: 32),
+                              decoration: BoxDecoration(
+                                color: isDark ? Colors.grey[850] : Colors.white,
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? Colors.orange[900]?.withOpacity(0.3) : Colors.orange[50],
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.timer,
+                                      size: 48,
+                                      color: isDark ? Colors.orange[300] : Colors.orange[700],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Text(
+                                    'Daily Voting Limit Reached!',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.orange[300] : Colors.orange[700],
+                                      letterSpacing: -0.5,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'You\'ve reached your daily limit of 30 votes. Come back tomorrow to continue helping improve accessibility information!',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: isDark ? Colors.grey[300] : Colors.grey[600],
+                                      height: 1.4,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 32),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const ProfilePage(),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.person, color: Colors.white),
+                                    label: const Text(
+                                      'View Profile',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                                      elevation: 2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : availableImages.isEmpty
+                            ? Column(
+                                children: [
+                                  // No images content
+                                  Expanded(
+                                    child: Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.all(24),
+                                        margin: const EdgeInsets.symmetric(horizontal: 32),
+                                        decoration: BoxDecoration(
+                                          color: isDark ? Colors.grey[850] : Colors.white,
+                                          borderRadius: BorderRadius.circular(24),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                              blurRadius: 12,
+                                              offset: const Offset(0, 4),
                                             ),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                const SizedBox(height: 16),
-                                                // Flexible image area
-                                                ConstrainedBox(
-                                                  constraints: BoxConstraints(
-                                                    maxHeight: MediaQuery.of(context).size.height * 0.36,
-                                                    minHeight: 120,
-                                                  ),
-                                                  child: Container(
-                                                    width: double.infinity,
-                                                    color: isDark ? Colors.grey[900] : Colors.grey[200],
-                                                    child: availableImages[currentImageIndex]['url'] != null
-                                                        ? Image.network(
-                                                            availableImages[currentImageIndex]['url'],
-                                                            fit: BoxFit.contain,
-                                                            errorBuilder: (context, error, stackTrace) {
-                                                              return Center(
-                                                                child: Icon(
-                                                                  Icons.broken_image,
-                                                                  size: 48,
-                                                                  color: isDark ? Colors.grey[600] : Colors.grey.shade300
-                                                                ),
-                                                              );
-                                                            },
-                                                          )
-                                                        : Center(
-                                                            child: Icon(
-                                                              Icons.image,
-                                                              size: 64,
-                                                              color: isDark ? Colors.grey[600] : Colors.grey.shade300
-                                                            ),
-                                                          ),
-                                                  ),
+                                          ],
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(16),
+                                              decoration: BoxDecoration(
+                                                color: isDark ? Colors.blue[900]?.withOpacity(0.3) : Colors.blue[50],
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.image_not_supported,
+                                                size: 48,
+                                                color: isDark ? Colors.blue[300] : Colors.blue[700],
+                                              ),
+                                            ),
+                                            const SizedBox(height: 24),
+                                            Text(
+                                              'No Images Available',
+                                              style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold,
+                                                color: isDark ? Colors.white : Colors.black87,
+                                                letterSpacing: -0.5,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
+                                            Text(
+                                              'We\'re currently out of images to vote on. Help us grow our database by uploading new images of accessible locations!',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: isDark ? Colors.grey[300] : Colors.grey[600],
+                                                height: 1.4,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            const SizedBox(height: 24),
+                                            ElevatedButton.icon(
+                                              onPressed: () {
+                                                setState(() {
+                                                  loadAllImages();
+                                                });
+                                              },
+                                              icon: Icon(
+                                                Icons.refresh,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                              label: const Text(
+                                                'Refresh',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w500,
                                                 ),
-                                                const SizedBox(height: 16),
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                                    children: [
-                                                      Text(
-                                                        availableImages[currentImageIndex]['locationType'] == 'hospital'
-                                                            ? 'Hospital'
-                                                            : availableImages[currentImageIndex]['locationType'] == 'toilet'
-                                                                ? 'Toilet'
-                                                                : availableImages[currentImageIndex]['locationType'] == 'train'
-                                                                    ? 'Train Station'
-                                                                    : 'Tram Stop',
-                                                        style: TextStyle(
-                                                          fontSize: 15,
-                                                          color: isDark ? Colors.grey[300] : Colors.black87,
+                                              ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: isDark ? Colors.blue[700] : Colors.lightBlue,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(16),
+                                                ),
+                                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                                                elevation: 2,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
+                                            Text(
+                                              'Check back later for more images!',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: isDark ? Colors.grey[400] : Colors.grey[500],
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Column(
+                                children: [
+                                  GestureDetector(
+                                    onPanStart: _onPanStart,
+                                    onPanUpdate: _onPanUpdate,
+                                    onPanEnd: _onPanEnd,
+                                    child: Transform.translate(
+                                      offset: Offset(_dragPosition, 0),
+                                      child: Transform.rotate(
+                                        angle: _maxAngle * _dragPercentage,
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            // Card with image and location info
+                                            Container(
+                                              width: MediaQuery.of(context).size.width * 0.88,
+                                              decoration: BoxDecoration(
+                                                color: isDark ? Colors.grey[800] : Colors.white,
+                                                borderRadius: BorderRadius.circular(20),
+                                                border: Border.all(
+                                                  color: isDark ? Colors.grey[700]! : Colors.grey.shade300,
+                                                  width: 1
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+                                                    blurRadius: 12,
+                                                    offset: const Offset(0, 4),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const SizedBox(height: 16),
+                                                  // Flexible image area
+                                                  ConstrainedBox(
+                                                    constraints: BoxConstraints(
+                                                      maxHeight: MediaQuery.of(context).size.height * 0.32,
+                                                      minHeight: 120,
+                                                    ),
+                                                    child: Container(
+                                                      width: double.infinity,
+                                                      color: isDark ? Colors.grey[900] : Colors.grey[200],
+                                                      child: availableImages[currentImageIndex]['url'] != null
+                                                          ? Image.network(
+                                                              availableImages[currentImageIndex]['url'],
+                                                              fit: BoxFit.contain,
+                                                              errorBuilder: (context, error, stackTrace) {
+                                                                return Center(
+                                                                  child: Icon(
+                                                                    Icons.broken_image,
+                                                                    size: 48,
+                                                                    color: isDark ? Colors.grey[600] : Colors.grey.shade300
+                                                                  ),
+                                                                );
+                                                              },
+                                                            )
+                                                          : Center(
+                                                              child: Icon(
+                                                                Icons.image,
+                                                                size: 64,
+                                                                color: isDark ? Colors.grey[600] : Colors.grey.shade300
+                                                              ),
+                                                            ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 16),
+                                                  Padding(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                                      children: [
+                                                        Text(
+                                                          availableImages[currentImageIndex]['locationType'] == 'hospital'
+                                                              ? 'Hospital'
+                                                              : availableImages[currentImageIndex]['locationType'] == 'toilet'
+                                                                  ? 'Toilet'
+                                                                  : availableImages[currentImageIndex]['locationType'] == 'train'
+                                                                      ? 'Train Station'
+                                                                      : 'Tram Stop',
+                                                          style: TextStyle(
+                                                            fontSize: 15,
+                                                            color: isDark ? Colors.grey[300] : Colors.black87,
+                                                          ),
+                                                          textAlign: TextAlign.center,
                                                         ),
-                                                        textAlign: TextAlign.center,
-                                                      ),
-                                                      Text(
-                                                        (availableImages[currentImageIndex]['locationName'] != null &&
-                                                         (availableImages[currentImageIndex]['locationName'] as String).trim().isNotEmpty)
-                                                          ? availableImages[currentImageIndex]['locationName']
-                                                          : 'Unknown Location',
-                                                        style: TextStyle(
-                                                          fontSize: 17,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: isDark ? Colors.white : Colors.black,
+                                                        Text(
+                                                          (availableImages[currentImageIndex]['locationName'] != null &&
+                                                           (availableImages[currentImageIndex]['locationName'] as String).trim().isNotEmpty)
+                                                              ? availableImages[currentImageIndex]['locationName']
+                                                              : 'Unknown Location',
+                                                          style: TextStyle(
+                                                            fontSize: 17,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: isDark ? Colors.white : Colors.black,
+                                                          ),
+                                                          textAlign: TextAlign.left,
                                                         ),
-                                                        textAlign: TextAlign.left,
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 16),
+                                                ],
+                                              ),
+                                            ),
+                                            // Thumbs down button (left)
+                                            Positioned(
+                                              left: 0,
+                                              child: GestureDetector(
+                                                onTap: () => _vote(false),
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.red[300]?.withOpacity(0.9),
+                                                    shape: BoxShape.circle,
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.red[300]!.withOpacity(0.3),
+                                                        blurRadius: 8,
+                                                        spreadRadius: 2,
                                                       ),
                                                     ],
                                                   ),
+                                                  child: const Icon(Icons.thumb_down, color: Colors.white, size: 32),
                                                 ),
-                                                const SizedBox(height: 16),
-                                              ],
-                                            ),
-                                          ),
-                                          // Thumbs down button (left)
-                                          Positioned(
-                                            left: 0,
-                                            child: GestureDetector(
-                                              onTap: () => _vote(false),
-                                              child: CircleAvatar(
-                                                radius: 32,
-                                                backgroundColor: Colors.red[300],
-                                                child: const Icon(Icons.thumb_down, color: Colors.white, size: 32),
                                               ),
                                             ),
-                                          ),
-                                          // Thumbs up button (right)
-                                          Positioned(
-                                            right: 0,
-                                            child: GestureDetector(
-                                              onTap: () => _vote(true),
-                                              child: CircleAvatar(
-                                                radius: 32,
-                                                backgroundColor: Colors.green[400],
-                                                child: const Icon(Icons.thumb_up, color: Colors.white, size: 32),
+                                            // Thumbs up button (right)
+                                            Positioned(
+                                              right: 0,
+                                              child: GestureDetector(
+                                                onTap: () => _vote(true),
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.green[400]?.withOpacity(0.9),
+                                                    shape: BoxShape.circle,
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.green[400]!.withOpacity(0.3),
+                                                        blurRadius: 8,
+                                                        spreadRadius: 2,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: const Icon(Icons.thumb_up, color: Colors.white, size: 32),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 24),
-                                // Skip button
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    if (currentImageIndex < availableImages.length - 1) {
-                                      setState(() {
-                                        currentImageIndex++;
-                                      });
-                                    }
-                                  },
-                                  icon: const Icon(Icons.skip_next, color: Colors.white),
-                                  label: const Text('Skip', style: TextStyle(color: Colors.white)),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.lightBlue,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(24),
+                                  const SizedBox(height: 12),
+                                  // Skip button
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      if (currentImageIndex < availableImages.length - 1) {
+                                        setState(() {
+                                          currentImageIndex++;
+                                        });
+                                      }
+                                    },
+                                    icon: const Icon(Icons.skip_next, color: Colors.white),
+                                    label: const Text('Skip', style: TextStyle(color: Colors.white)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.lightBlue,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                                     ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                                   ),
-                                ),
-                                const SizedBox(height: 16),
-                                // Progress indicator
-                                LinearProgressIndicator(
-                                  value: (currentImageIndex + 1) / availableImages.length,
-                                  backgroundColor: Colors.grey[200],
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Theme.of(context).colorScheme.primary,
+                                  const SizedBox(height: 8),
+                                  // Progress indicator
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    margin: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? Colors.grey[800] : Colors.grey[50],
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: isDark ? Colors.grey[700]!.withOpacity(0.3) : Colors.grey[200]!,
+                                        width: 1,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 8,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: LinearProgressIndicator(
+                                            value: (currentImageIndex + 1) / availableImages.length,
+                                            backgroundColor: isDark ? Colors.grey[700] : Colors.grey[200],
+                                            valueColor: AlwaysStoppedAnimation<Color>(
+                                              isDark ? Colors.blue[400]! : Colors.blue[600]!,
+                                            ),
+                                            minHeight: 8,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'Progress',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            Text(
+                                              '${currentImageIndex + 1} of ${availableImages.length}',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    '${currentImageIndex + 1} of ${availableImages.length}',
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                                ],
+                              ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

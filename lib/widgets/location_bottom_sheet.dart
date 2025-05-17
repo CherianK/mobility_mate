@@ -734,7 +734,7 @@ class LocationBottomSheet extends StatelessWidget {
                     valueColor = isDark ? Colors.green.shade300 : Colors.green;
                     displayValue = 'Available';
                   } else if (value == 'no') {
-                    valueColor = isDark ? Colors.red.shade300 : Colors.red;
+                    valueColor = isDark ? Colors.grey[400]! : Colors.grey[600]!;
                     displayValue = 'Unavailable';
                   } else {
                     valueColor = isDark ? Colors.blue.shade300 : theme.primaryColor;
