@@ -7,10 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/mapbox_config.dart';
 import '../models/marker_type.dart';
 import '../utils/icon_utils.dart';
+import '../utils/pattern_painters.dart';
 import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
-import 'profile_page.dart';
 import '../utils/vote_tracker.dart';
 import '../utils/badge_manager.dart';
 
@@ -334,7 +334,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                       child: Opacity(
                         opacity: 0.1,
                         child: CustomPaint(
-                          painter: HexagonPatternPainter(),
+                          painter: DotPatternPainter(),
                         ),
                       ),
                     ),
@@ -398,33 +398,6 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                 ],
                               ),
                             ),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
-                                  width: 1,
-                                ),
-                              ),
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.person,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const ProfilePage(),
-                                    ),
-                                  );
-                                },
-                                tooltip: 'View Profile',
-                              ),
-                            ),
-                            const SizedBox(width: 8),
                             Container(
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.1),
@@ -549,16 +522,11 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                   const SizedBox(height: 32),
                                   ElevatedButton.icon(
                                     onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => const ProfilePage(),
-                                        ),
-                                      );
+                                      Navigator.pop(context);
                                     },
-                                    icon: const Icon(Icons.person, color: Colors.white),
+                                    icon: const Icon(Icons.home, color: Colors.white),
                                     label: const Text(
-                                      'View Profile',
+                                      'Back to Home',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 15,
@@ -927,11 +895,16 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
     }
 
     try {
+      // Get username from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final username = prefs.getString('username_$deviceId');
+      
       final response = await http.post(
         Uri.parse('https://mobility-mate.onrender.com/api/vote'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'device_id': deviceId,
+          'username': username,
           'location_id': availableImages[currentImageIndex]['locationId'],
           'image_url': imageUrl,
           'is_accurate': isAccurate,

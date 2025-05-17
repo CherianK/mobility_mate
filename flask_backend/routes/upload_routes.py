@@ -27,6 +27,8 @@ def generate_upload_url():
         longitude = data.get('longitude')
         accessibility_type = data.get('accessibility_type')
         content_type = data.get('content_type', 'image/jpeg')
+        device_id = data.get('device_id')
+        username = data.get('username')
 
         if not all([filename, latitude, longitude, accessibility_type]):
             return jsonify({'error': 'Filename, latitude, longitude, and accessibility_type are required'}), 400
@@ -81,7 +83,9 @@ def generate_upload_url():
             "image_url": public_url,
             "image_upload_time": datetime.utcnow().isoformat() + "Z",
             "approved_status": False,
-            "image_approved_time": None
+            "image_approved_time": None,
+            "device_id": device_id,
+            "username": username
         }
 
         result = collection.update_one(

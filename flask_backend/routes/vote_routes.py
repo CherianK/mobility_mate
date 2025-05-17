@@ -18,6 +18,9 @@ def submit_vote():
 
         # Get votes collection
         votes_collection = get_collection('votes')
+        
+        # Get username from request if available
+        username = data.get('username')
 
         # Check if this device has already voted on this image
         existing_vote = votes_collection.find_one({
@@ -46,6 +49,7 @@ def submit_vote():
         current_time = datetime.utcnow()
         vote_doc = {
             'device_id': data['device_id'],
+            'username': username,  # Include username in vote record
             'location_id': data['location_id'],
             'image_url': data['image_url'],
             'is_accurate': data['is_accurate'],
@@ -151,6 +155,92 @@ def get_device_vote_summary():
         ]
 
         return jsonify(summary), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@vote_bp.route('/api/leaderboard', methods=['GET'])
+def get_leaderboard():
+    try:
+        # Get collections
+        votes_collection = get_collection('votes')
+        medical_collection = get_collection('medical-victoria')
+        toilet_collection = get_collection('toilets-victoria')
+        train_collection = get_collection('trains-victoria')
+        tram_collection = get_collection('trams-victoria')
+        
+        # Get vote counts per username
+        vote_pipeline = [
+            {
+                '$match': {
+                    'username': {'$ne': None, '$exists': True}
+                }
+            },
+            {
+                '$group': {
+                    '_id': '$username',
+                    'vote_count': {'$sum': 1}
+                }
+            }
+        ]
+        
+        vote_results = list(votes_collection.aggregate(vote_pipeline))
+        
+        # Create a dictionary to store username -> points
+        user_points = {}
+        
+        # Process vote results (1 point per vote)
+        for result in vote_results:
+            username = result['_id']
+            vote_count = result['vote_count']
+            if username not in user_points:
+                user_points[username] = 0
+            user_points[username] += vote_count
+        
+        # Function to count uploads for a collection
+        def count_uploads_for_collection(collection):
+            upload_counts = {}
+            
+            # Find all documents with Images array
+            cursor = collection.find({"Images": {"$exists": True, "$ne": []}})
+            
+            for doc in cursor:
+                if 'Images' in doc:
+                    for image in doc['Images']:
+                        if 'username' in image and image['username']:
+                            username = image['username']
+                            if username not in upload_counts:
+                                upload_counts[username] = 0
+                            upload_counts[username] += 1
+            
+            return upload_counts
+        
+        # Count uploads for each collection (5 points per upload)
+        for collection in [medical_collection, toilet_collection, train_collection, tram_collection]:
+            upload_counts = count_uploads_for_collection(collection)
+            for username, count in upload_counts.items():
+                if username not in user_points:
+                    user_points[username] = 0
+                # 5 points per upload
+                user_points[username] += count * 5
+        
+        # Convert to list and sort by points
+        leaderboard = [
+            {
+                'username': username,
+                'points': points
+            }
+            for username, points in user_points.items()
+        ]
+        
+        # Sort by points (descending)
+        leaderboard.sort(key=lambda x: x['points'], reverse=True)
+        
+        # Add rank
+        for i, entry in enumerate(leaderboard):
+            entry['rank'] = i + 1
+        
+        return jsonify(leaderboard), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

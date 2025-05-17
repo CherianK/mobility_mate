@@ -12,6 +12,11 @@ import '../widgets/toilet_finder_bottom_sheet.dart';
 import '../utils/location_helper.dart'; // 
 import '../providers/theme_provider.dart';
 import '../utils/tag_formatter.dart';
+import 'profile_page.dart';
+import 'leaderboard_page.dart';
+import '../utils/username_generator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 
 class MapHomePage extends StatefulWidget {
@@ -27,12 +32,14 @@ class _MapHomePageState extends State<MapHomePage> {
   bool _isLocating = false;
   Timer? _zoomTimer;
   bool _mapReady = false;
+  String? deviceId;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final Map<MarkerType, PointAnnotationManager> _annotationManagers = {};
   final Map<MarkerType, List<PointAnnotationOptions>> _markerOptions = {};
   final Map<MarkerType, List<Map<String, dynamic>>> _markerPayloads = {};
   final Map<MarkerType, List<PointAnnotation>> _activeMarkers = {};
-final Map<String, Map<String, dynamic>> _markerData = {};
+  final Map<String, Map<String, dynamic>> _markerData = {};
   /// Keeps track of the bottom‑sheet that is currently displayed
   Future<void>? _activeSheet;
 
@@ -44,6 +51,16 @@ final Map<String, Map<String, dynamic>> _markerData = {};
   @override
   void initState() {
     super.initState();
+    _initializeDeviceId();
+  }
+
+  Future<void> _initializeDeviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    deviceId = prefs.getString('device_id');
+    if (deviceId == null) {
+      deviceId = const Uuid().v4();
+      await prefs.setString('device_id', deviceId!);
+    }
   }
 
   Future<void> _onMapInitialized(MapboxMap map) async {
@@ -212,6 +229,8 @@ final Map<String, Map<String, dynamic>> _markerData = {};
     }
     
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: _buildDrawer(context, isDark),
       body: Stack(
         children: [
           MapWidget(
@@ -226,17 +245,14 @@ final Map<String, Map<String, dynamic>> _markerData = {};
           if (_isLoading)
             const Center(child: CircularProgressIndicator()),
           if (_mapReady) ...[
-            // Floating search bar with theme toggle
+            // Floating search bar with hamburger menu
             Positioned(
               top: MediaQuery.of(context).padding.top + 16,
               left: 16,
               right: 16,
               child: Row(
                 children: [
-                  Expanded(
-                    child: SearchBarWidget(mapboxMap: _mapboxMap),
-                  ),
-                  const SizedBox(width: 8),
+                  // Hamburger menu button
                   Container(
                     decoration: BoxDecoration(
                       color: isDark ? Colors.grey[900] : Colors.white,
@@ -251,18 +267,19 @@ final Map<String, Map<String, dynamic>> _markerData = {};
                     ),
                     child: IconButton(
                       icon: Icon(
-                        isDark ? Icons.light_mode : Icons.dark_mode,
+                        Icons.menu,
                         color: isDark ? Colors.white : Colors.black87,
                       ),
                       onPressed: () {
-                        final themeProvider = context.read<ThemeProvider>();
-                        final newMode = themeProvider.themeMode == ThemeMode.dark
-                            ? ThemeMode.light
-                            : ThemeMode.dark;
-                        themeProvider.setThemeMode(newMode);
+                        _scaffoldKey.currentState?.openDrawer();
                       },
-                      tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+                      tooltip: 'Menu',
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Search bar
+                  Expanded(
+                    child: SearchBarWidget(mapboxMap: _mapboxMap),
                   ),
                 ],
               ),
@@ -736,6 +753,116 @@ final Map<String, Map<String, dynamic>> _markerData = {};
         _activeSheet = null;
       }
     }
+  }
+
+  // Build the drawer menu
+  Widget _buildDrawer(BuildContext context, bool isDark) {
+    return Drawer(
+      child: FutureBuilder<String?>(
+        future: _getUsername(),
+        builder: (context, snapshot) {
+          final username = snapshot.data ?? 'Loading...';
+          
+          return ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              // Drawer header with user info
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 36,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      username,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Text(
+                      'Mobility Mate User',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Profile page link
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Profile'),
+                onTap: () {
+                  Navigator.pop(context); // Close the drawer
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfilePage(),
+                    ),
+                  );
+                },
+              ),
+              
+              // Leaderboard link
+              ListTile(
+                leading: const Icon(Icons.emoji_events),
+                title: const Text('Leaderboard'),
+                onTap: () {
+                  Navigator.pop(context); // Close the drawer
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LeaderboardPage(),
+                    ),
+                  );
+                },
+              ),
+              
+              const Divider(),
+              
+              // Dark mode toggle
+              ListTile(
+                leading: Icon(
+                  isDark ? Icons.light_mode : Icons.dark_mode,
+                ),
+                title: Text(isDark ? 'Light Mode' : 'Dark Mode'),
+                onTap: () {
+                  final themeProvider = context.read<ThemeProvider>();
+                  final newMode = themeProvider.themeMode == ThemeMode.dark
+                      ? ThemeMode.light
+                      : ThemeMode.dark;
+                  themeProvider.setThemeMode(newMode);
+                  Navigator.pop(context); // Close the drawer
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+  
+  // Helper method to get the username
+  Future<String?> _getUsername() async {
+    if (deviceId == null) {
+      await _initializeDeviceId();
+    }
+    return UsernameGenerator.getUsername(deviceId!);
   }
 }
 
