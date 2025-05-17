@@ -210,6 +210,7 @@ def get_leaderboard():
                         # Only count approved images
                         if (image.get('approved_status') == True and 
                             'username' in image and image['username']):
+
                             username = image['username']
                             if username not in upload_counts:
                                 upload_counts[username] = 0
