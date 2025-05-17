@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/username_generator.dart';
 import '../utils/badge_manager.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -81,260 +84,444 @@ class _ProfilePageState extends State<ProfilePage> {
         title: const Text('Profile'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: Icon(
+                isDark ? Icons.light_mode : Icons.dark_mode,
+                color: Colors.white,
+                size: 24,
+              ),
+              onPressed: () {
+                final themeProvider = context.read<ThemeProvider>();
+                final newMode = themeProvider.themeMode == ThemeMode.dark
+                    ? ThemeMode.light
+                    : ThemeMode.dark;
+                themeProvider.setThemeMode(newMode);
+              },
+              tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+            ),
+          ),
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Center(
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.blue,
-                        child: Icon(Icons.person, size: 50, color: Colors.white),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Profile Header Section
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.only(bottom: 24),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(24),
+                        bottomRight: Radius.circular(24),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: Text(
-                        username ?? 'Anonymous User',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                    // Streak Section
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[850] : Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                    child: Stack(
+                      children: [
+                        // Gaming-style background pattern
+                        Positioned.fill(
+                          child: Opacity(
+                            opacity: 0.1,
+                            child: CustomPaint(
+                              painter: HexagonPatternPainter(),
+                            ),
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                        ),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.local_fire_department,
-                                color: Colors.orange[700],
-                                size: 24,
+                              const SizedBox(height: 16),
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor: Colors.blue,
+                                  child: Icon(Icons.person, size: 50, color: Colors.white),
+                                ),
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Current Streak',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : Colors.black87,
+                              const SizedBox(height: 16),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.2),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  username ?? 'Anonymous User',
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                    letterSpacing: -0.5,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            '${badgeInfo?['currentStreak'] ?? 0} days',
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange[700],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Streak Section
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey[850] : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            border: Border.all(
+                              color: Colors.orange[700]!.withOpacity(0.3),
+                              width: 1,
                             ),
                           ),
-                          if (badgeInfo?['nextBadge'] != null) ...[
-                            const SizedBox(height: 16),
-                            const Divider(),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Next Badge: ${badgeInfo!['nextBadge']['name']}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: isDark ? Colors.grey[300] : Colors.grey[700],
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange[700]?.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.orange[700]!.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.local_fire_department,
+                                      color: Colors.orange[700],
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Current Streak',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            LinearProgressIndicator(
-                              value: badgeInfo!['nextBadge']['progress'] / 100,
-                              backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange[700]!),
-                              minHeight: 8,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '${badgeInfo!['nextBadge']['progress']}% complete',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                              const SizedBox(height: 16),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange[700]?.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.orange[700]!.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  '${badgeInfo?['currentStreak'] ?? 0} days',
+                                  style: TextStyle(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange[700],
+                                    letterSpacing: -1,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Badges Section
-                    Text(
-                      'Earned Badges',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    if ((badgeInfo?['earnedBadges'] as Set<String>?)?.isEmpty ?? true)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Text(
-                            'No badges earned yet. Keep voting daily to earn badges!',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: isDark ? Colors.grey[400] : Colors.grey[600],
-                              fontStyle: FontStyle.italic,
-                            ),
-                            textAlign: TextAlign.center,
+                              if (badgeInfo?['nextBadge'] != null) ...[
+                                const SizedBox(height: 20),
+                                const Divider(height: 1),
+                                const SizedBox(height: 20),
+                                Text(
+                                  'Next Badge: ${badgeInfo!['nextBadge']['name']}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.orange[700]!.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: LinearProgressIndicator(
+                                      value: badgeInfo!['nextBadge']['progress'] / 100,
+                                      backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.orange[700]!),
+                                      minHeight: 8,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '${badgeInfo!['nextBadge']['progress']}% complete',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                      )
-                    else
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 1.5,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
+                        const SizedBox(height: 24),
+                        // Badges Section
+                        Text(
+                          'Earned Badges',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white : Colors.black87,
+                            letterSpacing: -0.5,
+                          ),
                         ),
-                        itemCount: (badgeInfo?['earnedBadges'] as Set<String>?)?.length ?? 0,
-                        itemBuilder: (context, index) {
-                          final badgeId = (badgeInfo!['earnedBadges'] as Set<String>).elementAt(index);
-                          final badge = BadgeManager.badges[badgeId]!;
-                          
-                          return Container(
-                            padding: const EdgeInsets.all(16),
+                        const SizedBox(height: 16),
+                        if ((badgeInfo?['earnedBadges'] as Set<String>?)?.isEmpty ?? true)
+                          Container(
+                            padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
                               color: isDark ? Colors.grey[850] : Colors.white,
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                Icon(
+                                  Icons.emoji_events_outlined,
+                                  size: 48,
+                                  color: isDark ? Colors.grey[600] : Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
                                 Text(
-                                  badge['icon'],
-                                  style: const TextStyle(fontSize: 32),
+                                  'No badges earned yet',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  badge['name'],
+                                  'Keep voting daily to earn badges!',
                                   style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  badge['description'],
-                                  style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 14,
                                     color: isDark ? Colors.grey[400] : Colors.grey[600],
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
                               ],
                             ),
-                          );
-                        },
-                      ),
-                    const SizedBox(height: 24),
-                    // Voting Statistics Section
-                    Text(
-                      'Voting Statistics',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Card(
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            _buildStatRow('Total Votes', userStats?['total_votes'] ?? 0),
-                            const Divider(),
-                            _buildStatRow('Accurate Votes', userStats?['accurate_votes'] ?? 0),
-                            const Divider(),
-                            _buildStatRow('Inaccurate Votes', userStats?['inaccurate_votes'] ?? 0),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // About Section
-                    Text(
-                      'About',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Card(
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'Mobility Mate',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          )
+                        else
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 1.2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
                             ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Help improve accessibility information by voting on location images. Your contributions help make the world more accessible for everyone.',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
+                            itemCount: (badgeInfo?['earnedBadges'] as Set<String>?)?.length ?? 0,
+                            itemBuilder: (context, index) {
+                              final badgeId = (badgeInfo!['earnedBadges'] as Set<String>).elementAt(index);
+                              final badge = BadgeManager.badges[badgeId]!;
+                              
+                              return Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: isDark ? Colors.grey[850] : Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      badge['icon'],
+                                      style: const TextStyle(fontSize: 36),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      badge['name'],
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                        letterSpacing: -0.5,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      badge['description'],
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        const SizedBox(height: 24),
+                        // Voting Statistics Section
+                        Text(
+                          'Voting Statistics',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white : Colors.black87,
+                            letterSpacing: -0.5,
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey[850] : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              _buildStatRow('Total Votes', userStats?['total_votes'] ?? 0),
+                              const Divider(height: 24),
+                              _buildStatRow('Accurate Votes', userStats?['accurate_votes'] ?? 0),
+                              const Divider(height: 24),
+                              _buildStatRow('Inaccurate Votes', userStats?['inaccurate_votes'] ?? 0),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // About Section
+                        Text(
+                          'About',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white : Colors.black87,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey[850] : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Mobility Mate',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Help improve accessibility information by voting on location images. Your contributions help make the world more accessible for everyone.',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  height: 1.5,
+                                  color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
     );
@@ -343,28 +530,71 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildStatRow(String label, int value) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 16,
-              color: isDark ? Colors.grey[300] : Colors.black87,
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: isDark ? Colors.grey[300] : Colors.grey[700],
           ),
-          Text(
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
             value.toString(),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
               color: Colors.blue,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
+}
+
+class HexagonPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    final hexSize = 20.0;
+    final rows = (size.height / hexSize).ceil();
+    final cols = (size.width / hexSize).ceil();
+
+    for (var row = 0; row < rows; row++) {
+      for (var col = 0; col < cols; col++) {
+        final x = col * hexSize * 1.5;
+        final y = row * hexSize * 1.3 + (col % 2) * hexSize * 0.65;
+
+        final path = Path();
+        for (var i = 0; i < 6; i++) {
+          final angle = i * pi / 3;
+          final pointX = x + hexSize * cos(angle);
+          final pointY = y + hexSize * sin(angle);
+          if (i == 0) {
+            path.moveTo(pointX, pointY);
+          } else {
+            path.lineTo(pointX, pointY);
+          }
+        }
+        path.close();
+        canvas.drawPath(path, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 } 

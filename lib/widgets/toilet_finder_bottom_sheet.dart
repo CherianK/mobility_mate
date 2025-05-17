@@ -60,57 +60,50 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
             ),
             child: Column(
               children: [
-                // Drag handle
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[500] : const Color(0xFFE5E5EA),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                // Header
-                Container(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: isDark ? Colors.grey[800]! : Colors.grey[300]!,
-                        width: 1.0,
+                // Drag handle with animation
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Animated indicator
+                    Positioned(
+                      top: 2,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(seconds: 3),
+                        curve: Curves.easeInOut,
+                        builder: (context, value, child) {
+                          return Opacity(
+                            opacity: (1 - value).clamp(0.0, 1.0),
+                            child: Transform.translate(
+                              offset: Offset(0, 6 * value),
+                              child: Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: isDark ? Colors.blue.shade700.withOpacity(0.2) : theme.primaryColor.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.keyboard_arrow_up,
+                                  color: isDark ? Colors.blue.shade300 : theme.primaryColor,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
-                    color: isDark ? Colors.grey[900] : null,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline, 
-                        size: 24, 
-                        color: isDark ? Colors.lightBlueAccent : theme.primaryColor
+                    // Drag handle
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.grey[500] : const Color(0xFFE5E5EA),
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Public Toilets Near You',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.close, color: isDark ? Colors.white70 : Colors.black87),
-                        onPressed: () {
-                          if (mounted && Navigator.of(context).canPop()) {
-                            Navigator.of(context).maybePop();
-                          }
-                        },
-                        tooltip: 'Close',
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 // Content
                 Expanded(
@@ -118,7 +111,95 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
                       ? const Center(child: CircularProgressIndicator())
                       : _displayedToilets.isEmpty
                           ? _buildNoToiletsContent(context)
-                          : _buildToiletList(context, scrollController),
+                          : ListView(
+                              controller: scrollController,
+                              padding: EdgeInsets.zero,
+                              children: [
+                                // Title and close button
+                                Container(
+                                  padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 16.0),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? theme.cardColor : Colors.white,
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: isDark ? theme.primaryColor.withOpacity(0.2) : theme.primaryColor.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          Icons.wc_outlined,
+                                          size: 24,
+                                          color: isDark ? Colors.lightBlueAccent : theme.primaryColor,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Public Toilets Near You',
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: isDark ? Colors.white : Colors.black,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '${_displayedToilets.length} ${_displayedToilets.length == 1 ? 'toilet' : 'toilets'} found nearby',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.close, color: isDark ? Colors.white70 : Colors.black87),
+                                        onPressed: () {
+                                          if (mounted && Navigator.of(context).canPop()) {
+                                            Navigator.of(context).maybePop();
+                                          }
+                                        },
+                                        tooltip: 'Close',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Nearest Toilets',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      ..._displayedToilets.map((toilet) => Padding(
+                                        padding: const EdgeInsets.only(bottom: 12),
+                                        child: _buildToiletItem(context, toilet),
+                                      )).toList(),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                 ),
               ],
             ),
@@ -171,18 +252,6 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
     );
   }
   
-  Widget _buildToiletList(BuildContext context, ScrollController scrollController) {
-    return ListView.builder(
-      controller: scrollController,
-      padding: const EdgeInsets.all(16),
-      itemCount: _displayedToilets.length,
-      itemBuilder: (context, index) {
-        final toilet = _displayedToilets[index];
-        return _buildToiletItem(context, toilet);
-      },
-    );
-  }
-  
   Widget _buildToiletItem(BuildContext context, Map<String, dynamic> toilet) {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
     final theme = Theme.of(context);
@@ -200,7 +269,6 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
     final distance = (toilet['distance'] as double).toStringAsFixed(1);
     
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
       elevation: isDark ? 4 : 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -212,7 +280,6 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // Navigate to this toilet on the map
           _navigateToToilet(toilet);
         },
         child: Padding(
@@ -256,6 +323,12 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 14,
+                              color: isDark ? Colors.grey[400] : Colors.grey[600],
+                            ),
+                            const SizedBox(width: 4),
                             Text(
                               '$distance km away',
                               style: TextStyle(
@@ -268,21 +341,29 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: isDark ? Colors.grey[600] : Colors.grey[400],
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.chevron_right,
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      size: 20,
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               const Divider(
                 color: Colors.grey,
                 thickness: 0.5,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               // Display important features
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _buildFeatureItem(
                     context,
@@ -291,7 +372,6 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
                     tags['Wheelchair'] == 'yes',
                     tags['Wheelchair'] == 'limited',
                   ),
-                  const SizedBox(width: 40),
                   _buildFeatureItem(
                     context,
                     'Accessible Parking',

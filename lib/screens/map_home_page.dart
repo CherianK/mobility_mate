@@ -289,13 +289,6 @@ final Map<String, Map<String, dynamic>> _markerData = {};
                   ),
                   const SizedBox(height: 16),
                   FloatingActionButton(
-                    heroTag: 'toilet_finder',
-                    onPressed: () => _showToiletFinderBottomSheet(context),
-                    tooltip: 'Find Nearest Toilets',
-                    child: const Icon(Icons.wc),
-                  ),
-                  const SizedBox(height: 16),
-                  FloatingActionButton(
                     heroTag: 'zoom_in',
                     onPressed: () async {
                       final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
@@ -317,6 +310,56 @@ final Map<String, Map<String, dynamic>> _markerData = {};
                       );
                     },
                     child: const Icon(Icons.remove),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.blue.shade700 : Colors.blue.shade600,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: FloatingActionButton(
+                      heroTag: 'toilet_finder',
+                      onPressed: () => _showToiletFinderBottomSheet(context),
+                      tooltip: 'Find Nearest Toilets',
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.wc,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                            const SizedBox(height: 1),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'Find',
+                                style: TextStyle(
+                                  color: isDark ? Colors.blue.shade700 : Colors.blue.shade600,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
