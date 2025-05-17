@@ -21,13 +21,23 @@
                 <div class="col-md-6 mb-4">
                   <img src="{{ image.image_url }}" alt="Pending Image"
                        style="max-width: 100%; height: auto; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 12px;">
-                  <form method="POST"
-                        action="{{ url_for(request.endpoint.split('.')[0] + '.approve_image', location_id=location._id, image_index=image_index) }}"
-                        onsubmit="return confirm('Are you sure you want to approve this image?');">
-                    <button type="submit" class="btn btn-success btn-lg">
-                      ✅ Approve
-                    </button>
-                  </form>
+                  <div class="d-flex justify-content-center">
+                    <form method="POST"
+                          action="{{ url_for(request.endpoint.split('.')[0] + '.approve_image', location_id=location._id, image_index=image_index) }}"
+                          onsubmit="return confirm('Are you sure you want to approve this image?');"
+                          class="mr-2">
+                      <button type="submit" class="btn btn-success">
+                        ✅ Approve
+                      </button>
+                    </form>
+                    <form method="POST"
+                          action="{{ url_for(request.endpoint.split('.')[0] + '.reject_image', location_id=location._id, image_index=image_index) }}"
+                          onsubmit="return confirm('Are you sure you want to reject this image?');">
+                      <button type="submit" class="btn btn-danger">
+                        ❌ Reject
+                      </button>
+                    </form>
+                  </div>
                 </div>
               {% endif %}
             {% endfor %}
