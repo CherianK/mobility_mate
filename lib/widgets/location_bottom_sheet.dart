@@ -18,6 +18,8 @@ class LocationBottomSheet extends StatelessWidget {
   final String title;
   final IconData Function(String, dynamic) iconGetter;
   final VoidCallback onClose;
+  final VoidCallback? onBack;
+  final bool showBackButton;
 
   const LocationBottomSheet({
     super.key,
@@ -25,6 +27,8 @@ class LocationBottomSheet extends StatelessWidget {
     required this.title,
     required this.iconGetter,
     required this.onClose,
+    this.onBack,
+    this.showBackButton = false,
   });
 
   @override
@@ -152,6 +156,14 @@ class LocationBottomSheet extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
           child: Row(
             children: [
+              if (showBackButton) ...[
+                IconButton(
+                  icon: Icon(Icons.arrow_back, color: isDark ? Colors.white70 : Colors.black87),
+                  onPressed: onBack ?? () => Navigator.of(context).pop(),
+                  tooltip: 'Back to toilet list',
+                ),
+                const SizedBox(width: 8),
+              ],
               Expanded(
                 child: Text(
                   title,

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../models/marker_type.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/location_bottom_sheet.dart';
+import '../widgets/toilet_finder_bottom_sheet.dart';
 import '../utils/location_helper.dart'; // 
 import '../providers/theme_provider.dart';
 import '../utils/tag_formatter.dart';
@@ -288,6 +289,13 @@ final Map<String, Map<String, dynamic>> _markerData = {};
                   ),
                   const SizedBox(height: 16),
                   FloatingActionButton(
+                    heroTag: 'toilet_finder',
+                    onPressed: () => _showToiletFinderBottomSheet(context),
+                    tooltip: 'Find Nearest Toilets',
+                    child: const Icon(Icons.wc),
+                  ),
+                  const SizedBox(height: 16),
+                  FloatingActionButton(
                     heroTag: 'zoom_in',
                     onPressed: () async {
                       final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
@@ -490,6 +498,200 @@ final Map<String, Map<String, dynamic>> _markerData = {};
       await _updateVisibility(zoom);
     } catch (e) {
       debugPrint('Error updating map style: $e');
+    }
+  }
+
+  Future<void> _showToiletFinderBottomSheet(BuildContext context) async {
+    // If a sheet is already open, dismiss it and wait until it is gone
+    if (_activeSheet != null) {
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).maybePop();
+      }
+      await _activeSheet;
+    }
+
+    if (!mounted) return;
+
+    // Get current user location
+    geo.Position? userPosition = await LocationHelper.getCurrentLocation();
+    if (userPosition == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to get your location. This feature is available when your location services are turned on. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Get all toilet markers data
+    List<Map<String, dynamic>> allToilets = [];
+    if (_markerPayloads.containsKey(MarkerType.toilet)) {
+      final toiletPayloads = _markerPayloads[MarkerType.toilet]!;
+      
+      // Calculate distance for each toilet from current user position
+      for (var toilet in toiletPayloads) {
+        final tags = toilet['Tags'] as Map<String, dynamic>? ?? {};
+        
+        // Continue with existing code to calculate distance
+        final toiletLat = (toilet['Location_Lat'] as num).toDouble();
+        final toiletLon = (toilet['Location_Lon'] as num).toDouble();
+        
+        // Calculate distance in kilometers
+        final distanceInMeters = geo.Geolocator.distanceBetween(
+          userPosition.latitude, 
+          userPosition.longitude, 
+          toiletLat, 
+          toiletLon
+        );
+        
+        allToilets.add({
+          ...toilet,
+          'distance': distanceInMeters / 1000, // Convert to kilometers
+        });
+      }
+      
+      // Sort toilets by distance (nearest first)
+      allToilets.sort((a, b) => 
+        (a['distance'] as double).compareTo(b['distance'] as double)
+      );
+      
+      // Filter for wheelchair accessible toilets
+      List<Map<String, dynamic>> accessibleToilets = allToilets.where((toilet) {
+        final tags = toilet['Tags'] as Map<String, dynamic>? ?? {};
+        final wheelchairValue = tags['Wheelchair']?.toString().toLowerCase() ?? '';
+        return wheelchairValue == 'yes' || wheelchairValue == 'limited';
+      }).toList();
+      
+      // If we found accessible toilets, use those, otherwise keep all toilets
+      if (accessibleToilets.isNotEmpty) {
+        allToilets = accessibleToilets;
+      }
+      
+      // Take only the 3 nearest if there are more than 3
+      if (allToilets.length > 3) {
+        allToilets = allToilets.sublist(0, 3);
+      }
+    }
+
+    Future<void> showToiletList() async {
+      if (!mounted) return;
+      
+      try {
+        // Set a flag to track if we're showing the sheet
+        bool isShowingSheet = true;
+        
+        final result = await showModalBottomSheet<Map<String, dynamic>>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (sheetCtx) => ToiletFinderBottomSheet(
+            userPosition: userPosition,
+            nearbyToilets: allToilets,
+          ),
+        ).whenComplete(() {
+          isShowingSheet = false;
+        });
+        
+        // Only proceed if we're still mounted and the result is valid
+        if (!mounted) return;
+        
+        // Handle the navigation result if a toilet was selected
+        if (result != null && result['action'] == 'show_details') {
+          await _showToiletLocationSheet(result['toilet_data'] as Map<String, dynamic>, showToiletList);
+        }
+      } catch (e) {
+        debugPrint('Error in toilet finder: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        // Only clear the active sheet if we're still mounted
+        if (mounted) {
+          _activeSheet = null;
+        }
+      }
+    }
+    
+    // Show the toilet list initially
+    await showToiletList();
+  }
+  
+  // Helper method to show the location bottom sheet for a toilet
+  Future<void> _showToiletLocationSheet(Map<String, dynamic> toiletData, Function showToiletListCallback) async {
+    if (!mounted) return;
+    
+    // Add marker_type to the toilet data if not already present
+    if (!toiletData.containsKey('marker_type')) {
+      toiletData['marker_type'] = MarkerType.toilet;
+    }
+    
+    // Generate a unique ID if not present
+    final String toiletId = toiletData['id']?.toString() ?? 
+                          'toilet_${DateTime.now().millisecondsSinceEpoch}';
+    
+    String title = MarkerType.toilet.displayName;
+    
+    // Try to get a more specific name if available
+    final tags = toiletData['Tags'] as Map<String, dynamic>?;
+    final metadata = toiletData['Metadata'] as Map<String, dynamic>?;
+    String? name = (tags?['name'] ?? tags?['Name'] ?? 
+                   metadata?['name'] ?? metadata?['Name'])?.toString().trim();
+    
+    if (name != null && name.isNotEmpty) {
+      title = formatMarkerDisplayName(
+        name: name,
+        markerType: 'toilet',
+      ) ?? title;
+    }
+    
+    try {
+      final sheetFuture = showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (sheetCtx) => LocationBottomSheet(
+          data: toiletData,
+          title: title,
+          iconGetter: MarkerType.toilet.iconGetter,
+          onClose: () {
+            if (Navigator.of(sheetCtx).canPop()) {
+              Navigator.of(sheetCtx).maybePop();
+            }
+          },
+          showBackButton: true,
+          onBack: () {
+            // Close this sheet first
+            if (Navigator.of(sheetCtx).canPop()) {
+              Navigator.of(sheetCtx).pop();
+              // Then reopen the toilet finder sheet if we're still mounted
+              if (mounted) {
+                showToiletListCallback();
+              }
+            }
+          },
+        ),
+      );
+      
+      _activeSheet = sheetFuture;
+      await sheetFuture;
+      
+      // Only clear the active sheet if we're still mounted
+      if (mounted) {
+        _activeSheet = null;
+      }
+    } catch (e) {
+      debugPrint('Error showing toilet location sheet: $e');
+      // Only clear the active sheet if we're still mounted
+      if (mounted) {
+        _activeSheet = null;
+      }
     }
   }
 }
