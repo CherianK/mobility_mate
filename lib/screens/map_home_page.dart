@@ -66,6 +66,24 @@ class _MapHomePageState extends State<MapHomePage> {
 
   Future<void> _onMapInitialized(MapboxMap map) async {
     _mapboxMap = map;
+    
+    // Hide the compass
+    try {
+      final compassSettings = CompassSettings(enabled: false);
+      await _mapboxMap.compass.updateSettings(compassSettings);
+    } catch (_) {
+      // Ignore errors if compass can't be hidden
+    }
+
+    // Hide the scale bar
+    try {
+      final scaleBarSettings = ScaleBarSettings(enabled: false);
+      await _mapboxMap.scaleBar.updateSettings(scaleBarSettings);
+    } catch (_) {
+      // Ignore errors if scale bar can't be hidden
+    }
+    
+    // Handle map initialization
     await _initAllTypes();
     _startZoomListener();
     
@@ -244,7 +262,7 @@ class _MapHomePageState extends State<MapHomePage> {
           if (_mapReady) ...[
             // Floating search bar with hamburger menu
             Positioned(
-              top: MediaQuery.of(context).padding.top + 16,
+              top: MediaQuery.of(context).padding.top + 8,
               left: 16,
               right: 16,
               child: Row(
@@ -288,6 +306,7 @@ class _MapHomePageState extends State<MapHomePage> {
                 ],
               ),
             ),
+            
             // Map controls
             Positioned(
               right: 16,
@@ -297,6 +316,7 @@ class _MapHomePageState extends State<MapHomePage> {
                   FloatingActionButton(
                     heroTag: 'location',
                     onPressed: _isLocating ? null : _goToCurrentLocation,
+                    backgroundColor: const Color(0xFF2196F3),
                     child: _isLocating
                         ? const SizedBox(
                             width: 24,
@@ -311,6 +331,7 @@ class _MapHomePageState extends State<MapHomePage> {
                   const SizedBox(height: 16),
                   FloatingActionButton(
                     heroTag: 'zoom_in',
+                    backgroundColor: const Color(0xFF2196F3),
                     onPressed: () async {
                       final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
                       await _mapboxMap.flyTo(
@@ -323,6 +344,7 @@ class _MapHomePageState extends State<MapHomePage> {
                   const SizedBox(height: 16),
                   FloatingActionButton(
                     heroTag: 'zoom_out',
+                    backgroundColor: const Color(0xFF2196F3),
                     onPressed: () async {
                       final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
                       await _mapboxMap.flyTo(
@@ -335,7 +357,7 @@ class _MapHomePageState extends State<MapHomePage> {
                   const SizedBox(height: 16),
                   Container(
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.blue.shade700 : Colors.blue.shade600,
+                      color: const Color(0xFF2196F3),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -359,20 +381,20 @@ class _MapHomePageState extends State<MapHomePage> {
                             Icon(
                               Icons.wc,
                               color: Colors.white,
-                              size: 22,
+                              size: 20,
                             ),
-                            const SizedBox(height: 1),
                             Container(
+                              margin: const EdgeInsets.only(top: 2),
                               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                'Find',
+                                'Find Toilet',
                                 style: TextStyle(
                                   color: isDark ? Colors.blue.shade700 : Colors.blue.shade600,
-                                  fontSize: 9,
+                                  fontSize: 7,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -554,6 +576,15 @@ class _MapHomePageState extends State<MapHomePage> {
   Future<void> _updateMapStyle(bool isDark) async {
     try {
       await _mapboxMap.style.setStyleURI(isDark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS);
+      
+      // Re-hide the compass after style change
+      try {
+        final compassSettings = CompassSettings(enabled: false);
+        await _mapboxMap.compass.updateSettings(compassSettings);
+      } catch (_) {
+        // Ignore errors if compass can't be hidden
+      }
+      
       // Re-add markers after style change
       final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
       await _updateVisibility(zoom);

@@ -147,13 +147,9 @@ class BadgeManager {
     // Get current streak
     int currentStreak = prefs.getInt(streakKey) ?? 0;
 
-    print('DEBUG - Updating streak');
-    print('DEBUG - Last vote date: $lastVoteDate');
-    print('DEBUG - Current streak: $currentStreak');
 
     if (lastVoteDate == null) {
       // First vote ever
-      print('DEBUG - This is the first vote');
       currentStreak = 1;
       await _awardBadge('first_vote');
     } else {
@@ -163,7 +159,6 @@ class BadgeManager {
       if (lastVoteDay.isAtSameMomentAs(yesterday)) {
         // Voted yesterday, increment streak
         currentStreak++;
-        print('DEBUG - Incremented streak to: $currentStreak');
         
         // Check for perfect week achievement
         if (currentStreak == 7) {
@@ -172,7 +167,7 @@ class BadgeManager {
       } else if (!lastVoteDay.isAtSameMomentAs(today)) {
         // Didn't vote yesterday, reset streak to 0
         currentStreak = 0;
-        print('DEBUG - Reset streak to 0');
+
       }
     }
 
@@ -219,8 +214,6 @@ class BadgeManager {
       earnedBadges = Set<String>.from(json.decode(earnedBadgesJson));
     }
 
-    print('DEBUG - Checking badges');
-    print('DEBUG - Current earned badges: $earnedBadges');
 
     // Get total votes from API
     final deviceId = prefs.getString('device_id');
@@ -232,11 +225,11 @@ class BadgeManager {
       if (votesResponse.statusCode == 200) {
         final List<dynamic> votes = json.decode(votesResponse.body);
         final totalVotes = votes.length;
-        print('DEBUG - Total votes from API: $totalVotes');
+
 
         // Check for first vote badge if not already earned
         if (totalVotes > 0 && !earnedBadges.contains('first_vote')) {
-          print('DEBUG - Awarding first vote badge');
+
           await _awardBadge('first_vote');
         }
 
@@ -245,7 +238,6 @@ class BadgeManager {
           if (badge.value['type'] == 'votes' && 
               totalVotes >= badge.value['requiredVotes'] && 
               !earnedBadges.contains(badge.key)) {
-            print('DEBUG - Awarding voting badge: ${badge.key}');
             await _awardBadge(badge.key);
           }
         }
@@ -257,7 +249,6 @@ class BadgeManager {
       if (badge.value['type'] == 'streak' && 
           currentStreak >= badge.value['requiredStreak'] && 
           !earnedBadges.contains(badge.key)) {
-        print('DEBUG - Awarding streak badge: ${badge.key}');
         await _awardBadge(badge.key);
       }
     }
@@ -291,13 +282,12 @@ class BadgeManager {
       earnedBadges = Set<String>.from(json.decode(earnedBadgesJson));
     }
 
-    print('DEBUG - Awarding badge: $badgeId');
-    print('DEBUG - Current earned badges: $earnedBadges');
+
     
     earnedBadges.add(badgeId);
     await prefs.setString(badgesKey, json.encode(earnedBadges.toList()));
     
-    print('DEBUG - Updated earned badges: $earnedBadges');
+
   }
 
   static Future<Map<String, dynamic>> getBadgeInfo() async {
@@ -320,7 +310,7 @@ class BadgeManager {
       if (votesResponse.statusCode == 200) {
         final List<dynamic> votes = json.decode(votesResponse.body);
         totalVotes = votes.length;
-        print('DEBUG - Total votes: $totalVotes');
+
       }
     }
 
@@ -342,7 +332,7 @@ class BadgeManager {
     }
 
     final nextBadge = _getNextBadge(currentStreak, totalVotes, totalUploads);
-    print('DEBUG - Next badge: $nextBadge');
+
 
     return {
       'currentStreak': currentStreak,
@@ -354,17 +344,13 @@ class BadgeManager {
   }
 
   static Map<String, dynamic>? _getNextBadge(int currentStreak, int totalVotes, int totalUploads) {
-    print('DEBUG - Calculating next badge');
-    print('DEBUG - Current streak: $currentStreak');
-    print('DEBUG - Total votes: $totalVotes');
-    print('DEBUG - Total uploads: $totalUploads');
+
 
     // Check streak badges
     for (final badge in badges.entries) {
       if (badge.value['type'] == 'streak' && 
           currentStreak < badge.value['requiredStreak']) {
         final progress = (currentStreak / badge.value['requiredStreak'] * 100).round();
-        print('DEBUG - Found next streak badge: ${badge.key} with progress: $progress%');
         return {
           'id': badge.key,
           ...badge.value,
@@ -378,7 +364,6 @@ class BadgeManager {
       if (badge.value['type'] == 'votes' && 
           totalVotes < badge.value['requiredVotes']) {
         final progress = (totalVotes / badge.value['requiredVotes'] * 100).round();
-        print('DEBUG - Found next voting badge: ${badge.key} with progress: $progress%');
         return {
           'id': badge.key,
           ...badge.value,
@@ -392,7 +377,6 @@ class BadgeManager {
       if (badge.value['type'] == 'uploads' && 
           totalUploads < badge.value['requiredUploads']) {
         final progress = (totalUploads / badge.value['requiredUploads'] * 100).round();
-        print('DEBUG - Found next upload badge: ${badge.key} with progress: $progress%');
         return {
           'id': badge.key,
           ...badge.value,
@@ -401,7 +385,6 @@ class BadgeManager {
       }
     }
 
-    print('DEBUG - No next badge found');
     return null;
   }
 
@@ -426,7 +409,6 @@ class BadgeManager {
     final earnedBadgesJson = prefs.getString(badgesKey);
     
     if (earnedBadgesJson == null) {
-      print('DEBUG - Initializing badge storage');
       await prefs.setString(badgesKey, json.encode([]));
     }
     
@@ -448,19 +430,14 @@ class BadgeManager {
     final currentStreak = prefs.getInt(streakKey) ?? 0;
     final lastVoteDate = prefs.getString(lastVoteDateKey);
     
-    print('Debug Badge Info:');
-    print('Current Streak: $currentStreak');
-    print('Last Vote Date: $lastVoteDate');
-    print('Earned Badges: $earnedBadgesJson');
+
     
     if (earnedBadgesJson != null) {
       final earnedBadges = Set<String>.from(json.decode(earnedBadgesJson));
-      print('Parsed Badges: $earnedBadges');
       
       for (final badgeId in earnedBadges) {
         final badge = badges[badgeId];
         if (badge != null) {
-          print('Badge $badgeId: ${badge['name']}');
         }
       }
     }
