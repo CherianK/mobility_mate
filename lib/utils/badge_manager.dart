@@ -186,20 +186,25 @@ class BadgeManager {
 
   static Future<void> recordUpload() async {
     final prefs = await SharedPreferences.getInstance();
-    
-    // Check for first upload badge
-    final uploadsResponse = await http.get(
-      Uri.parse('https://mobility-mate.onrender.com/api/uploads/username/${Uri.encodeComponent(prefs.getString('username') ?? '')}'),
+    final username = prefs.getString('username');
+    if (username == null) return;
+
+    // Use leaderboard endpoint to get approved uploads
+    final leaderboardResponse = await http.get(
+      Uri.parse('https://mobility-mate.onrender.com/api/leaderboard'),
     );
 
-    if (uploadsResponse.statusCode == 200) {
-      final uploads = json.decode(uploadsResponse.body);
-      final totalUploads = uploads['approved_uploads'] ?? 0;
+    if (leaderboardResponse.statusCode == 200) {
+      final List<dynamic> leaderboardData = json.decode(leaderboardResponse.body);
+      final userEntry = leaderboardData.firstWhere(
+        (entry) => entry['username'] == username,
+        orElse: () => null,
+      );
+      final totalUploads = userEntry != null ? (userEntry['approved_uploads'] ?? 0) : 0;
 
       if (totalUploads == 1) {
         await _awardBadge('first_upload');
       }
-
       // Check for upload-based badges
       await _checkAndAwardUploadBadges(totalUploads);
     }
@@ -300,14 +305,8 @@ class BadgeManager {
     final currentStreak = prefs.getInt(streakKey) ?? 0;
     final earnedBadgesJson = prefs.getString(badgesKey);
     Set<String> earnedBadges = {};
-    
-    print('DEBUG - Getting badge info');
-    print('DEBUG - Current streak: $currentStreak');
-    print('DEBUG - Raw earned badges JSON: $earnedBadgesJson');
-    
     if (earnedBadgesJson != null) {
       earnedBadges = Set<String>.from(json.decode(earnedBadgesJson));
-      print('DEBUG - Parsed earned badges: $earnedBadges');
     }
 
     // Get total votes from API
@@ -325,18 +324,20 @@ class BadgeManager {
       }
     }
 
-    // Get total uploads from API
+    // Get total uploads from leaderboard API
     int totalUploads = 0;
     final username = prefs.getString('username');
     if (username != null) {
-      final uploadsResponse = await http.get(
-        Uri.parse('https://mobility-mate.onrender.com/api/uploads/username/${Uri.encodeComponent(username)}'),
+      final leaderboardResponse = await http.get(
+        Uri.parse('https://mobility-mate.onrender.com/api/leaderboard'),
       );
-
-      if (uploadsResponse.statusCode == 200) {
-        final uploads = json.decode(uploadsResponse.body);
-        totalUploads = uploads['approved_uploads'] ?? 0;
-        print('DEBUG - Total uploads: $totalUploads');
+      if (leaderboardResponse.statusCode == 200) {
+        final List<dynamic> leaderboardData = json.decode(leaderboardResponse.body);
+        final userEntry = leaderboardData.firstWhere(
+          (entry) => entry['username'] == username,
+          orElse: () => null,
+        );
+        totalUploads = userEntry != null ? (userEntry['approved_uploads'] ?? 0) : 0;
       }
     }
 
@@ -464,4 +465,4 @@ class BadgeManager {
       }
     }
   }
-} 
+}

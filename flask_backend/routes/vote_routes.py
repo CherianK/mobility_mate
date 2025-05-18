@@ -200,10 +200,8 @@ def get_leaderboard():
         # Function to count uploads for a collection
         def count_uploads_for_collection(collection):
             upload_counts = {}
-            
             # Find all documents with Images array
             cursor = collection.find({"Images": {"$exists": True, "$ne": []}})
-            
             for doc in cursor:
                 if 'Images' in doc:
                     for image in doc['Images']:
@@ -214,10 +212,11 @@ def get_leaderboard():
                             if username not in upload_counts:
                                 upload_counts[username] = 0
                             upload_counts[username] += 1
-            
             return upload_counts
         
         # Count uploads for each collection (5 points per upload)
+        # Also aggregate upload counts per user for badge system
+        user_upload_counts = {}
         for collection in [medical_collection, toilet_collection, train_collection, tram_collection]:
             upload_counts = count_uploads_for_collection(collection)
             for username, count in upload_counts.items():
@@ -225,12 +224,17 @@ def get_leaderboard():
                     user_points[username] = 0
                 # 5 points per upload
                 user_points[username] += count * 5
+                # Aggregate upload counts for badge system
+                if username not in user_upload_counts:
+                    user_upload_counts[username] = 0
+                user_upload_counts[username] += count
         
         # Convert to list and sort by points
         leaderboard = [
             {
                 'username': username,
-                'points': points
+                'points': points,
+                'approved_uploads': user_upload_counts.get(username, 0)  # Add approved upload count for badge system
             }
             for username, points in user_points.items()
         ]
