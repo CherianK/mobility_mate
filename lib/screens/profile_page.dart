@@ -43,9 +43,8 @@ class _ProfilePageState extends State<ProfilePage> {
         
         // Load badge info
         badgeInfo = await BadgeManager.getBadgeInfo();
-        print('DEBUG - Profile page received badge info: $badgeInfo');
         
-        // Debug check badges
+        // Check badges
         await BadgeManager.debugCheckBadges();
 
         // Load leaderboard data to get user's stats (including uploads for badge system)
@@ -77,7 +76,6 @@ class _ProfilePageState extends State<ProfilePage> {
           final List<dynamic> votes = json.decode(votesResponse.body);
           totalVotes = votes.length;
           // Ensure badges are checked and awarded for votes
-          // Remove the call to the private method _checkAndAwardBadges (not accessible)
           await BadgeManager.updateStreak();
           // Reload badgeInfo after awarding
           badgeInfo = await BadgeManager.getBadgeInfo();
@@ -93,7 +91,6 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       }
     } catch (e) {
-      print('DEBUG - Error in _loadUserData: $e');
       setState(() {
         isLoading = false;
       });
@@ -316,52 +313,45 @@ class _ProfilePageState extends State<ProfilePage> {
                                 const SizedBox(height: 20),
                                 const Divider(height: 1),
                                 const SizedBox(height: 20),
-                                Builder(
-                                  builder: (context) {
-                                    print('DEBUG - Rendering next badge section');
-                                    print('DEBUG - Next badge data: ${badgeInfo!['nextBadge']}');
-                                    print('DEBUG - Progress value: ${badgeInfo!['nextBadge']['progress']}');
-                                    return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Next Badge: ${badgeInfo!['nextBadge']['name']}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            color: isDark ? Colors.grey[300] : Colors.grey[700],
-                                          ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Next Badge: ${badgeInfo!['nextBadge']['name']}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: Colors.orange[700]!.withOpacity(0.3),
+                                          width: 1,
                                         ),
-                                        const SizedBox(height: 12),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(
-                                              color: Colors.orange[700]!.withOpacity(0.3),
-                                              width: 1,
-                                            ),
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(8),
-                                            child: LinearProgressIndicator(
-                                              value: badgeInfo!['nextBadge']['progress'] / 100,
-                                              backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange[700]!),
-                                              minHeight: 8,
-                                            ),
-                                          ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: LinearProgressIndicator(
+                                          value: badgeInfo!['nextBadge']['progress'] / 100,
+                                          backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.orange[700]!),
+                                          minHeight: 8,
                                         ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          '${badgeInfo!['nextBadge']['progress']}% complete',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: isDark ? Colors.grey[400] : Colors.grey[600],
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '${badgeInfo!['nextBadge']['progress']}% complete',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ],
