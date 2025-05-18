@@ -539,36 +539,6 @@ class _VotePageState extends State<VotePage> {
                 },
               )
             : null,
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.grey[900] : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: IconButton(
-              icon: Icon(
-                isDark ? Icons.light_mode : Icons.dark_mode,
-                color: isDark ? Colors.white : Colors.black87,
-              ),
-              onPressed: () {
-                final themeProvider = context.read<ThemeProvider>();
-                final newMode = themeProvider.themeMode == ThemeMode.dark
-                    ? ThemeMode.light
-                    : ThemeMode.dark;
-                themeProvider.setThemeMode(newMode);
-              },
-              tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-            ),
-          ),
-        ],
       ),
       body: selectedLocation != null
           ? SingleChildScrollView(

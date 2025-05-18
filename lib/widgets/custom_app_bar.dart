@@ -29,18 +29,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       foregroundColor: isDark ? Colors.white : Colors.black,
       elevation: 0,
       actions: [
-        // Theme toggle button
-        IconButton(
-          icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-          onPressed: () {
-            final themeProvider = context.read<ThemeProvider>();
-            final newMode = themeProvider.themeMode == ThemeMode.dark
-                ? ThemeMode.light
-                : ThemeMode.dark;
-            themeProvider.setThemeMode(newMode);
-          },
-          tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-        ),
         // Additional actions
         if (actions != null) ...actions!,
       ],

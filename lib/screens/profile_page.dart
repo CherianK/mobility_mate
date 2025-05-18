@@ -86,30 +86,6 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         elevation: 0,
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: Icon(
-                isDark ? Icons.light_mode : Icons.dark_mode,
-                color: Colors.white,
-                size: 24,
-              ),
-              onPressed: () {
-                final themeProvider = context.read<ThemeProvider>();
-                final newMode = themeProvider.themeMode == ThemeMode.dark
-                    ? ThemeMode.light
-                    : ThemeMode.dark;
-                themeProvider.setThemeMode(newMode);
-              },
-              tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-            ),
-          ),
-        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -205,13 +181,14 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         // Streak Section
                         Container(
-                          padding: const EdgeInsets.all(20),
+                          margin: const EdgeInsets.only(top: 16),
+                          padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.grey[850] : Colors.white,
+                            color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                color: Colors.orange[700]!.withOpacity(isDark ? 0.3 : 0.1),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -320,248 +297,419 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         const SizedBox(height: 24),
                         // Badges Section
-                        Text(
-                          'Earned Badges',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white : Colors.black87,
-                            letterSpacing: -0.5,
+                        Container(
+                          margin: const EdgeInsets.only(top: 16),
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.amber[700]!.withOpacity(isDark ? 0.3 : 0.1),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            border: Border.all(
+                              color: Colors.amber[700]!.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.amber[700]?.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.amber[700]!.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.emoji_events,
+                                      color: Colors.amber[700],
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Earned Badges',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              if ((badgeInfo?['earnedBadges'] as Set<String>?)?.isEmpty ?? true)
+                                Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber[700]?.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.amber[700]!.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.emoji_events_outlined,
+                                        size: 48,
+                                        color: Colors.amber[700],
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'No badges earned yet',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Keep voting daily to earn badges!',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else
+                                GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    childAspectRatio: 1.2,
+                                    crossAxisSpacing: 16,
+                                    mainAxisSpacing: 16,
+                                  ),
+                                  itemCount: (badgeInfo?['earnedBadges'] as Set<String>?)?.length ?? 0,
+                                  itemBuilder: (context, index) {
+                                    final badgeId = (badgeInfo!['earnedBadges'] as Set<String>).elementAt(index);
+                                    final badge = BadgeManager.badges[badgeId]!;
+                                    
+                                    return Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber[700]?.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: Colors.amber[700]!.withOpacity(0.3),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            badge['icon'],
+                                            style: const TextStyle(fontSize: 36),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Text(
+                                            badge['name'],
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: isDark ? Colors.white : Colors.black87,
+                                              letterSpacing: -0.5,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            badge['description'],
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                            ),
+                                            textAlign: TextAlign.center,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        if ((badgeInfo?['earnedBadges'] as Set<String>?)?.isEmpty ?? true)
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[850] : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                        const SizedBox(height: 24),
+                        // Voting Statistics Section
+                        Container(
+                          margin: const EdgeInsets.only(top: 16),
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green[700]!.withOpacity(isDark ? 0.3 : 0.1),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            border: Border.all(
+                              color: Colors.green[700]!.withOpacity(0.3),
+                              width: 1,
                             ),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.emoji_events_outlined,
-                                  size: 48,
-                                  color: isDark ? Colors.grey[600] : Colors.grey[400],
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'No badges earned yet',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: isDark ? Colors.grey[300] : Colors.grey[700],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green[700]?.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.green[700]!.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.analytics,
+                                      color: Colors.green[700],
+                                      size: 24,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Keep voting daily to earn badges!',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Voting Statistics',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                      letterSpacing: -0.5,
+                                    ),
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          )
-                        else
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 1.2,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                            ),
-                            itemCount: (badgeInfo?['earnedBadges'] as Set<String>?)?.length ?? 0,
-                            itemBuilder: (context, index) {
-                              final badgeId = (badgeInfo!['earnedBadges'] as Set<String>).elementAt(index);
-                              final badge = BadgeManager.badges[badgeId]!;
-                              
-                              return Container(
-                                padding: const EdgeInsets.all(16),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              Container(
+                                padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
-                                  color: isDark ? Colors.grey[850] : Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.green[700]?.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.green[700]!.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    _buildStatRow('Total Votes', userStats?['total_votes'] ?? 0),
+                                    const Divider(height: 24),
+                                    _buildStatRow('Accurate Votes', userStats?['accurate_votes'] ?? 0),
+                                    const Divider(height: 24),
+                                    _buildStatRow('Inaccurate Votes', userStats?['inaccurate_votes'] ?? 0),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // Community Section (Leaderboard)
+                        Container(
+                          margin: const EdgeInsets.only(top: 16),
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF6C63FF).withOpacity(isDark ? 0.3 : 0.1),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            border: Border.all(
+                              color: const Color(0xFF6C63FF).withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF6C63FF).withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.people_alt,
+                                      color: Color(0xFF6C63FF),
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Community',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                      color: const Color(0xFF6C63FF).withOpacity(0.4),
                                       blurRadius: 12,
                                       offset: const Offset(0, 4),
                                     ),
                                   ],
                                 ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      badge['icon'],
-                                      style: const TextStyle(fontSize: 36),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      badge['name'],
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark ? Colors.white : Colors.black87,
-                                        letterSpacing: -0.5,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const LeaderboardPage(),
                                       ),
-                                      textAlign: TextAlign.center,
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF6C63FF),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 18),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      badge['description'],
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                    elevation: 0,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'VIEW LEADERBOARD',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 1.5,
+                                          color: Colors.white,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.black.withOpacity(0.3),
+                                              offset: const Offset(0, 2),
+                                              blurRadius: 4,
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                                      const SizedBox(width: 12),
+                                      Icon(
+                                        Icons.arrow_forward,
+                                        size: 24,
+                                        color: Colors.white,
+                                        shadows: [
+                                          Shadow(
+                                            color: Colors.black.withOpacity(0.3),
+                                            offset: const Offset(0, 2),
+                                            blurRadius: 4,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              );
-                            },
-                          ),
-                        const SizedBox(height: 24),
-                        // Voting Statistics Section
-                        Text(
-                          'Voting Statistics',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white : Colors.black87,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: isDark ? Colors.grey[850] : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
-                          child: Column(
-                            children: [
-                              _buildStatRow('Total Votes', userStats?['total_votes'] ?? 0),
-                              const Divider(height: 24),
-                              _buildStatRow('Accurate Votes', userStats?['accurate_votes'] ?? 0),
-                              const Divider(height: 24),
-                              _buildStatRow('Inaccurate Votes', userStats?['inaccurate_votes'] ?? 0),
-                            ],
-                          ),
                         ),
-                        const SizedBox(height: 24),
                         // About Section
-                        Text(
-                          'About',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white : Colors.black87,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
                         Container(
-                          padding: const EdgeInsets.all(20),
+                          margin: const EdgeInsets.only(top: 16),
+                          padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.grey[850] : Colors.white,
+                            color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                color: Colors.blue[700]!.withOpacity(isDark ? 0.3 : 0.1),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
                             ],
+                            border: Border.all(
+                              color: Colors.blue[700]!.withOpacity(0.3),
+                              width: 1,
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Mobility Mate',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  letterSpacing: -0.5,
-                                ),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue[700]?.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.blue[700]!.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.info_outline,
+                                      color: Colors.blue[700],
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'About',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 20),
                               Text(
-                                'Help improve accessibility information by voting on location images. Your contributions help make the world more accessible for everyone.',
+                                'Mobility Mate is a community-driven platform that helps people with mobility needs find accessible locations and share their experiences.',
                                 style: TextStyle(
                                   fontSize: 15,
+                                  color: isDark ? Colors.grey[300] : Colors.grey[600],
                                   height: 1.5,
-                                  color: isDark ? Colors.grey[300] : Colors.grey[700],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        // Community Section
-                        const Text(
-                          'Community',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 2,
-                          child: Column(
-                            children: [
-                              // Leaderboard Button
-                              ListTile(
-                                leading: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.amber.withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.emoji_events,
-                                    color: Colors.amber,
-                                  ),
-                                ),
-                                title: const Text('Leaderboard'),
-                                subtitle: const Text('See top contributors'),
-                                trailing: const Icon(Icons.chevron_right),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const LeaderboardPage(),
-                                    ),
-                                  );
-                                },
-                              ),
-                              const Divider(),
-                              // ... existing ListTiles ...
                             ],
                           ),
                         ),
@@ -591,15 +739,19 @@ class _ProfilePageState extends State<ProfilePage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.green[700]?.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.green[700]!.withOpacity(0.3),
+              width: 1,
+            ),
           ),
           child: Text(
             value.toString(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.blue,
+              color: Colors.green[700],
             ),
           ),
         ),

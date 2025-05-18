@@ -93,16 +93,16 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
                         },
                       ),
                     ),
-                    // Drag handle
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[500] : const Color(0xFFE5E5EA),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+                // Drag handle
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[500] : const Color(0xFFE5E5EA),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
                   ],
                 ),
                 // Content
@@ -116,19 +116,19 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
                               padding: EdgeInsets.zero,
                               children: [
                                 // Title and close button
-                                Container(
+                Container(
                                   padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 16.0),
-                                  decoration: BoxDecoration(
+                  decoration: BoxDecoration(
                                     color: isDark ? theme.cardColor : Colors.white,
-                                    border: Border(
-                                      bottom: BorderSide(
+                    border: Border(
+                      bottom: BorderSide(
                                         color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
                                       Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
@@ -137,22 +137,22 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
                                         ),
                                         child: Icon(
                                           Icons.wc_outlined,
-                                          size: 24,
+                        size: 24, 
                                           color: isDark ? Colors.lightBlueAccent : theme.primaryColor,
                                         ),
-                                      ),
+                      ),
                                       const SizedBox(width: 16),
-                                      Expanded(
+                      Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              'Public Toilets Near You',
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: isDark ? Colors.white : Colors.black,
-                                              ),
+                          'Public Toilets Near You',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
@@ -163,20 +163,20 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
                                               ),
                                             ),
                                           ],
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: Icon(Icons.close, color: isDark ? Colors.white70 : Colors.black87),
-                                        onPressed: () {
-                                          if (mounted && Navigator.of(context).canPop()) {
-                                            Navigator.of(context).maybePop();
-                                          }
-                                        },
-                                        tooltip: 'Close',
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, color: isDark ? Colors.white70 : Colors.black87),
+                        onPressed: () {
+                          if (mounted && Navigator.of(context).canPop()) {
+                            Navigator.of(context).maybePop();
+                          }
+                        },
+                        tooltip: 'Close',
+                      ),
+                    ],
+                  ),
+                ),
                                 Padding(
                                   padding: const EdgeInsets.all(16.0),
                                   child: Column(
@@ -348,7 +348,7 @@ class _ToiletFinderBottomSheetState extends State<ToiletFinderBottomSheet> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      Icons.chevron_right,
+                    Icons.chevron_right,
                       color: isDark ? Colors.grey[400] : Colors.grey[600],
                       size: 20,
                     ),

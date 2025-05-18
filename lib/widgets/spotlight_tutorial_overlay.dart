@@ -65,17 +65,17 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
     TutorialStep(
       title: 'Search',
       description: 'Find wheelchair-accessible locations and features in Victoria. Plan your trip with ease.',
-      position: const Offset(0.12, 0.10),
+      position: const Offset(0.3, 0.10),
       radius: 40,
       icon: Icons.search,
       isNavigationItem: false,
     ),
     TutorialStep(
-      title: 'Dark Mode',
-      description: 'Toggle between light and dark themes for comfortable viewing in any lighting condition.',
-      position: const Offset(0.88, 0.10),
-      radius: 40,
-      icon: Icons.dark_mode,
+      title: 'Menu',
+      description: 'Access your profile, leaderboard, and toggle between light and dark themes through the menu.',
+      position: const Offset(0.09, 0.10),
+      radius: 20,
+      icon: Icons.menu,
       isNavigationItem: false,
     ),
     TutorialStep(
@@ -309,36 +309,36 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
             left: 20,
             right: 20,
             top: size.height * 0.30,
-            child: Material(
-              color: isDark ? theme.cardColor : Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              elevation: 8,
-              child: Container(
+              child: Material(
+                color: isDark ? theme.cardColor : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                elevation: 8,
+                child: Container(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isDark ? theme.primaryColor.withOpacity(0.5) : Colors.blue.shade100,
-                    width: 1,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark ? theme.primaryColor.withOpacity(0.5) : Colors.blue.shade100,
+                      width: 1,
+                    ),
                   ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                     SizedBox(
                       height: 32,
                       child: _currentStep > 0
                           ? Align(
-                              alignment: Alignment.centerLeft,
-                              child: IconButton(
-                                onPressed: _previousStep,
-                                icon: const Icon(Icons.arrow_back),
-                                color: isDark ? Colors.white : Colors.blue.shade700,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: isDark ? theme.primaryColor.withOpacity(0.2) : Colors.blue.shade50,
+                          alignment: Alignment.centerLeft,
+                          child: IconButton(
+                            onPressed: _previousStep,
+                            icon: const Icon(Icons.arrow_back),
+                            color: isDark ? Colors.white : Colors.blue.shade700,
+                            style: IconButton.styleFrom(
+                              backgroundColor: isDark ? theme.primaryColor.withOpacity(0.2) : Colors.blue.shade50,
                                   padding: const EdgeInsets.all(6),
-                                ),
-                              ),
+                            ),
+                          ),
                             )
                           : null,
                     ),
@@ -360,62 +360,62 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
+                      Text(
                                   step.title,
-                                  style: TextStyle(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.blue.shade900,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.blue.shade900,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
                                 const SizedBox(height: 8),
-                                Text(
+                      Text(
                                   step.description,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    height: 1.5,
-                                    color: isDark ? Colors.white : Colors.grey.shade800,
-                                  ),
-                                ),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          height: 1.5,
+                          color: isDark ? Colors.white : Colors.grey.shade800,
+                        ),
+                      ),
                                 if (step.additionalIcons != null) ...[
                                   const SizedBox(height: 12),
-                                  Container(
+                        Container(
                                     padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: isDark ? theme.cardColor : Colors.white,
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: isDark ? Colors.white.withOpacity(0.3) : Colors.blue.shade100,
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Wrap(
+                          decoration: BoxDecoration(
+                            color: isDark ? theme.cardColor : Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isDark ? Colors.white.withOpacity(0.3) : Colors.blue.shade100,
+                              width: 1,
+                            ),
+                          ),
+                          child: Wrap(
                                       spacing: 12,
                                       runSpacing: 12,
-                                      alignment: WrapAlignment.center,
+                            alignment: WrapAlignment.center,
                                       children: step.additionalIcons!
-                                          .map((icon) => Container(
+                                .map((icon) => Container(
                                                 padding: const EdgeInsets.all(8),
-                                                decoration: BoxDecoration(
-                                                  color: isDark ? Colors.white.withOpacity(0.1) : Colors.blue.shade50,
-                                                  borderRadius: BorderRadius.circular(12),
-                                                  border: Border.all(
-                                                    color: isDark ? Colors.white.withOpacity(0.2) : Colors.blue.shade100,
-                                                    width: 1,
-                                                  ),
-                                                ),
-                                                child: Icon(
-                                                  icon,
+                                      decoration: BoxDecoration(
+                                        color: isDark ? Colors.white.withOpacity(0.1) : Colors.blue.shade50,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: isDark ? Colors.white.withOpacity(0.2) : Colors.blue.shade100,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        icon,
                                                   size: step.title == 'Tap the Markers' || step.title == 'Contribute & Share' ? 32 : 24,
-                                                  color: isDark ? Colors.white : Colors.blue.shade700,
-                                                ),
-                                              ))
-                                          .toList(),
-                                    ),
-                                  ),
-                                ],
+                                        color: isDark ? Colors.white : Colors.blue.shade700,
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
+                        ),
+                      ],
                               ],
                             ),
                           );
@@ -423,78 +423,78 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        _steps.length,
-                        (index) => Container(
-                          width: 8,
-                          height: 8,
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: index == _currentStep
-                                ? (isDark ? Colors.white : Colors.blue.shade700)
-                                : (isDark ? Colors.white.withOpacity(0.3) : Colors.blue.shade100),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          _steps.length,
+                          (index) => Container(
+                            width: 8,
+                            height: 8,
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: index == _currentStep
+                                  ? (isDark ? Colors.white : Colors.blue.shade700)
+                                  : (isDark ? Colors.white.withOpacity(0.3) : Colors.blue.shade100),
+                            ),
                           ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (_currentStep < _steps.length - 1)
-                          TextButton(
-                            onPressed: _skipTutorial,
-                            style: TextButton.styleFrom(
-                              foregroundColor: isDark ? Colors.white : Colors.grey.shade600,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (_currentStep < _steps.length - 1)
+                            TextButton(
+                              onPressed: _skipTutorial,
+                              style: TextButton.styleFrom(
+                                foregroundColor: isDark ? Colors.white : Colors.grey.shade600,
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              ),
+                              child: const Text('Skip'),
                             ),
-                            child: const Text('Skip'),
-                          ),
-                        if (_currentStep == _steps.length - 1)
+                          if (_currentStep == _steps.length - 1)
                           const SizedBox(width: 16),
-                        ElevatedButton(
-                          onPressed: _nextStep,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isDark ? Colors.white : Colors.blue.shade700,
-                            foregroundColor: isDark ? theme.primaryColor : Colors.white,
+                          ElevatedButton(
+                            onPressed: _nextStep,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isDark ? Colors.white : Colors.blue.shade700,
+                              foregroundColor: isDark ? theme.primaryColor : Colors.white,
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
+                            child: Text(_currentStep < _steps.length - 1 ? 'Next' : 'Finish'),
                           ),
-                          child: Text(_currentStep < _steps.length - 1 ? 'Next' : 'Finish'),
-                        ),
-                      ],
-                    ),
-                    if (_currentStep == _steps.length - 1)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: CheckboxListTile(
-                          title: Text(
-                            'Don\'t show again',
-                            style: TextStyle(
-                              color: isDark ? Colors.white : Colors.grey.shade700,
-                              fontSize: 14,
-                            ),
-                          ),
-                          value: _dontShowAgain,
-                          onChanged: (value) {
-                            setState(() {
-                              _dontShowAgain = value ?? false;
-                            });
-                          },
-                          controlAffinity: ListTileControlAffinity.leading,
-                          contentPadding: EdgeInsets.zero,
-                          activeColor: isDark ? Colors.white : Colors.blue.shade700,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
+                        ],
                       ),
-                  ],
+                      if (_currentStep == _steps.length - 1)
+                        Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                          child: CheckboxListTile(
+                            title: Text(
+                              'Don\'t show again',
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.grey.shade700,
+                                fontSize: 14,
+                              ),
+                            ),
+                            value: _dontShowAgain,
+                            onChanged: (value) {
+                              setState(() {
+                                _dontShowAgain = value ?? false;
+                              });
+                            },
+                            controlAffinity: ListTileControlAffinity.leading,
+                            contentPadding: EdgeInsets.zero,
+                            activeColor: isDark ? Colors.white : Colors.blue.shade700,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                    ],
                 ),
               ),
             ),
