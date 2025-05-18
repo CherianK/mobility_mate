@@ -10,6 +10,7 @@ import '../widgets/custom_app_bar.dart';
 import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../utils/badge_manager.dart';
 
 class VotePage extends StatefulWidget {
   final Map<String, dynamic>? initialLocation;
@@ -147,6 +148,10 @@ class _VotePageState extends State<VotePage> {
           currentVotes[photoId] = photoVotes;
           locationPhotoVotes[locationId] = currentVotes;
         });
+
+        // Update streak and check for badges
+        await BadgeManager.updateStreak();
+      
       } else if (response.statusCode == 400) {
         // Handle case where user has already voted
         final data = json.decode(response.body);
