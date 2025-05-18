@@ -48,56 +48,49 @@ class _ProfilePageState extends State<ProfilePage> {
         // Debug check badges
         await BadgeManager.debugCheckBadges();
 
-        // Load leaderboard data to get user's stats
+        // Load leaderboard data to get user's stats (including uploads for badge system)
         final response = await http.get(
           Uri.parse('https://mobility-mate.onrender.com/api/leaderboard'),
         );
 
+        int approvedPhotos = 0;
+        int totalPoints = 0;
         if (response.statusCode == 200) {
           final List<dynamic> leaderboardData = json.decode(response.body);
-          
-          // Find user's entry in leaderboard
           final userEntry = leaderboardData.firstWhere(
             (entry) => entry['username'] == username,
-            orElse: () => {'points': 0, 'rank': 0},
+            orElse: () => null,
           );
-
-          // Load voting stats
-          final votesResponse = await http.get(
-            Uri.parse('https://mobility-mate.onrender.com/api/votes/device/$deviceId'),
-          );
-
-          int totalVotes = 0;
-          if (votesResponse.statusCode == 200) {
-            final List<dynamic> votes = json.decode(votesResponse.body);
-            totalVotes = votes.length;
-            // Ensure badges are checked and awarded for votes
-            // Remove the call to the private method _checkAndAwardBadges (not accessible)
-            await BadgeManager.updateStreak();
-            // Reload badgeInfo after awarding
-            badgeInfo = await BadgeManager.getBadgeInfo();
+          if (userEntry != null) {
+            totalPoints = userEntry['points'] ?? 0;
+            approvedPhotos = userEntry['total_uploads'] ?? 0;
           }
-
-          // Load approved photos for username
-          final uploadsResponse = await http.get(
-            Uri.parse('https://mobility-mate.onrender.com/api/uploads/username/${Uri.encodeComponent(username!)}'),
-          );
-
-          int approvedPhotos = 0;
-          if (uploadsResponse.statusCode == 200) {
-            final uploads = json.decode(uploadsResponse.body);
-            approvedPhotos = uploads['approved_uploads'] ?? 0;
-          }
-
-          setState(() {
-            userStats = {
-              'total_points': userEntry['points'],
-              'total_votes': totalVotes,
-              'photo_uploads': approvedPhotos,
-            };
-            isLoading = false;
-          });
         }
+
+        // Load voting stats
+        final votesResponse = await http.get(
+          Uri.parse('https://mobility-mate.onrender.com/api/votes/device/$deviceId'),
+        );
+
+        int totalVotes = 0;
+        if (votesResponse.statusCode == 200) {
+          final List<dynamic> votes = json.decode(votesResponse.body);
+          totalVotes = votes.length;
+          // Ensure badges are checked and awarded for votes
+          // Remove the call to the private method _checkAndAwardBadges (not accessible)
+          await BadgeManager.updateStreak();
+          // Reload badgeInfo after awarding
+          badgeInfo = await BadgeManager.getBadgeInfo();
+        }
+
+        setState(() {
+          userStats = {
+            'total_points': totalPoints,
+            'total_votes': totalVotes,
+            'photo_uploads': approvedPhotos,
+          };
+          isLoading = false;
+        });
       }
     } catch (e) {
       print('DEBUG - Error in _loadUserData: $e');
@@ -202,22 +195,34 @@ class _ProfilePageState extends State<ProfilePage> {
                               const SizedBox(height: 8),
                               if (userStats != null)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                   decoration: BoxDecoration(
-                                    color: Colors.amber.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(16),
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18),
+                                    border: Border.all(
+                                      color: Colors.amber,
+                                      width: 2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.amber.withOpacity(0.08),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.stars, color: Colors.amber[800], size: 20),
-                                      const SizedBox(width: 8),
+                                      Icon(Icons.stars, color: Colors.amber, size: 24),
+                                      const SizedBox(width: 10),
                                       Text(
                                         '${userStats?['total_points'] ?? 0} Points',
                                         style: const TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 22,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.amber,
+                                          letterSpacing: -0.5,
                                         ),
                                       ),
                                     ],
