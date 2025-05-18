@@ -19,6 +19,8 @@ class _SearchPageState extends State<SearchPage> {
   List<Map<String, dynamic>> recentSearches = [];
   List<Map<String, dynamic>> allLocations = [];
   bool isLoading = false;
+  // Track active searches to cancel them if needed
+  bool _isMounted = true;
 
   static const _recentKey = 'recent_searches';
 
@@ -28,11 +30,18 @@ class _SearchPageState extends State<SearchPage> {
     loadRecentSearches();
     loadLocalData();
   }
+  
+  @override
+  void dispose() {
+    _isMounted = false;
+    super.dispose();
+  }
 
   Future<void> loadLocalData() async {
     try {
       final String jsonString = await rootBundle.loadString('assets/suburb_stations.json');
       final List<dynamic> data = json.decode(jsonString);
+      if (!_isMounted) return;
       allLocations = data.cast<Map<String, dynamic>>();
       debugPrint('Loaded ${allLocations.length} local locations');
     } catch (e) {
@@ -41,7 +50,10 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> searchLocations(String query) async {
+    if (!_isMounted) return;
+    
     if (query.isEmpty) {
+      if (!_isMounted) return;
       setState(() {
         mapboxResults = [];
         localResults = [];
@@ -50,22 +62,40 @@ class _SearchPageState extends State<SearchPage> {
       return;
     }
 
+    if (!_isMounted) return;
     setState(() {
       isLoading = true;
     });
 
-    // Search local data
-    final filteredLocal = allLocations.where((location) {
+    // Search local data and separate by type
+    final trainTramResults = <Map<String, dynamic>>[];
+    final suburbResults = <Map<String, dynamic>>[];
+    final healthcareResults = <Map<String, dynamic>>[];
+    
+    allLocations.where((location) {
       final name = location['Name'].toString().toLowerCase();
       return name.contains(query.toLowerCase());
-    }).map((location) {
-      return {
+    }).forEach((location) {
+      if (!_isMounted) return;
+      final type = location['Accessibility_Type_Name']?.toString().toLowerCase() ?? '';
+      final resultMap = {
         'name': location['Name'],
         'lat': location['Latitude'],
         'lon': location['Longitude'],
         'isLocal': true,
+        'type': type,
       };
-    }).toList();
+      
+      if (type == 'trains' || type == 'trams') {
+        trainTramResults.add(resultMap);
+      } else if (type == 'suburb') {
+        suburbResults.add(resultMap);
+      } else if (type == 'healthcare') {
+        healthcareResults.add(resultMap);
+      }
+    });
+    
+    if (!_isMounted) return;
 
     // Search Mapbox
     try {
@@ -78,6 +108,9 @@ class _SearchPageState extends State<SearchPage> {
       );
 
       final response = await http.get(url);
+      
+      // Check if widget is still mounted after async operation
+      if (!_isMounted) return;
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -92,27 +125,35 @@ class _SearchPageState extends State<SearchPage> {
             'lat': lat,
             'lon': lon,
             'isLocal': false,
+            'type': 'mapbox',
           };
         }).toList();
 
+        // One final mounted check before setState
+        if (!_isMounted) return;
         setState(() {
           mapboxResults = mapboxLocations;
-          localResults = filteredLocal;
+          // Include all local results (trains, trams, healthcare, and suburbs)
+          localResults = [...trainTramResults, ...suburbResults, ...healthcareResults];
           isLoading = false;
         });
       } else {
         debugPrint('Mapbox API Error: ${response.statusCode}');
+        if (!_isMounted) return;
         setState(() {
           mapboxResults = [];
-          localResults = filteredLocal;
+          // Include all local results (trains, trams, healthcare, and suburbs)
+          localResults = [...trainTramResults, ...suburbResults, ...healthcareResults];
           isLoading = false;
         });
       }
     } catch (e) {
       debugPrint('Error: $e');
+      if (!_isMounted) return;
       setState(() {
         mapboxResults = [];
-        localResults = filteredLocal;
+        // Include all local results (trains, trams, healthcare, and suburbs)
+        localResults = [...trainTramResults, ...suburbResults, ...healthcareResults];
         isLoading = false;
       });
     }
@@ -141,14 +182,32 @@ class _SearchPageState extends State<SearchPage> {
       final List<Map<String, dynamic>> decoded = encoded
           .map((e) => Map<String, dynamic>.from(json.decode(e)))
           .toList();
+      if (!_isMounted) return;
       setState(() {
         recentSearches = decoded;
       });
     }
   }
 
+  Future<void> clearRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_recentKey);
+    if (!_isMounted) return;
+    setState(() {
+      recentSearches = [];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Separate local results by type for UI display
+    final trainTramResults = localResults.where((loc) => 
+      loc['type'] == 'trains' || loc['type'] == 'trams').toList();
+    final healthcareResults = localResults.where((loc) => 
+      loc['type'] == 'healthcare').toList();
+    final suburbResults = localResults.where((loc) => 
+      loc['type'] == 'suburb').toList();
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search Locations'),
@@ -160,8 +219,10 @@ class _SearchPageState extends State<SearchPage> {
             child: TextField(
               controller: _controller,
               onChanged: (value) {
+                // Cancel any previous delayed searches to prevent race conditions
                 Future.delayed(const Duration(milliseconds: 300), () {
-                  if (value == _controller.text) {
+                  // Verify the widget is still mounted and the text hasn't changed
+                  if (_isMounted && value == _controller.text) {
                     searchLocations(value);
                   }
                 });
@@ -184,46 +245,134 @@ class _SearchPageState extends State<SearchPage> {
             child: _controller.text.isEmpty
                 ? ListView(
                     children: [
-                      if (recentSearches.isNotEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          child: Text(
-                            'Recent Searches',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
+                      if (recentSearches.isNotEmpty) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Recent Searches',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              TextButton.icon(
+                                icon: const Icon(Icons.clear_all, size: 18),
+                                label: const Text('Clear All'),
+                                onPressed: () {
+                                  clearRecentSearches();
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ...recentSearches.map((location) {
-                        return ListTile(
-                          leading: const Icon(Icons.history),
-                          title: Text(location['name']),
-                          onTap: () {
-                            Navigator.pop(context, location);
-                          },
-                        );
-                      })
+                        ...recentSearches.map((location) {
+                          // Determine the icon based on the location type
+                          Widget leadingIcon;
+                          if (location['type'] == 'trains') {
+                            leadingIcon = const Icon(Icons.train, color: Colors.blue);
+                          } else if (location['type'] == 'trams') {
+                            leadingIcon = const Icon(Icons.tram, color: Colors.green);
+                          } else if (location['type'] == 'healthcare') {
+                            leadingIcon = const Icon(Icons.local_hospital, color: Colors.red);
+                          } else if (location['type'] == 'suburb') {
+                            leadingIcon = const Icon(Icons.location_city, color: Colors.orange);
+                          } else {
+                            leadingIcon = const Icon(Icons.history);
+                          }
+                          
+                          return ListTile(
+                            leading: leadingIcon,
+                            title: Text(location['name']),
+                            onTap: () {
+                              Navigator.pop(context, location);
+                            },
+                          );
+                        })
+                      ],
                     ],
                   )
                 : ListView(
                     children: [
-                      if (localResults.isNotEmpty) ...[
+                      // 1. Display Train and Tram stations first
+                      if (trainTramResults.isNotEmpty) ...[
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           child: Text(
-                            'Stations & Suburbs',
+                            'Train & Tram Stations',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                         ),
-                        ...localResults.map((location) => ListTile(
-                          leading: const Icon(Icons.train),
+                        ...trainTramResults.map((location) => ListTile(
+                          leading: Icon(
+                            location['type'] == 'trains' ? Icons.train : Icons.tram,
+                            color: location['type'] == 'trains' ? Colors.blue : Colors.green,
+                          ),
                           title: Text(location['name']),
                           onTap: () {
+                            // For trains and trams, add to recent searches and pop with location data
+                            // This will trigger bottom sheet with info + center to location
                             _addToRecentSearches(location);
                             Navigator.pop(context, location);
                           },
                         )),
                       ],
+                      
+                      // 2. Display Healthcare Facilities second
+                      if (healthcareResults.isNotEmpty) ...[
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Text(
+                            'Healthcare Facilities',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ),
+                        ...healthcareResults.map((location) => ListTile(
+                          leading: const Icon(Icons.local_hospital, color: Colors.red),
+                          title: Text(location['name']),
+                          onTap: () {
+                            // For healthcare, add to recent searches and pop with location data
+                            // This will trigger bottom sheet with info + center to location
+                            _addToRecentSearches(location);
+                            Navigator.pop(context, location);
+                          },
+                        )),
+                      ],
+                      
+                      // 3. Display Suburbs third
+                      if (suburbResults.isNotEmpty) ...[
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Text(
+                            'Suburbs',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ),
+                        ...suburbResults.map((location) => ListTile(
+                          leading: const Icon(Icons.location_city, color: Colors.orange),
+                          title: Text(location['name']),
+                          onTap: () {
+                            // For suburbs, add to recent searches and pop with location data
+                            // Include a flag to indicate this should only center the map without bottom sheet
+                            final locationWithFlag = {
+                              ...location,
+                              'centerOnly': true, // Flag to indicate only center to location, no bottom sheet
+                            };
+                            _addToRecentSearches(locationWithFlag);
+                            Navigator.pop(context, locationWithFlag);
+                          },
+                        )),
+                      ],
+                      
+                      // 4. Display Mapbox results last
                       if (mapboxResults.isNotEmpty) ...[
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -234,15 +383,23 @@ class _SearchPageState extends State<SearchPage> {
                           ),
                         ),
                         ...mapboxResults.map((location) => ListTile(
-                          leading: const Icon(Icons.location_on),
+                          leading: const Icon(Icons.location_on, color: Colors.red),
                           title: Text(location['name']),
                           onTap: () {
-                            _addToRecentSearches(location);
-                            Navigator.pop(context, location);
+                            // For Mapbox results, add to recent searches and pop with location data
+                            // Include a flag to indicate this should only center the map without bottom sheet
+                            final locationWithFlag = {
+                              ...location,
+                              'centerOnly': true, // Flag to indicate only center to location, no bottom sheet
+                            };
+                            _addToRecentSearches(locationWithFlag);
+                            Navigator.pop(context, locationWithFlag);
                           },
                         )),
                       ],
-                      if (localResults.isEmpty && mapboxResults.isEmpty)
+                      
+                      if (trainTramResults.isEmpty && healthcareResults.isEmpty && 
+                          suburbResults.isEmpty && mapboxResults.isEmpty)
                         const Padding(
                           padding: EdgeInsets.all(16),
                           child: Center(

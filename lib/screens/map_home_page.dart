@@ -88,9 +88,8 @@ class _MapHomePageState extends State<MapHomePage> {
         ),
         MapAnimationOptions(duration: 1000),
       );
-      debugPrint(' Initial centering on user location: ${position.latitude}, ${position.longitude}');
     } else {
-      debugPrint(' Using Melbourne center for initial load');
+      // Fallback to Melbourne center
     }
     
     setState(() {
@@ -193,10 +192,7 @@ class _MapHomePageState extends State<MapHomePage> {
         ),
         MapAnimationOptions(duration: 1000),
       );
-
-      debugPrint(' Centered on user location: ${position.latitude}, ${position.longitude}');
     } catch (e) {
-      debugPrint(' Error getting location: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -432,13 +428,12 @@ class _MapHomePageState extends State<MapHomePage> {
     try {
       final resp = await http.get(Uri.parse('$_baseUrl/${type.endpoint}'));
       if (resp.statusCode != 200) {
-        debugPrint(' ${type.name} API error ${resp.statusCode}');
+        // API error
         return;
       }
 
       final List<dynamic> list = json.decode(resp.body);
-      debugPrint(' ${list.length} ${type.name}s fetched');
-
+      
       _markerPayloads[type] = list.cast<Map<String, dynamic>>();
 
       _markerOptions[type] = [
@@ -454,7 +449,7 @@ class _MapHomePageState extends State<MapHomePage> {
           )
       ];
     } catch (e) {
-      debugPrint(' Error fetching ${type.name}: $e');
+      // Error fetching data
     }
   }
 
@@ -487,13 +482,11 @@ class _MapHomePageState extends State<MapHomePage> {
             }
           }
           _activeMarkers[type] = nonNull;
-          debugPrint(' Show ${type.name} markers at zoom $zoom');
         }
       } else {
         if (_activeMarkers[type]!.isNotEmpty) {
           await mgr.deleteAll();
           _activeMarkers[type] = [];
-          debugPrint(' Hide ${type.name} markers at zoom $zoom');
         }
       }
     }
@@ -564,7 +557,7 @@ class _MapHomePageState extends State<MapHomePage> {
       final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
       await _updateVisibility(zoom);
     } catch (e) {
-      debugPrint('Error updating map style: $e');
+      // Error updating style
     }
   }
 
@@ -669,7 +662,6 @@ class _MapHomePageState extends State<MapHomePage> {
           await _showToiletLocationSheet(result['toilet_data'] as Map<String, dynamic>, showToiletList);
         }
       } catch (e) {
-        debugPrint('Error in toilet finder: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -754,7 +746,14 @@ class _MapHomePageState extends State<MapHomePage> {
         _activeSheet = null;
       }
     } catch (e) {
-      debugPrint('Error showing toilet location sheet: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       // Only clear the active sheet if we're still mounted
       if (mounted) {
         _activeSheet = null;
