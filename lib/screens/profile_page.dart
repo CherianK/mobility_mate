@@ -31,6 +31,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _loadUserData() async {
     try {
+      // Initialize badge storage
+      await BadgeManager.initializeBadgeStorage();
+      
       final prefs = await SharedPreferences.getInstance();
       deviceId = prefs.getString('device_id');
       
@@ -40,36 +43,64 @@ class _ProfilePageState extends State<ProfilePage> {
         
         // Load badge info
         badgeInfo = await BadgeManager.getBadgeInfo();
+        print('DEBUG - Profile page received badge info: $badgeInfo');
+        
+        // Debug check badges
+        await BadgeManager.debugCheckBadges();
 
-        // Load voting stats
+        // Load leaderboard data to get user's stats
         final response = await http.get(
-          Uri.parse('https://mobility-mate.onrender.com/api/votes/device/$deviceId'),
+          Uri.parse('https://mobility-mate.onrender.com/api/leaderboard'),
         );
 
         if (response.statusCode == 200) {
-          final List<dynamic> votes = json.decode(response.body);
-          int accurateCount = 0;
-          int inaccurateCount = 0;
+          final List<dynamic> leaderboardData = json.decode(response.body);
+          
+          // Find user's entry in leaderboard
+          final userEntry = leaderboardData.firstWhere(
+            (entry) => entry['username'] == username,
+            orElse: () => {'points': 0, 'rank': 0},
+          );
 
-          for (var vote in votes) {
-            if (vote['is_accurate'] == true) {
-              accurateCount++;
-            } else {
-              inaccurateCount++;
-            }
+          // Load voting stats
+          final votesResponse = await http.get(
+            Uri.parse('https://mobility-mate.onrender.com/api/votes/device/$deviceId'),
+          );
+
+          int totalVotes = 0;
+          if (votesResponse.statusCode == 200) {
+            final List<dynamic> votes = json.decode(votesResponse.body);
+            totalVotes = votes.length;
+            // Ensure badges are checked and awarded for votes
+            // Remove the call to the private method _checkAndAwardBadges (not accessible)
+            await BadgeManager.updateStreak();
+            // Reload badgeInfo after awarding
+            badgeInfo = await BadgeManager.getBadgeInfo();
+          }
+
+          // Load approved photos for username
+          final uploadsResponse = await http.get(
+            Uri.parse('https://mobility-mate.onrender.com/api/uploads/username/${Uri.encodeComponent(username!)}'),
+          );
+
+          int approvedPhotos = 0;
+          if (uploadsResponse.statusCode == 200) {
+            final uploads = json.decode(uploadsResponse.body);
+            approvedPhotos = uploads['approved_uploads'] ?? 0;
           }
 
           setState(() {
             userStats = {
-              'total_votes': votes.length,
-              'accurate_votes': accurateCount,
-              'inaccurate_votes': inaccurateCount,
+              'total_points': userEntry['points'],
+              'total_votes': totalVotes,
+              'photo_uploads': approvedPhotos,
             };
             isLoading = false;
           });
         }
       }
     } catch (e) {
+      print('DEBUG - Error in _loadUserData: $e');
       setState(() {
         isLoading = false;
       });
@@ -168,6 +199,30 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                 ),
                               ),
+                              const SizedBox(height: 8),
+                              if (userStats != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.stars, color: Colors.amber[800], size: 20),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '${userStats?['total_points'] ?? 0} Points',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.amber,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -256,40 +311,52 @@ class _ProfilePageState extends State<ProfilePage> {
                                 const SizedBox(height: 20),
                                 const Divider(height: 1),
                                 const SizedBox(height: 20),
-                                Text(
-                                  'Next Badge: ${badgeInfo!['nextBadge']['name']}',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: isDark ? Colors.grey[300] : Colors.grey[700],
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: Colors.orange[700]!.withOpacity(0.3),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: LinearProgressIndicator(
-                                      value: badgeInfo!['nextBadge']['progress'] / 100,
-                                      backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.orange[700]!),
-                                      minHeight: 8,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '${badgeInfo!['nextBadge']['progress']}% complete',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: isDark ? Colors.grey[400] : Colors.grey[600],
-                                  ),
+                                Builder(
+                                  builder: (context) {
+                                    print('DEBUG - Rendering next badge section');
+                                    print('DEBUG - Next badge data: ${badgeInfo!['nextBadge']}');
+                                    print('DEBUG - Progress value: ${badgeInfo!['nextBadge']['progress']}');
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Next Badge: ${badgeInfo!['nextBadge']['name']}',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: Colors.orange[700]!.withOpacity(0.3),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: LinearProgressIndicator(
+                                              value: badgeInfo!['nextBadge']['progress'] / 100,
+                                              backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange[700]!),
+                                              minHeight: 8,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          '${badgeInfo!['nextBadge']['progress']}% complete',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 ),
                               ],
                             ],
@@ -298,155 +365,44 @@ class _ProfilePageState extends State<ProfilePage> {
                         const SizedBox(height: 24),
                         // Badges Section
                         Container(
-                          margin: const EdgeInsets.only(top: 16),
-                          padding: const EdgeInsets.all(24),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+                            color: isDark ? Colors.grey[850] : Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.amber[700]!.withOpacity(isDark ? 0.3 : 0.1),
+                                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
                             ],
                             border: Border.all(
-                              color: Colors.amber[700]!.withOpacity(0.3),
+                              color: Colors.blue[700]!.withOpacity(0.15),
                               width: 1,
                             ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.amber[700]?.withOpacity(0.2),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.amber[700]!.withOpacity(0.3),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      Icons.emoji_events,
-                                      color: Colors.amber[700],
-                                      size: 24,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'Earned Badges',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: isDark ? Colors.white : Colors.black87,
-                                      letterSpacing: -0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              if ((badgeInfo?['earnedBadges'] as Set<String>?)?.isEmpty ?? true)
-                                Container(
-                                  padding: const EdgeInsets.all(24),
-                                  decoration: BoxDecoration(
-                                    color: Colors.amber[700]?.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: Colors.amber[700]!.withOpacity(0.3),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.emoji_events_outlined,
-                                        size: 48,
-                                        color: Colors.amber[700],
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        'No badges earned yet',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
-                                          color: isDark ? Colors.white : Colors.black87,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        'Keep voting daily to earn badges!',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: isDark ? Colors.grey[400] : Colors.grey[600],
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              else
-                                GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    childAspectRatio: 1.2,
-                                    crossAxisSpacing: 16,
-                                    mainAxisSpacing: 16,
-                                  ),
-                                  itemCount: (badgeInfo?['earnedBadges'] as Set<String>?)?.length ?? 0,
-                                  itemBuilder: (context, index) {
-                                    final badgeId = (badgeInfo!['earnedBadges'] as Set<String>).elementAt(index);
-                                    final badge = BadgeManager.badges[badgeId]!;
-                                    
-                                    return Container(
-                                      padding: const EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        color: Colors.amber[700]?.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color: Colors.amber[700]!.withOpacity(0.3),
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            badge['icon'],
-                                            style: const TextStyle(fontSize: 36),
-                                          ),
-                                          const SizedBox(height: 12),
-                                          Text(
-                                            badge['name'],
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: isDark ? Colors.white : Colors.black87,
-                                              letterSpacing: -0.5,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            badge['description'],
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: isDark ? Colors.grey[400] : Colors.grey[600],
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
+                              Text(
+                                'Earned Badges',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  letterSpacing: -0.5,
                                 ),
+                              ),
+                              const SizedBox(height: 16),
+                              _BadgeDropdownSection(
+                                earnedBadges: (badgeInfo?['earnedBadges'] is Set)
+                                    ? (badgeInfo?['earnedBadges'] as Set<String>)
+                                    : badgeInfo?['earnedBadges'] is List
+                                        ? Set<String>.from(badgeInfo?['earnedBadges'] ?? [])
+                                        : <String>{},
+                                badgeInfo: badgeInfo,
+                                isDark: isDark,
+                              ),
                             ],
                           ),
                         ),
@@ -649,6 +605,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ],
                           ),
                         ),
+                        const SizedBox(height: 24),
                         // About Section
                         Container(
                           margin: const EdgeInsets.only(top: 16),
@@ -796,4 +753,224 @@ class HexagonPatternPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-} 
+}
+
+class _BadgeDropdownSection extends StatefulWidget {
+  final Set<String> earnedBadges;
+  final Map<String, dynamic>? badgeInfo;
+  final bool isDark;
+  const _BadgeDropdownSection({
+    required this.earnedBadges,
+    required this.badgeInfo,
+    required this.isDark,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<_BadgeDropdownSection> createState() => _BadgeDropdownSectionState();
+}
+
+class _BadgeDropdownSectionState extends State<_BadgeDropdownSection> {
+  bool _isExpanded = false;
+
+  final List<Map<String, String>> _categories = [
+    {'type': 'streak', 'label': 'Streak Badges', 'icon': '🔥'},
+    {'type': 'votes', 'label': 'Voting Badges', 'icon': '👍'},
+    {'type': 'uploads', 'label': 'Upload Badges', 'icon': '📸'},
+    {'type': 'special', 'label': 'Special Achievements', 'icon': '✨'},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final earnedBadges = widget.earnedBadges;
+    final badgeInfo = widget.badgeInfo;
+    final isDark = widget.isDark;
+    final hasAnyEarned = earnedBadges.isNotEmpty;
+
+    // Earned badges section (always visible)
+    Widget earnedBadgesSection = hasAnyEarned
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _categories.map((category) {
+              final type = category['type']!;
+              final label = category['label']!;
+              final icon = category['icon']!;
+              final badgesOfType = BadgeManager.badges.entries
+                  .where((badge) => badge.value['type'] == type && earnedBadges.contains(badge.key))
+                  .toList();
+              if (badgesOfType.isEmpty) return const SizedBox.shrink();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(icon, style: const TextStyle(fontSize: 22)),
+                      const SizedBox(width: 8),
+                      Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black87)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ...badgesOfType.map((badge) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.blueGrey[900] : Colors.blue[50],
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.blue[200]!, width: 2),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(badge.value['icon'] ?? '', style: const TextStyle(fontSize: 28)),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(badge.value['name'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87, fontSize: 15)),
+                                const SizedBox(height: 2),
+                                Text(badge.value['description'] ?? '', style: TextStyle(fontSize: 12, color: isDark ? Colors.grey[300] : Colors.grey[700])),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 12),
+                ],
+              );
+            }).toList(),
+          )
+        : Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              'No badges earned yet. Start contributing to earn achievements!',
+              style: TextStyle(color: isDark ? Colors.grey[300] : Colors.grey[700]),
+            ),
+          );
+
+    // Upcoming (unearned) badges dropdown
+    Widget upcomingDropdown = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () => setState(() => _isExpanded = !_isExpanded),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.blueGrey[900] : Colors.blue[50],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(_isExpanded ? Icons.expand_less : Icons.expand_more, color: isDark ? Colors.white : Colors.blue[900]),
+                const SizedBox(width: 8),
+                Text(
+                  'Upcoming Achievements',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.blue[900],
+                  ),
+                ),
+                const Spacer(),
+                Icon(Icons.emoji_events, color: isDark ? Colors.amber[200] : Colors.amber[800]),
+              ],
+            ),
+          ),
+        ),
+        if (_isExpanded)
+          Padding(
+            padding: const EdgeInsets.only(top: 12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: _categories.map((category) {
+                final type = category['type']!;
+                final label = category['label']!;
+                final icon = category['icon']!;
+                final badgesOfType = BadgeManager.badges.entries
+                    .where((badge) => badge.value['type'] == type && !earnedBadges.contains(badge.key))
+                    .toList();
+                if (badgesOfType.isEmpty) return const SizedBox.shrink();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(icon, style: const TextStyle(fontSize: 22)),
+                        const SizedBox(width: 8),
+                        Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black87)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ...badgesOfType.map((badge) {
+                      // Progress calculation
+                      int currentProgress = 0;
+                      int requiredProgress = 0;
+                      String progressText = '';
+                      if (badge.value['type'] == 'streak') {
+                        requiredProgress = badge.value['requiredStreak'] ?? 0;
+                        currentProgress = badgeInfo?['currentStreak'] ?? 0;
+                        progressText = '$currentProgress/$requiredProgress days';
+                      } else if (badge.value['type'] == 'votes') {
+                        requiredProgress = badge.value['requiredVotes'] ?? 0;
+                        currentProgress = badgeInfo?['totalVotes'] ?? 0;
+                        progressText = '$currentProgress/$requiredProgress votes';
+                      } else if (badge.value['type'] == 'uploads') {
+                        requiredProgress = badge.value['requiredUploads'] ?? 0;
+                        currentProgress = badgeInfo?['totalUploads'] ?? 0;
+                        progressText = '$currentProgress/$requiredProgress uploads';
+                      }
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey[900] : Colors.grey[200],
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.grey[400]!, width: 2),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(badge.value['icon'] ?? '', style: const TextStyle(fontSize: 28, color: Colors.grey)),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(badge.value['name'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[500], fontSize: 15)),
+                                  const SizedBox(height: 2),
+                                  Text(badge.value['description'] ?? '', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                                  if (requiredProgress > 0)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4.0),
+                                      child: Text(
+                                        progressText,
+                                        style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 12),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+      ],
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        earnedBadgesSection,
+        const SizedBox(height: 12),
+        upcomingDropdown,
+      ],
+    );
+  }
+}
