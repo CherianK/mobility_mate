@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../utils/pattern_painters.dart';
 
 class LeaderboardPage extends StatefulWidget {
   const LeaderboardPage({super.key});
@@ -61,6 +62,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Leaderboard'),
+        backgroundColor: const Color(0xFF6C63FF),
+        foregroundColor: Colors.white,
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -135,156 +139,242 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                         ],
                       ),
                     )
-                  : Column(
+                  : Stack(
                       children: [
-                        // Header with explanation
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          color: isDark ? Colors.blue.shade900.withOpacity(0.2) : Colors.blue.shade50,
-                          child: Column(
-                            children: [
-                              const Text(
-                                'Community Contributors',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Points are earned through voting (1 point) and uploading photos (5 points).',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: isDark ? Colors.grey[300] : Colors.grey[700],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Table header
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: isDark ? Colors.grey[800] : Colors.grey[200],
-                            border: Border(
-                              bottom: BorderSide(
-                                color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-                                width: 1,
-                              ),
+                        // Background pattern
+                        Positioned.fill(
+                          child: Opacity(
+                            opacity: 0.1,
+                            child: CustomPaint(
+                              painter: HexagonPatternPainter(),
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 50,
-                                child: Text(
-                                  'Rank',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 3,
-                                child: Text(
-                                  'Username',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 80,
-                                child: Text(
-                                  'Points',
-                                  textAlign: TextAlign.end,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                        // Leaderboard list
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: _leaderboardData.length,
-                            itemBuilder: (context, index) {
-                              final entry = _leaderboardData[index];
-                              final rank = entry['rank'];
-                              final username = entry['username'];
-                              final points = entry['points'];
-                              
-                              // Determine if this is a top 3 position
-                              final isTop3 = rank <= 3;
-                              final rankColor = rank == 1
-                                  ? Colors.amber
-                                  : rank == 2
-                                      ? Colors.grey.shade400
-                                      : rank == 3
-                                          ? Colors.brown.shade300
-                                          : isDark
-                                              ? Colors.grey[700]
-                                              : Colors.grey[300];
-                              
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: isDark ? Colors.grey[900] : Colors.white,
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-                                      width: 1,
+                        Column(
+                          children: [
+                            // Header with explanation
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF6C63FF).withOpacity(isDark ? 0.3 : 0.1),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF6C63FF).withOpacity(0.2),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.emoji_events,
+                                          color: Color(0xFF6C63FF),
+                                          size: 24,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        'Community Contributors',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                          letterSpacing: -0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF6C63FF).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Points are earned through voting (1 point) and uploading photos (5 points).',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                        height: 1.5,
+                                      ),
                                     ),
                                   ),
+                                ],
+                              ),
+                            ),
+                            // Table header
+                            Container(
+                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF6C63FF).withOpacity(isDark ? 0.3 : 0.1),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                  width: 1,
                                 ),
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                  leading: Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: rankColor,
-                                    ),
-                                    child: Center(
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 50,
                                       child: Text(
-                                        '$rank',
+                                        'Rank',
                                         style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: rank <= 3 ? Colors.white : (isDark ? Colors.white : Colors.black87),
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white : Colors.black87,
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  title: Text(
-                                    username,
-                                    style: TextStyle(
-                                      fontWeight: isTop3 ? FontWeight.bold : FontWeight.normal,
-                                      fontSize: isTop3 ? 16 : 14,
-                                    ),
-                                  ),
-                                  trailing: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: isDark ? Colors.blue.shade900.withOpacity(0.3) : Colors.blue.shade50,
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Text(
-                                      '$points',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.blue.shade300 : Colors.blue.shade800,
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      flex: 3,
+                                      child: Text(
+                                        'Username',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                    SizedBox(
+                                      width: 100,
+                                      child: Text(
+                                        'Points',
+                                        textAlign: TextAlign.end,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            ),
+                            // Leaderboard list
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: _leaderboardData.length,
+                                itemBuilder: (context, index) {
+                                  final entry = _leaderboardData[index];
+                                  final rank = entry['rank'];
+                                  final username = entry['username'];
+                                  final points = entry['points'];
+                                  
+                                  // Determine if this is a top 3 position
+                                  final isTop3 = rank <= 3;
+                                  final Color rankColor = rank == 1
+                                      ? Colors.amber
+                                      : rank == 2
+                                          ? Colors.grey.shade400
+                                          : rank == 3
+                                              ? Colors.brown.shade300
+                                              : isDark
+                                                  ? const Color(0xFF616161)  // Colors.grey[700]
+                                                  : const Color(0xFFE0E0E0); // Colors.grey[300]
+                                  
+                                  return Container(
+                                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFF6C63FF).withOpacity(isDark ? 0.3 : 0.1),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                      border: Border.all(
+                                        color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: ListTile(
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      leading: Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: rankColor.withOpacity(0.2),
+                                          border: Border.all(
+                                            color: rankColor.withOpacity(0.3),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '#$rank',
+                                            style: TextStyle(
+                                              color: rankColor,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      title: Text(
+                                        username,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                      ),
+                                      trailing: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF6C63FF).withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(20),
+                                          border: Border.all(
+                                            color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          points.toString(),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFF6C63FF),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

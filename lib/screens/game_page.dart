@@ -324,20 +324,29 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
             children: [
               // Blue header
               Container(
-                width: double.infinity,
-                color: Colors.blue,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
                 child: Stack(
                   children: [
-                    // Gaming-style background pattern
+                    // Hexagonal pattern
                     Positioned.fill(
                       child: Opacity(
                         opacity: 0.1,
                         child: CustomPaint(
-                          painter: DotPatternPainter(),
+                          painter: HexagonPatternPainter(),
                         ),
                       ),
                     ),
+                    // Header content
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -398,65 +407,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                 ],
                               ),
                             ),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
-                                  width: 1,
-                                ),
-                              ),
-                              child: IconButton(
-                                icon: Icon(
-                                  isDark ? Icons.light_mode : Icons.dark_mode,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                                onPressed: () {
-                                  final themeProvider = context.read<ThemeProvider>();
-                                  final newMode = themeProvider.themeMode == ThemeMode.dark
-                                      ? ThemeMode.light
-                                      : ThemeMode.dark;
-                                  themeProvider.setThemeMode(newMode);
-                                },
-                                tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-                              ),
-                            ),
                           ],
-                        ),
-                        const SizedBox(height: 12),
-                        // Swipe instructions
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.touch_app,
-                                size: 20,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  'Swipe right if the image shows good accessibility, left if it doesn\'t',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                    height: 1.4,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                       ],
                     ),

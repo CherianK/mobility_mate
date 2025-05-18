@@ -265,15 +265,22 @@ class _MapHomePageState extends State<MapHomePage> {
                         ),
                       ],
                     ),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.menu,
-                        color: isDark ? Colors.white : Colors.black87,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          _scaffoldKey.currentState?.openDrawer();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                            Icons.menu,
+                            color: isDark ? Colors.white : Colors.black87,
+                            size: 24,
+                          ),
+                        ),
                       ),
-                      onPressed: () {
-                        _scaffoldKey.currentState?.openDrawer();
-                      },
-                      tooltip: 'Menu',
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -763,96 +770,178 @@ class _MapHomePageState extends State<MapHomePage> {
         builder: (context, snapshot) {
           final username = snapshot.data ?? 'Loading...';
           
-          return ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              // Drawer header with user info
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      radius: 36,
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                        Icons.person,
-                        size: 40,
-                        color: Colors.blue,
+          return Container(
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[900] : Colors.white,
+            ),
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // Drawer header with user info
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      username,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 36,
+                          backgroundColor: Colors.blue[100],
+                          child: Icon(
+                            Icons.person,
+                            size: 40,
+                            color: Colors.blue[700],
+                          ),
+                        ),
                       ),
-                    ),
-                    const Text(
-                      'Mobility Mate User',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
+                      const SizedBox(height: 16),
+                      Text(
+                        username,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          'Mobility Mate User',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              
-              // Profile page link
-              ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text('Profile'),
-                onTap: () {
-                  Navigator.pop(context); // Close the drawer
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ProfilePage(),
-                    ),
-                  );
-                },
-              ),
-              
-              // Leaderboard link
-              ListTile(
-                leading: const Icon(Icons.emoji_events),
-                title: const Text('Leaderboard'),
-                onTap: () {
-                  Navigator.pop(context); // Close the drawer
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LeaderboardPage(),
-                    ),
-                  );
-                },
-              ),
-              
-              const Divider(),
-              
-              // Dark mode toggle
-              ListTile(
-                leading: Icon(
-                  isDark ? Icons.light_mode : Icons.dark_mode,
+                
+                // Profile page link
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.person_outline,
+                  title: 'Profile',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfilePage(),
+                      ),
+                    );
+                  },
                 ),
-                title: Text(isDark ? 'Light Mode' : 'Dark Mode'),
-                onTap: () {
-                  final themeProvider = context.read<ThemeProvider>();
-                  final newMode = themeProvider.themeMode == ThemeMode.dark
-                      ? ThemeMode.light
-                      : ThemeMode.dark;
-                  themeProvider.setThemeMode(newMode);
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
-            ],
+                
+                // Leaderboard link
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.emoji_events_outlined,
+                  title: 'Leaderboard',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LeaderboardPage(),
+                      ),
+                    );
+                  },
+                ),
+                
+                const Divider(height: 32, thickness: 1),
+                
+                // Dark mode toggle
+                _buildDrawerItem(
+                  context,
+                  icon: isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                  title: isDark ? 'Light Mode' : 'Dark Mode',
+                  onTap: () {
+                    final themeProvider = context.read<ThemeProvider>();
+                    final newMode = themeProvider.themeMode == ThemeMode.dark
+                        ? ThemeMode.light
+                        : ThemeMode.dark;
+                    themeProvider.setThemeMode(newMode);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[800] : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: isDark ? Colors.white : Colors.black87,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
