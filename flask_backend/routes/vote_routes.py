@@ -300,7 +300,8 @@ def get_device_uploaded_images(device_id):
         train_collection = get_collection('trains-victoria')
         tram_collection = get_collection('trams-victoria')
         
-        # Function to get images from a collection
+        all_images = []
+        
         def get_images_from_collection(collection, collection_type):
             images = []
             cursor = collection.find({"Images": {"$exists": True, "$ne": []}})
@@ -308,51 +309,35 @@ def get_device_uploaded_images(device_id):
                 if 'Images' in doc:
                     for image in doc['Images']:
                         if image.get('device_id') == device_id:
-                            # Get location name from Tags or Metadata
+                            # Get location name from either Metadata or Tags
                             location_name = None
-                            if 'Tags' in doc and 'name' in doc['Tags']:
-                                location_name = doc['Tags']['name']
-                            elif 'Metadata' in doc and 'name' in doc['Metadata']:
+                            if 'Metadata' in doc and 'name' in doc['Metadata']:
                                 location_name = doc['Metadata']['name']
-                            
-                            # Get accessibility type name
-                            accessibility_type = None
-                            if 'Tags' in doc and 'accessibility_type' in doc['Tags']:
-                                accessibility_type = doc['Tags']['accessibility_type']
-                            elif 'Metadata' in doc and 'accessibility_type' in doc['Metadata']:
-                                accessibility_type = doc['Metadata']['accessibility_type']
+                            elif 'Tags' in doc and 'name' in doc['Tags']:
+                                location_name = doc['Tags']['name']
                             
                             image_data = {
-                                'image_url': image.get('url'),
-                                'location_name': location_name,
-                                'accessibility_type': accessibility_type,
-                                'collection_type': collection_type,
+                                'image_url': image.get('image_url'),
+                                'location_name': location_name or 'Unknown Location',
+                                'accessibility_type': doc.get('Accessibility_Type_Name', 'Not specified'),
+                                'uploaded_at': image.get('image_upload_time'),
                                 'approved_status': image.get('approved_status', False),
-                                'uploaded_at': image.get('uploaded_at')
+                                'approved_at': image.get('image_approved_time') if image.get('approved_status') else None
                             }
-                            
-                            # Add approved_at field if the image is approved
-                            if image.get('approved_status') == True:
-                                image_data['approved_at'] = image.get('approved_at', image.get('uploaded_at'))
-                            
                             images.append(image_data)
             return images
         
         # Get images from all collections
-        all_images = []
-        all_images.extend(get_images_from_collection(medical_collection, 'medical'))
+        all_images.extend(get_images_from_collection(medical_collection, 'hospital'))
         all_images.extend(get_images_from_collection(toilet_collection, 'toilet'))
         all_images.extend(get_images_from_collection(train_collection, 'train'))
         all_images.extend(get_images_from_collection(tram_collection, 'tram'))
         
-        # Sort by upload date (most recent first)
-        all_images.sort(key=lambda x: x.get('uploaded_at', ''), reverse=True)
+        # Sort images by upload time (most recent first)
+        all_images.sort(key=lambda x: x['uploaded_at'] if x['uploaded_at'] else '', reverse=True)
         
-        return jsonify({
-            'device_id': device_id,
-            'images': all_images
-        }), 200
-
+        return jsonify({'images': all_images}), 200
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
