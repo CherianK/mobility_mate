@@ -12,6 +12,7 @@ import '../widgets/toilet_finder_bottom_sheet.dart';
 import '../utils/location_helper.dart'; // 
 import '../providers/theme_provider.dart';
 import '../utils/tag_formatter.dart';
+import '../widgets/about_overlay.dart';
 import 'profile_page.dart';
 import 'leaderboard_page.dart';
 import '../utils/username_generator.dart';
@@ -891,6 +892,21 @@ class _MapHomePageState extends State<MapHomePage> {
                         : ThemeMode.dark;
                     themeProvider.setThemeMode(newMode);
                     Navigator.pop(context);
+                  },
+                ),
+                
+                // About link
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.info_outline,
+                  title: 'About',
+                  onTap: () {
+                    Navigator.pop(context);
+                    showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (context) => const AboutOverlay(),
+                    );
                   },
                 ),
               ],

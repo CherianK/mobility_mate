@@ -372,62 +372,17 @@ class _ProfilePageState extends State<ProfilePage> {
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.grey[850] : Colors.white,
+                            color: isDark ? const Color(0xFF1A1A2E).withOpacity(0.7) : Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                                color: isDark ? Colors.blue[700]!.withOpacity(0.3) : Colors.black.withOpacity(0.05),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
                             ],
                             border: Border.all(
-                              color: Colors.blue[700]!.withOpacity(0.15),
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Earned Badges',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              _BadgeDropdownSection(
-                                earnedBadges: (badgeInfo?['earnedBadges'] is Set)
-                                    ? (badgeInfo?['earnedBadges'] as Set<String>)
-                                    : badgeInfo?['earnedBadges'] is List
-                                        ? Set<String>.from(badgeInfo?['earnedBadges'] ?? [])
-                                        : <String>{},
-                                badgeInfo: badgeInfo,
-                                isDark: isDark,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        // Community Section (Leaderboard)
-                        Container(
-                          margin: const EdgeInsets.only(top: 16),
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF6C63FF).withOpacity(isDark ? 0.3 : 0.1),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                            border: Border.all(
-                              color: const Color(0xFF6C63FF).withOpacity(0.3),
+                              color: isDark ? Colors.blue[700]!.withOpacity(0.3) : Colors.blue[700]!.withOpacity(0.15),
                               width: 1,
                             ),
                           ),
@@ -439,22 +394,22 @@ class _ProfilePageState extends State<ProfilePage> {
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF6C63FF).withOpacity(0.2),
+                                      color: Colors.blue[700]?.withOpacity(0.2),
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                        color: Colors.blue[700]!.withOpacity(0.3),
                                         width: 1,
                                       ),
                                     ),
-                                    child: const Icon(
-                                      Icons.people_alt,
-                                      color: Color(0xFF6C63FF),
+                                    child: Icon(
+                                      Icons.emoji_events,
+                                      color: Colors.blue[700],
                                       size: 24,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
-                                    'Community',
+                                    'Earned Badges',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w600,
@@ -463,6 +418,16 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(height: 16),
+                              _BadgeDropdownSection(
+                                earnedBadges: (badgeInfo?['earnedBadges'] is Set)
+                                    ? (badgeInfo?['earnedBadges'] as Set<String>)
+                                    : badgeInfo?['earnedBadges'] is List
+                                        ? Set<String>.from(badgeInfo?['earnedBadges'] ?? [])
+                                        : <String>{},
+                                badgeInfo: badgeInfo,
+                                isDark: isDark,
                               ),
                               const SizedBox(height: 20),
                               Container(
@@ -488,7 +453,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF6C63FF),
                                     foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 18),
+                                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
@@ -500,7 +465,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       Text(
                                         'VIEW LEADERBOARD',
                                         style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.w800,
                                           letterSpacing: 1.5,
                                           color: Colors.white,
@@ -513,10 +478,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                           ],
                                         ),
                                       ),
-                                      const SizedBox(width: 12),
+                                      const SizedBox(width: 8),
                                       Icon(
                                         Icons.arrow_forward,
-                                        size: 24,
+                                        size: 20,
                                         color: Colors.white,
                                         shadows: [
                                           Shadow(
@@ -528,71 +493,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ),
                                     ],
                                   ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        // About Section
-                        Container(
-                          margin: const EdgeInsets.only(top: 16),
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blue[700]!.withOpacity(isDark ? 0.3 : 0.1),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                            border: Border.all(
-                              color: Colors.blue[700]!.withOpacity(0.3),
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue[700]?.withOpacity(0.2),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.blue[700]!.withOpacity(0.3),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      Icons.info_outline,
-                                      color: Colors.blue[700],
-                                      size: 24,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'About',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: isDark ? Colors.white : Colors.black87,
-                                      letterSpacing: -0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                'Mobility Mate is a community-driven platform that helps people with mobility needs find accessible locations and share their experiences.',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: isDark ? Colors.grey[300] : Colors.grey[600],
-                                  height: 1.5,
                                 ),
                               ),
                             ],
