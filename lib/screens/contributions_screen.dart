@@ -21,6 +21,9 @@ class _ContributionsScreenState extends State<ContributionsScreen> with SingleTi
   bool _isLoading = true;
   String? _error;
   final FocusNode _focusNode = FocusNode();
+  
+  // Base URL for API endpoints
+  static const String _baseUrl = 'https://mobility-mate.onrender.com';
 
   @override
   void initState() {
@@ -51,7 +54,7 @@ class _ContributionsScreenState extends State<ContributionsScreen> with SingleTi
 
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:5000/api/uploads/device/${widget.deviceId}/images'),
+        Uri.parse('$_baseUrl/api/uploads/device/${widget.deviceId}/images'),
       );
 
       if (response.statusCode == 200) {
