@@ -25,6 +25,7 @@ class _ContributionsScreenState extends State<ContributionsScreen> with SingleTi
   // Base URL for API endpoints
   static const String _baseUrl = 'https://mobility-mate.onrender.com';
 
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +55,9 @@ class _ContributionsScreenState extends State<ContributionsScreen> with SingleTi
 
     try {
       final response = await http.get(
+
         Uri.parse('$_baseUrl/api/uploads/device/${widget.deviceId}/images'),
+
       );
 
       if (response.statusCode == 200) {
