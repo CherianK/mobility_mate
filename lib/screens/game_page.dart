@@ -324,7 +324,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
             children: [
               // Blue header
               Container(
-                padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                 decoration: BoxDecoration(
                   color: Colors.blue,
                   boxShadow: [
@@ -409,11 +409,48 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                             ),
                           ],
                         ),
+                        const SizedBox(height: 12),
+                        // Swipe prompt in header
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.swipe,
+                                color: Colors.white.withOpacity(0.9),
+                                size: 18,
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  'Swipe right for accessible, left for not',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
+              // Add spacing between header and content
+              const SizedBox(height: 24),
               // Main content
               Expanded(
                 child: isLoading
