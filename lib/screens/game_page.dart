@@ -28,6 +28,10 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
   int currentImageIndex = 0;
   int remainingVotes = 30;
   
+  // Queue to store votes that need to be submitted
+  List<Map<String, dynamic>> _voteQueue = [];
+  bool _isSubmittingVotes = false;
+  
   // Swipe animation controllers
   late AnimationController _animationController;
   Animation<double>? _animation;
@@ -56,6 +60,8 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
 
   @override
   void dispose() {
+    // Submit any remaining votes when the page is closed
+    _submitQueuedVotes();
     _animationController.dispose();
     super.dispose();
   }
@@ -285,15 +291,19 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         return;
       }
 
-      // Submit vote to backend
-      await _submitVote(availableImages[currentImageIndex]['url'], isAccessible);
+      // Add vote to queue
+      _voteQueue.add({
+        'image_url': availableImages[currentImageIndex]['url'],
+        'location_id': availableImages[currentImageIndex]['locationId'],
+        'is_accurate': isAccessible,
+      });
       
-      // Record the vote and update streak
+      // Record the vote and update streak locally
       await VoteTracker.recordVote();
       await BadgeManager.updateStreak();
       await _updateRemainingVotes();
       
-      // Remove the voted image from availableImages
+      // Update UI immediately
       setState(() {
         availableImages.removeAt(currentImageIndex);
         // If we've removed the last image, stay at the current index
@@ -302,11 +312,58 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         }
       });
 
+      // Submit votes if we've reached a threshold or no more images
+      if (_voteQueue.length >= 5 || availableImages.isEmpty || remainingVotes <= 0) {
+        _submitQueuedVotes();
+      }
+
       if (availableImages.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('You have voted on all available images!')),
         );
       }
+    }
+  }
+
+  Future<void> _submitQueuedVotes() async {
+    if (_voteQueue.isEmpty || _isSubmittingVotes) return;
+
+    _isSubmittingVotes = true;
+    final votesToSubmit = List<Map<String, dynamic>>.from(_voteQueue);
+    _voteQueue.clear();
+
+    try {
+      // Get username from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final username = prefs.getString('username_$deviceId');
+
+      // Submit votes in parallel
+      final futures = votesToSubmit.map((vote) => http.post(
+        Uri.parse('https://mobility-mate.onrender.com/api/vote'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'device_id': deviceId,
+          'username': username,
+          'location_id': vote['location_id'],
+          'image_url': vote['image_url'],
+          'is_accurate': vote['is_accurate'],
+        }),
+      ));
+
+      await Future.wait(futures);
+    } catch (e) {
+      // If submission fails, add votes back to queue
+      _voteQueue.addAll(votesToSubmit);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error submitting votes. Will retry later.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } finally {
+      _isSubmittingVotes = false;
     }
   }
 
@@ -875,56 +932,5 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         ),
       ),
     );
-  }
-
-  Future<void> _submitVote(String imageUrl, bool isAccurate) async {
-    if (deviceId == null) {
-      await _initializeDeviceId();
-    }
-
-    try {
-      // Get username from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final username = prefs.getString('username_$deviceId');
-      
-      final response = await http.post(
-        Uri.parse('https://mobility-mate.onrender.com/api/vote'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'device_id': deviceId,
-          'username': username,
-          'location_id': availableImages[currentImageIndex]['locationId'],
-          'image_url': imageUrl,
-          'is_accurate': isAccurate,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Vote recorded! ${data['accurate_count']} accurate, ${data['inaccurate_count']} inaccurate'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      } else if (response.statusCode == 400) {
-        final data = json.decode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['error'] ?? 'You have already voted on this image'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      } else {
-        throw Exception('Failed to submit vote');
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error submitting vote: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 } 

@@ -250,3 +250,111 @@ def get_leaderboard():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+@vote_bp.route('/api/uploads/device/<device_id>', methods=['GET'])
+def get_device_uploads(device_id):
+    try:
+        # Get collections
+        medical_collection = get_collection('medical-victoria')
+        toilet_collection = get_collection('toilets-victoria')
+        train_collection = get_collection('trains-victoria')
+        tram_collection = get_collection('trams-victoria')
+        
+        # Function to count uploads for a collection by device_id
+        def count_uploads_for_collection(collection, device_id):
+            upload_count = 0
+            # Find all documents with Images array
+            cursor = collection.find({"Images": {"$exists": True, "$ne": []}})
+            for doc in cursor:
+                if 'Images' in doc:
+                    for image in doc['Images']:
+                        # Count only approved images uploaded by this device
+                        if (image.get('device_id') == device_id and 
+                            image.get('approved_status') == True):
+                            upload_count += 1
+            return upload_count
+        
+        # Count total uploads across all collections
+        total_uploads = (
+            count_uploads_for_collection(medical_collection, device_id) +
+            count_uploads_for_collection(toilet_collection, device_id) +
+            count_uploads_for_collection(train_collection, device_id) +
+            count_uploads_for_collection(tram_collection, device_id)
+        )
+        
+        return jsonify({
+            'device_id': device_id,
+            'total_uploads': total_uploads
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@vote_bp.route('/api/uploads/device/<device_id>/images', methods=['GET'])
+def get_device_uploaded_images(device_id):
+    try:
+        # Get collections
+        medical_collection = get_collection('medical-victoria')
+        toilet_collection = get_collection('toilets-victoria')
+        train_collection = get_collection('trains-victoria')
+        tram_collection = get_collection('trams-victoria')
+        
+        # Function to get images from a collection
+        def get_images_from_collection(collection, collection_type):
+            images = []
+            cursor = collection.find({"Images": {"$exists": True, "$ne": []}})
+            for doc in cursor:
+                if 'Images' in doc:
+                    for image in doc['Images']:
+                        if image.get('device_id') == device_id:
+                            # Get location name from Tags or Metadata
+                            location_name = None
+                            if 'Tags' in doc and 'name' in doc['Tags']:
+                                location_name = doc['Tags']['name']
+                            elif 'Metadata' in doc and 'name' in doc['Metadata']:
+                                location_name = doc['Metadata']['name']
+                            
+                            # Get accessibility type name
+                            accessibility_type = None
+                            if 'Tags' in doc and 'accessibility_type' in doc['Tags']:
+                                accessibility_type = doc['Tags']['accessibility_type']
+                            elif 'Metadata' in doc and 'accessibility_type' in doc['Metadata']:
+                                accessibility_type = doc['Metadata']['accessibility_type']
+                            
+                            image_data = {
+                                'image_url': image.get('url'),
+                                'location_name': location_name,
+                                'accessibility_type': accessibility_type,
+                                'collection_type': collection_type,
+                                'approved_status': image.get('approved_status', False),
+                                'uploaded_at': image.get('uploaded_at')
+                            }
+                            
+                            # Add approved_at field if the image is approved
+                            if image.get('approved_status') == True:
+                                image_data['approved_at'] = image.get('approved_at', image.get('uploaded_at'))
+                            
+                            images.append(image_data)
+            return images
+        
+        # Get images from all collections
+        all_images = []
+        all_images.extend(get_images_from_collection(medical_collection, 'medical'))
+        all_images.extend(get_images_from_collection(toilet_collection, 'toilet'))
+        all_images.extend(get_images_from_collection(train_collection, 'train'))
+        all_images.extend(get_images_from_collection(tram_collection, 'tram'))
+        
+        # Sort by upload date (most recent first)
+        all_images.sort(key=lambda x: x.get('uploaded_at', ''), reverse=True)
+        
+        return jsonify({
+            'device_id': device_id,
+            'images': all_images
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+    
