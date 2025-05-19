@@ -378,6 +378,8 @@ class _MapHomePageState extends State<MapHomePage> {
                         padding: const EdgeInsets.all(6),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.wc,
@@ -393,6 +395,7 @@ class _MapHomePageState extends State<MapHomePage> {
                               ),
                               child: Text(
                                 'Find Toilet',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: isDark ? Colors.blue.shade700 : Colors.blue.shade600,
                                   fontSize: 7,
@@ -910,8 +913,8 @@ class _MapHomePageState extends State<MapHomePage> {
                   },
                 ),
                 
-                // Contributions link
-                _buildDrawerItem(
+                // Contributions link - temporarily hidden
+                /* _buildDrawerItem(
                   context,
                   icon: Icons.photo_library_outlined,
                   title: 'Your Contributions',
@@ -926,7 +929,7 @@ class _MapHomePageState extends State<MapHomePage> {
                       ),
                     );
                   },
-                ),
+                ), */
                 
                 const Divider(height: 32, thickness: 1),
                 
