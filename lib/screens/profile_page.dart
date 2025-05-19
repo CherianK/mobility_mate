@@ -41,6 +41,10 @@ class _ProfilePageState extends State<ProfilePage> {
         // Load username
         username = await UsernameGenerator.getUsername(deviceId!);
         
+        // Store username in SharedPreferences for badge system
+        await prefs.setString('username', username!);
+        print('Stored username for badge system: $username');
+        
         // Load badge info
         badgeInfo = await BadgeManager.getBadgeInfo();
         
@@ -56,13 +60,31 @@ class _ProfilePageState extends State<ProfilePage> {
         int totalPoints = 0;
         if (response.statusCode == 200) {
           final List<dynamic> leaderboardData = json.decode(response.body);
-          final userEntry = leaderboardData.firstWhere(
-            (entry) => entry['username'] == username,
-            orElse: () => null,
-          );
+ 
+          print('User entry: $leaderboardData');
+          
+          // Find user entry by username
+          dynamic userEntry;
+          for (var entry in leaderboardData) {
+            if (entry['username'] == username) {
+              userEntry = entry;
+              break;
+            }
+          }
+          
           if (userEntry != null) {
             totalPoints = userEntry['points'] ?? 0;
-            approvedPhotos = userEntry['total_uploads'] ?? 0;
+            // Use approved_uploads for upload badge system and stats
+            approvedPhotos = userEntry['approved_uploads'] ?? 0;
+            
+            // Store approved_uploads in SharedPreferences
+            await prefs.setInt('total_uploads', approvedPhotos);
+            
+            // Check and award upload badges
+            await BadgeManager.recordUpload();
+            
+            // Reload badge info after awarding new badges
+            badgeInfo = await BadgeManager.getBadgeInfo();
           }
         }
 
@@ -91,6 +113,7 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       }
     } catch (e) {
+      print('Error loading user data: $e');
       setState(() {
         isLoading = false;
       });
@@ -592,6 +615,30 @@ class _BadgeDropdownSectionState extends State<_BadgeDropdownSection> {
                   ),
                   const SizedBox(height: 8),
                   ...badgesOfType.map((badge) {
+                    // Get date earned from badgeInfo if available
+                    String? dateEarned;
+                    List<String>? multipleDates;
+                    if (badgeInfo != null && badgeInfo['badgeDates'] != null) {
+                      final badgeDates = badgeInfo['badgeDates'];
+                      print('Badge dates for ${badge.key}: $badgeDates');
+                      
+                      // Check if this is the top_contributor badge with multiple dates
+                      if (badge.key == 'top_contributor' && badgeDates is Map) {
+                        final topDates = badgeDates[badge.key];
+                        if (topDates is List) {
+                          multipleDates = List<String>.from(topDates);
+                          print('Multiple dates for top_contributor: $multipleDates');
+                        } else if (topDates is String) {
+                          dateEarned = topDates;
+                        }
+                      } else if (badgeDates is Map && badgeDates[badge.key] != null) {
+                        dateEarned = badgeDates[badge.key];
+                        print('Date earned for ${badge.key}: $dateEarned');
+                      } else if (badgeDates is Map<String, dynamic> && badgeDates.containsKey(badge.key)) {
+                        dateEarned = badgeDates[badge.key]?.toString();
+                        print('Date earned for ${badge.key}: $dateEarned (as toString)');
+                      }
+                    }
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.all(10),
@@ -611,6 +658,31 @@ class _BadgeDropdownSectionState extends State<_BadgeDropdownSection> {
                                 Text(badge.value['name'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87, fontSize: 15)),
                                 const SizedBox(height: 2),
                                 Text(badge.value['description'] ?? '', style: TextStyle(fontSize: 12, color: isDark ? Colors.grey[300] : Colors.grey[700])),
+                                if (multipleDates != null && multipleDates.isNotEmpty) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Text(
+                                      'Earned ${multipleDates.length} times:',
+                                      style: TextStyle(fontSize: 12, color: isDark ? Colors.amber[200] : Colors.amber[800], fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                  ...multipleDates.map((date) => 
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2.0),
+                                      child: Text(
+                                        '• $date',
+                                        style: TextStyle(fontSize: 11, color: isDark ? Colors.amber[200] : Colors.amber[800]),
+                                      ),
+                                    ),
+                                  ).toList(),
+                                ] else if (dateEarned != null && dateEarned.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Text(
+                                      'Earned: $dateEarned',
+                                      style: TextStyle(fontSize: 12, color: isDark ? Colors.amber[200] : Colors.amber[800], fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
                               ],
                             ),
                           ),

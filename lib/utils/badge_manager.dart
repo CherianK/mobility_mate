@@ -8,6 +8,7 @@ class BadgeManager {
   static const String badgesKey = 'earned_badges';
   static const String totalVotesKey = 'total_votes';
   static const String totalUploadsKey = 'total_uploads';
+  static const String badgeDatesKey = 'badge_dates';
 
   // Badge definitions
   static const Map<String, Map<String, dynamic>> badges = {
@@ -107,6 +108,34 @@ class BadgeManager {
       'type': 'uploads',
       'requiredUploads': 25,
     },
+    'upload_50': {
+      'name': 'Photo Expert',
+      'description': 'Upload 50 photos',
+      'icon': '📱',
+      'type': 'uploads',
+      'requiredUploads': 50,
+    },
+    'upload_100': {
+      'name': 'Photo Legend',
+      'description': 'Upload 100 photos',
+      'icon': '🏆',
+      'type': 'uploads',
+      'requiredUploads': 100,
+    },
+    'upload_250': {
+      'name': 'Photo Champion',
+      'description': 'Upload 250 photos',
+      'icon': '👑',
+      'type': 'uploads',
+      'requiredUploads': 250,
+    },
+    'upload_500': {
+      'name': 'Photo Grandmaster',
+      'description': 'Upload 500 photos',
+      'icon': '⭐',
+      'type': 'uploads',
+      'requiredUploads': 500,
+    },
     
     // Special achievement badges
     'first_vote': {
@@ -116,12 +145,12 @@ class BadgeManager {
       'type': 'special',
       'oneTime': true,
     },
-    'first_upload': {
-      'name': 'First Upload',
-      'description': 'Upload your first photo',
-      'icon': '📸',
+    'top_contributor': {
+      'name': 'Top Contributor',
+      'description': 'Reached rank #1 on the leaderboard',
+      'icon': '👑',
       'type': 'special',
-      'oneTime': true,
+      'oneTime': false,
     },
     'perfect_week': {
       'name': 'Perfect Week',
@@ -184,6 +213,9 @@ class BadgeManager {
     final username = prefs.getString('username');
     if (username == null) return;
 
+    // Try to get the saved upload count first
+    int totalUploads = prefs.getInt(totalUploadsKey) ?? 0;
+
     // Use leaderboard endpoint to get approved uploads
     final leaderboardResponse = await http.get(
       Uri.parse('https://mobility-mate.onrender.com/api/leaderboard'),
@@ -191,17 +223,64 @@ class BadgeManager {
 
     if (leaderboardResponse.statusCode == 200) {
       final List<dynamic> leaderboardData = json.decode(leaderboardResponse.body);
-      final userEntry = leaderboardData.firstWhere(
-        (entry) => entry['username'] == username,
-        orElse: () => null,
-      );
-      final totalUploads = userEntry != null ? (userEntry['approved_uploads'] ?? 0) : 0;
-
-      if (totalUploads == 1) {
-        await _awardBadge('first_upload');
+      
+      // Debug the leaderboard data
+      print('Leaderboard data: $leaderboardData');
+      
+      // Find user entry by username
+      dynamic userEntry;
+      for (var entry in leaderboardData) {
+        if (entry['username'] == username) {
+          userEntry = entry;
+          break;
+        }
       }
-      // Check for upload-based badges
-      await _checkAndAwardUploadBadges(totalUploads);
+      
+      print('Found user entry: $userEntry');
+      
+      if (userEntry != null && userEntry['approved_uploads'] != null) {
+        totalUploads = userEntry['approved_uploads'];
+        // Save this value for future use
+        await prefs.setInt(totalUploadsKey, totalUploads);
+        print('Updated total uploads from leaderboard: $totalUploads');
+      }
+
+      // Print out badge info for debugging
+      print('Checking for upload badges with count: $totalUploads');
+      
+      // Check for upload count badges
+      if (totalUploads >= 1) {
+        await _awardBadge('upload_1');
+      }
+      if (totalUploads >= 5) {
+        await _awardBadge('upload_5');
+      }
+      if (totalUploads >= 10) {
+        await _awardBadge('upload_10');
+      }
+      if (totalUploads >= 25) {
+        await _awardBadge('upload_25');
+      }
+      if (totalUploads >= 50) {
+        await _awardBadge('upload_50');
+      }
+      if (totalUploads >= 100) {
+        await _awardBadge('upload_100');
+      }
+      if (totalUploads >= 250) {
+        await _awardBadge('upload_250');
+      }
+      if (totalUploads >= 500) {
+        await _awardBadge('upload_500');
+      }
+
+      // Check for top contributor badge
+      if (leaderboardData.isNotEmpty && leaderboardData[0]['username'] == username) {
+        await _awardBadge('top_contributor');
+      }
+      
+      // Force a refresh of badge info after awarding new badges
+      await getBadgeInfo();
     }
   }
 
@@ -264,11 +343,24 @@ class BadgeManager {
     }
 
     // Check upload badges
-    for (final badge in badges.entries) {
-      if (badge.value['type'] == 'uploads' && 
-          totalUploads >= badge.value['requiredUploads'] && 
-          !earnedBadges.contains(badge.key)) {
-        await _awardBadge(badge.key);
+    final uploadBadges = [
+      'upload_1',
+      'upload_5',
+      'upload_10',
+      'upload_25',
+      'upload_50',
+      'upload_100',
+      'upload_250',
+      'upload_500',
+    ];
+    
+    for (final badgeId in uploadBadges) {
+      final badge = badges[badgeId];
+      if (badge != null && 
+          badge['type'] == 'uploads' && 
+          totalUploads >= badge['requiredUploads'] && 
+          !earnedBadges.contains(badgeId)) {
+        await _awardBadge(badgeId);
       }
     }
   }
@@ -277,17 +369,79 @@ class BadgeManager {
     final prefs = await SharedPreferences.getInstance();
     final earnedBadgesJson = prefs.getString(badgesKey);
     Set<String> earnedBadges = {};
-    
     if (earnedBadgesJson != null) {
       earnedBadges = Set<String>.from(json.decode(earnedBadgesJson));
     }
-
-
     
-    earnedBadges.add(badgeId);
-    await prefs.setString(badgesKey, json.encode(earnedBadges.toList()));
+    // For top_contributor badge, we need to check if the user was previously at rank 1
+    // and has since dropped and returned to rank 1
+    bool shouldAward = true;
+    if (badgeId == 'top_contributor') {
+      // Get the last time this badge was awarded
+      final lastTopRankKey = 'last_top_rank_date';
+      final lastTopRankStr = prefs.getString(lastTopRankKey);
+      
+      if (lastTopRankStr != null) {
+        final lastTopRank = DateTime.parse(lastTopRankStr);
+        final now = DateTime.now();
+        final difference = now.difference(lastTopRank).inDays;
+        
+        // Only award again if it's been at least 7 days since last time
+        // This prevents awarding multiple times during the same "reign"
+        if (difference < 7) {
+          shouldAward = false;
+          print('Not awarding top_contributor badge: last awarded $difference days ago');
+        } else {
+          print('Re-awarding top_contributor badge after $difference days');
+        }
+      }
+      
+      // Update the last top rank date
+      await prefs.setString(lastTopRankKey, DateTime.now().toIso8601String());
+    } else {
+      // For other badges, only award if not already earned
+      shouldAward = !earnedBadges.contains(badgeId);
+    }
     
+    if (shouldAward) {
+      earnedBadges.add(badgeId);
+      await prefs.setString(badgesKey, json.encode(earnedBadges.toList()));
 
+      // Save date earned for this badge
+      final now = DateTime.now();
+      final dateStr = "${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      
+      // For top_contributor, we want to track multiple dates
+      Map<String, dynamic> badgeDates = {};
+      final badgeDatesJson = prefs.getString(badgeDatesKey);
+      if (badgeDatesJson != null) {
+        badgeDates = Map<String, dynamic>.from(json.decode(badgeDatesJson));
+      }
+      
+      if (badgeId == 'top_contributor') {
+        // Store dates as a list for top_contributor
+        List<String> topDates = [];
+        if (badgeDates.containsKey(badgeId)) {
+          if (badgeDates[badgeId] is List) {
+            topDates = List<String>.from(badgeDates[badgeId]);
+          } else if (badgeDates[badgeId] is String) {
+            // Convert old format (single string) to list
+            topDates = [badgeDates[badgeId]];
+          }
+        }
+        topDates.add(dateStr);
+        badgeDates[badgeId] = topDates;
+      } else {
+        // Regular single date for other badges
+        badgeDates[badgeId] = dateStr;
+      }
+      
+      await prefs.setString(badgeDatesKey, json.encode(badgeDates));
+      
+      print('Awarded badge: $badgeId on $dateStr');
+    } else {
+      print('Badge already earned: $badgeId');
+    }
   }
 
   static Future<Map<String, dynamic>> getBadgeInfo() async {
@@ -310,12 +464,11 @@ class BadgeManager {
       if (votesResponse.statusCode == 200) {
         final List<dynamic> votes = json.decode(votesResponse.body);
         totalVotes = votes.length;
-
       }
     }
 
     // Get total uploads from leaderboard API
-    int totalUploads = 0;
+    int totalUploads = prefs.getInt(totalUploadsKey) ?? 0;
     final username = prefs.getString('username');
     if (username != null) {
       final leaderboardResponse = await http.get(
@@ -323,24 +476,65 @@ class BadgeManager {
       );
       if (leaderboardResponse.statusCode == 200) {
         final List<dynamic> leaderboardData = json.decode(leaderboardResponse.body);
-        final userEntry = leaderboardData.firstWhere(
-          (entry) => entry['username'] == username,
-          orElse: () => null,
-        );
-        totalUploads = userEntry != null ? (userEntry['approved_uploads'] ?? 0) : 0;
+        
+        // Debug the leaderboard data
+        print('Leaderboard data in getBadgeInfo: $leaderboardData');
+        
+        // Find user entry by username
+        dynamic userEntry;
+        for (var entry in leaderboardData) {
+          if (entry['username'] == username) {
+            userEntry = entry;
+            break;
+          }
+        }
+        
+        print('Found user entry in getBadgeInfo: $userEntry');
+        
+        if (userEntry != null && userEntry['approved_uploads'] != null) {
+          totalUploads = userEntry['approved_uploads'];
+          await prefs.setInt(totalUploadsKey, totalUploads);
+          print('Updated totalUploads in getBadgeInfo: $totalUploads');
+        }
+        
+        // Check if user is currently top ranked and update last top rank date if needed
+        if (leaderboardData.isNotEmpty && leaderboardData[0]['username'] == username) {
+          print('User is currently top ranked!');
+          final lastTopRankKey = 'last_top_rank_date';
+          final lastTopRankStr = prefs.getString(lastTopRankKey);
+          final now = DateTime.now();
+          
+          if (lastTopRankStr == null) {
+            // First time at top rank
+            await prefs.setString(lastTopRankKey, now.toIso8601String());
+          }
+        }
       }
+    }
+
+    // Get badge dates
+    Map<String, dynamic> badgeDates = {};
+    final badgeDatesJson = prefs.getString(badgeDatesKey);
+    if (badgeDatesJson != null) {
+      badgeDates = Map<String, dynamic>.from(json.decode(badgeDatesJson));
+      print('Retrieved badge dates: $badgeDates');
+    } else {
+      print('No badge dates found in storage');
     }
 
     final nextBadge = _getNextBadge(currentStreak, totalVotes, totalUploads);
 
-
-    return {
+    final badgeInfo = {
       'currentStreak': currentStreak,
       'totalVotes': totalVotes,
       'totalUploads': totalUploads,
       'earnedBadges': earnedBadges,
       'nextBadge': nextBadge,
+      'badgeDates': badgeDates,
     };
+    
+    print('Returning badge info: $badgeInfo');
+    return badgeInfo;
   }
 
   static Map<String, dynamic>? _getNextBadge(int currentStreak, int totalVotes, int totalUploads) {
@@ -421,20 +615,25 @@ class BadgeManager {
     if (!prefs.containsKey(lastVoteDateKey)) {
       await prefs.setString(lastVoteDateKey, DateTime.now().toIso8601String());
     }
+
+    // Ensure badge dates storage is initialized
+    if (!prefs.containsKey(badgeDatesKey)) {
+      await prefs.setString(badgeDatesKey, json.encode({}));
+    }
+
+    // Debug: Print current badge storage state
+    print('Badge storage initialized:');
+    print('Earned badges: ${prefs.getString(badgesKey)}');
+    print('Badge dates: ${prefs.getString(badgeDatesKey)}');
   }
 
   // Debug method to check badge storage
   static Future<void> debugCheckBadges() async {
     final prefs = await SharedPreferences.getInstance();
     final earnedBadgesJson = prefs.getString(badgesKey);
-    final currentStreak = prefs.getInt(streakKey) ?? 0;
-    final lastVoteDate = prefs.getString(lastVoteDateKey);
-    
-
-    
+    // Removed unused variables to fix compile errors
     if (earnedBadgesJson != null) {
       final earnedBadges = Set<String>.from(json.decode(earnedBadgesJson));
-      
       for (final badgeId in earnedBadges) {
         final badge = badges[badgeId];
         if (badge != null) {
