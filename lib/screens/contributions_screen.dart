@@ -106,6 +106,42 @@ class _ContributionsScreenState extends State<ContributionsScreen> with SingleTi
         itemCount: images.length,
         itemBuilder: (context, index) {
           final image = images[index];
+          final imageUrl = image['image_url']?.toString();
+          final locationName = image['location_name']?.toString() ?? 'Unknown Location';
+          final accessibilityType = image['accessibility_type']?.toString() ?? 'Not specified';
+          final dateField = isApproved ? 'approved_at' : 'uploaded_at';
+          final dateStr = image[dateField]?.toString();
+
+          if (imageUrl == null) {
+            return Card(
+              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Padding(
+                padding: EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 200,
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: Icon(Icons.error_outline, size: 50, color: Colors.grey[600]),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      'Invalid Image Data',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red[700],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
           return Card(
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Padding(
@@ -116,7 +152,7 @@ class _ContributionsScreenState extends State<ContributionsScreen> with SingleTi
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      image['image_url'],
+                      imageUrl,
                       height: 200,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -131,7 +167,7 @@ class _ContributionsScreenState extends State<ContributionsScreen> with SingleTi
                   ),
                   SizedBox(height: 12),
                   Text(
-                    image['location_name'] ?? 'Unknown Location',
+                    locationName,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -139,7 +175,7 @@ class _ContributionsScreenState extends State<ContributionsScreen> with SingleTi
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Type: ${image['accessibility_type'] ?? 'Not specified'}',
+                    'Type: $accessibilityType',
                     style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                   ),
                   SizedBox(height: 4),
@@ -148,7 +184,7 @@ class _ContributionsScreenState extends State<ContributionsScreen> with SingleTi
                     style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                   Text(
-                    _formatDate(isApproved ? image['approved_at'] : image['uploaded_at']),
+                    _formatDate(dateStr),
                     style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                 ],
