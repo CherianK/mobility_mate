@@ -89,8 +89,10 @@ def generate_upload_url():
         try:
             is_clean = moderate_image_s3(bucket_name, s3_key)
         except Exception as e:
-            print(f"Error in Rekognition: {e}")
-            return jsonify({'error': 'Error in Rekognition'}), 500
+            # log to console so you still see it in your Flask logs
++           app.logger.error(f"Rekognition failed: {e}", exc_info=True)
++           # return the actual AWS error back to the client for debugging
++           return jsonify({'error': str(e)}), 500
 
         if not is_clean:
             # Delete the image from S3
