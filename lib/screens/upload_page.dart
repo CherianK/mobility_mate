@@ -76,6 +76,7 @@ class _UploadPageState extends State<UploadPage> {
       }
 
       final accessibilityType = _normalizeAccessibilityType(widget.venueData['Accessibility_Type_Name']);
+      // Step 1: Get upload URL and S3 key from backend
       final response = await http.post(
         Uri.parse('https://mobility-mate.onrender.com/generate-upload-url'),
         headers: {'Content-Type': 'application/json'},
@@ -93,7 +94,10 @@ class _UploadPageState extends State<UploadPage> {
       if (response.statusCode != 200) throw Exception('Failed to get upload URL: ${response.body}');
       final uploadData = jsonDecode(response.body);
       final uploadUrl = uploadData['upload_url'];
+      final publicUrl = uploadData['public_url'];
+      final s3Key = uploadData['s3_key'];
 
+      // Step 2: Upload image to S3
       final file = File(_selectedImage!.path);
       final uploadResponse = await http.put(
         Uri.parse(uploadUrl),
@@ -103,10 +107,31 @@ class _UploadPageState extends State<UploadPage> {
 
       if (uploadResponse.statusCode != 200) throw Exception('Failed to upload image to S3');
 
-      setState(() => _selectedImage = null);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Image uploaded successfully! Awaiting approval.'), backgroundColor: Colors.green),
+      // Step 3: Notify backend to moderate and update DB
+      final modResponse = await http.post(
+        Uri.parse('https://mobility-mate.onrender.com/moderate-uploaded-image'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          's3_key': s3Key,
+          'public_url': publicUrl,
+          'device_id': deviceId,
+          'username': username,
+          'latitude': widget.venueData['Location_Lat'],
+          'longitude': widget.venueData['Location_Lon'],
+          'accessibility_type': accessibilityType,
+        }),
       );
+
+      if (modResponse.statusCode == 200) {
+        setState(() => _selectedImage = null);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Image uploaded successfully! Awaiting approval.'), backgroundColor: Colors.green),
+        );
+      } else {
+        // Show moderation error from backend
+        final modError = jsonDecode(modResponse.body);
+        throw Exception('Moderation failed: ${modError['error'] ?? modResponse.body}');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Upload error: $e'), backgroundColor: Colors.red),
