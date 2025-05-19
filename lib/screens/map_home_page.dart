@@ -18,6 +18,7 @@ import 'leaderboard_page.dart';
 import '../utils/username_generator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import 'contributions_screen.dart';
 
 
 class MapHomePage extends StatefulWidget {
@@ -904,6 +905,24 @@ class _MapHomePageState extends State<MapHomePage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => const LeaderboardPage(),
+                      ),
+                    );
+                  },
+                ),
+                
+                // Contributions link
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.photo_library_outlined,
+                  title: 'Your Contributions',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ContributionsScreen(
+                          deviceId: deviceId!,
+                        ),
                       ),
                     );
                   },

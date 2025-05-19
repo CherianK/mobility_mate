@@ -12,6 +12,7 @@ dependencies:
   provider: ^6.1.1
   shared_preferences: ^2.2.2
   uuid: ^4.2.1
+  intl: ^0.18.1
 
   # Official Mapbox Maps SDK for Flutter (iOS & Android)
   mapbox_maps_flutter: ^2.7.0
