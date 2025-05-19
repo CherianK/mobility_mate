@@ -87,7 +87,7 @@ def generate_upload_url():
         # 6.1 Moderate image using Rekognition
         s3_key = key  # Already constructed above
         try:
-            is_clean, labels = moderate_image_s3(bucket_name, s3_key)
+            is_clean = moderate_image_s3(bucket_name, s3_key)
         except Exception as e:
             print(f"Error in Rekognition: {e}")
             return jsonify({'error': 'Error in Rekognition'}), 500
