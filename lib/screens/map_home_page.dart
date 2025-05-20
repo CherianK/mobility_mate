@@ -913,8 +913,8 @@ class _MapHomePageState extends State<MapHomePage> {
                   },
                 ),
                 
-                // Contributions link - temporarily hidden
-                /* _buildDrawerItem(
+                // Contributions link
+                _buildDrawerItem(
                   context,
                   icon: Icons.photo_library_outlined,
                   title: 'Your Contributions',
@@ -929,7 +929,7 @@ class _MapHomePageState extends State<MapHomePage> {
                       ),
                     );
                   },
-                ), */
+                ),
                 
                 const Divider(height: 32, thickness: 1),
                 

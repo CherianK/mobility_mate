@@ -54,7 +54,7 @@ class _ContributionsScreenState extends State<ContributionsScreen> with SingleTi
 
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/uploads/device/${widget.deviceId}/images'),
+        Uri.parse('https://mobility-mate.onrender.com/api/uploads/device/${widget.deviceId}/images'),
       );
 
       if (response.statusCode == 200) {

@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../utils/pattern_painters.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/username_generator.dart';
 
 class LeaderboardPage extends StatefulWidget {
   const LeaderboardPage({super.key});
@@ -16,11 +18,33 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _leaderboardData = [];
   String? _errorMessage;
+  String? _username;
+  bool _isUserOnLeaderboard = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchLeaderboardData();
+    _initUserData();
+  }
+
+  Future<void> _initUserData() async {
+    await _getUserName();
+    await _fetchLeaderboardData();
+  }
+
+  Future<void> _getUserName() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final deviceId = prefs.getString('device_id');
+      if (deviceId != null) {
+        final username = await UsernameGenerator.getUsername(deviceId);
+        setState(() {
+          _username = username;
+        });
+      }
+    } catch (e) {
+      print('Error getting username: $e');
+    }
   }
 
   Future<void> _fetchLeaderboardData() async {
@@ -38,6 +62,10 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
           _leaderboardData = data.map((item) => item as Map<String, dynamic>).toList();
+          
+          // Check if the user is on the leaderboard
+          _isUserOnLeaderboard = _leaderboardData.any((item) => item['username'] == _username);
+          
           _isLoading = false;
         });
       } else {
@@ -285,12 +313,18 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                             // Leaderboard list
                             Expanded(
                               child: ListView.builder(
-                                itemCount: _leaderboardData.length,
+                                itemCount: _leaderboardData.length + (!_isUserOnLeaderboard && _username != null ? 1 : 0),
                                 itemBuilder: (context, index) {
+                                  // Check if we're at the end and should show the user's entry
+                                  if (!_isUserOnLeaderboard && _username != null && index == _leaderboardData.length) {
+                                    return _buildUserEntry(isDark);
+                                  }
+                                  
                                   final entry = _leaderboardData[index];
                                   final rank = entry['rank'];
                                   final username = entry['username'];
                                   final points = entry['points'];
+                                  final isCurrentUser = username == _username;
                                   
                                   // Determine if this is a top 3 position
                                   final isTop3 = rank <= 3;
@@ -307,18 +341,24 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                                   return Container(
                                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+                                      color: isCurrentUser 
+                                        ? (isDark ? const Color(0xFF183055) : const Color(0xFFE3F2FD))
+                                        : (isDark ? const Color(0xFF1A1A2E) : Colors.white),
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFF6C63FF).withOpacity(isDark ? 0.3 : 0.1),
+                                          color: isCurrentUser
+                                            ? Colors.blue.withOpacity(isDark ? 0.4 : 0.2)
+                                            : const Color(0xFF6C63FF).withOpacity(isDark ? 0.3 : 0.1),
                                           blurRadius: 12,
                                           offset: const Offset(0, 4),
                                         ),
                                       ],
                                       border: Border.all(
-                                        color: const Color(0xFF6C63FF).withOpacity(0.3),
-                                        width: 1,
+                                        color: isCurrentUser
+                                          ? Colors.blue.withOpacity(0.5)
+                                          : const Color(0xFF6C63FF).withOpacity(0.3),
+                                        width: isCurrentUser ? 2 : 1,
                                       ),
                                     ),
                                     child: ListTile(
@@ -344,28 +384,59 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                                           ),
                                         ),
                                       ),
-                                      title: Text(
-                                        username,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          color: isDark ? Colors.white : Colors.black87,
-                                        ),
+                                      title: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              username,
+                                              style: TextStyle(
+                                                fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.w500,
+                                                color: isDark ? Colors.white : Colors.black87,
+                                              ),
+                                            ),
+                                          ),
+                                          if (isCurrentUser)
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              margin: const EdgeInsets.only(right: 8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue.withOpacity(0.2),
+                                                borderRadius: BorderRadius.circular(12),
+                                                border: Border.all(
+                                                  color: Colors.blue.withOpacity(0.3),
+                                                  width: 1,
+                                                ),
+                                              ),
+                                              child: const Text(
+                                                'YOU',
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.blue,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                       trailing: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF6C63FF).withOpacity(0.1),
+                                          color: isCurrentUser
+                                            ? Colors.blue.withOpacity(0.1)
+                                            : const Color(0xFF6C63FF).withOpacity(0.1),
                                           borderRadius: BorderRadius.circular(20),
                                           border: Border.all(
-                                            color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                            color: isCurrentUser
+                                              ? Colors.blue.withOpacity(0.3)
+                                              : const Color(0xFF6C63FF).withOpacity(0.3),
                                             width: 1,
                                           ),
                                         ),
                                         child: Text(
                                           points.toString(),
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontWeight: FontWeight.w600,
-                                            color: Color(0xFF6C63FF),
+                                            color: isCurrentUser ? Colors.blue : const Color(0xFF6C63FF),
                                           ),
                                         ),
                                       ),
@@ -378,6 +449,131 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                         ),
                       ],
                     ),
+    );
+  }
+  
+  Widget _buildUserEntry(bool isDark) {
+    // If the user isn't on the leaderboard, show their entry at the bottom with 0 points
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF183055) : const Color(0xFFE3F2FD),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(isDark ? 0.4 : 0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.blue.withOpacity(0.5),
+          width: 2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Text(
+              'Your Position',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: isDark ? Colors.blue[200] : Colors.blue[700],
+              ),
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.withOpacity(0.2),
+                border: Border.all(
+                  color: Colors.grey.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  '—',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _username!,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  margin: const EdgeInsets.only(right: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.blue.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: const Text(
+                    'YOU',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.blue.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: const Text(
+                '0',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: Text(
+              'Contribute by uploading photos and voting to earn points!',
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: isDark ? Colors.grey[400] : Colors.grey[600],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 } 
