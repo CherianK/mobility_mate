@@ -224,9 +224,6 @@ class BadgeManager {
     if (leaderboardResponse.statusCode == 200) {
       final List<dynamic> leaderboardData = json.decode(leaderboardResponse.body);
       
-      // Debug the leaderboard data
-      print('Leaderboard data: $leaderboardData');
-      
       // Find user entry by username
       dynamic userEntry;
       for (var entry in leaderboardData) {
@@ -236,17 +233,11 @@ class BadgeManager {
         }
       }
       
-      print('Found user entry: $userEntry');
-      
       if (userEntry != null && userEntry['approved_uploads'] != null) {
         totalUploads = userEntry['approved_uploads'];
         // Save this value for future use
         await prefs.setInt(totalUploadsKey, totalUploads);
-        print('Updated total uploads from leaderboard: $totalUploads');
       }
-
-      // Print out badge info for debugging
-      print('Checking for upload badges with count: $totalUploads');
       
       // Check for upload count badges
       if (totalUploads >= 1) {
@@ -390,9 +381,6 @@ class BadgeManager {
         // This prevents awarding multiple times during the same "reign"
         if (difference < 7) {
           shouldAward = false;
-          print('Not awarding top_contributor badge: last awarded $difference days ago');
-        } else {
-          print('Re-awarding top_contributor badge after $difference days');
         }
       }
       
@@ -437,10 +425,6 @@ class BadgeManager {
       }
       
       await prefs.setString(badgeDatesKey, json.encode(badgeDates));
-      
-      print('Awarded badge: $badgeId on $dateStr');
-    } else {
-      print('Badge already earned: $badgeId');
     }
   }
 
@@ -477,9 +461,6 @@ class BadgeManager {
       if (leaderboardResponse.statusCode == 200) {
         final List<dynamic> leaderboardData = json.decode(leaderboardResponse.body);
         
-        // Debug the leaderboard data
-        print('Leaderboard data in getBadgeInfo: $leaderboardData');
-        
         // Find user entry by username
         dynamic userEntry;
         for (var entry in leaderboardData) {
@@ -489,17 +470,13 @@ class BadgeManager {
           }
         }
         
-        print('Found user entry in getBadgeInfo: $userEntry');
-        
         if (userEntry != null && userEntry['approved_uploads'] != null) {
           totalUploads = userEntry['approved_uploads'];
           await prefs.setInt(totalUploadsKey, totalUploads);
-          print('Updated totalUploads in getBadgeInfo: $totalUploads');
         }
         
         // Check if user is currently top ranked and update last top rank date if needed
         if (leaderboardData.isNotEmpty && leaderboardData[0]['username'] == username) {
-          print('User is currently top ranked!');
           final lastTopRankKey = 'last_top_rank_date';
           final lastTopRankStr = prefs.getString(lastTopRankKey);
           final now = DateTime.now();
@@ -517,9 +494,6 @@ class BadgeManager {
     final badgeDatesJson = prefs.getString(badgeDatesKey);
     if (badgeDatesJson != null) {
       badgeDates = Map<String, dynamic>.from(json.decode(badgeDatesJson));
-      print('Retrieved badge dates: $badgeDates');
-    } else {
-      print('No badge dates found in storage');
     }
 
     final nextBadge = _getNextBadge(currentStreak, totalVotes, totalUploads);
@@ -533,13 +507,10 @@ class BadgeManager {
       'badgeDates': badgeDates,
     };
     
-    print('Returning badge info: $badgeInfo');
     return badgeInfo;
   }
 
   static Map<String, dynamic>? _getNextBadge(int currentStreak, int totalVotes, int totalUploads) {
-
-
     // Check streak badges
     for (final badge in badges.entries) {
       if (badge.value['type'] == 'streak' && 
@@ -620,11 +591,6 @@ class BadgeManager {
     if (!prefs.containsKey(badgeDatesKey)) {
       await prefs.setString(badgeDatesKey, json.encode({}));
     }
-
-    // Debug: Print current badge storage state
-    print('Badge storage initialized:');
-    print('Earned badges: ${prefs.getString(badgesKey)}');
-    print('Badge dates: ${prefs.getString(badgeDatesKey)}');
   }
 
   // Debug method to check badge storage
