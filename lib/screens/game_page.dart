@@ -98,7 +98,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       // Process hospital images
       for (var hospital in hospitalsData) {
         final images = hospital['Images'];
-        final name = hospital['name'] ?? hospital['Name'];
+        final name = hospital['Tags']?['name'] ?? hospital['name'] ?? hospital['Name'];
         if (images != null && images is List) {
           for (var image in images) {
             if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
@@ -116,7 +116,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       // Process toilet images
       for (var toilet in toiletsData) {
         final images = toilet['Images'];
-        final name = toilet['name'] ?? toilet['Name'];
+        final name = toilet['Tags']?['name'] ?? toilet['name'] ?? toilet['Name'];
         if (images != null && images is List) {
           for (var image in images) {
             if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
@@ -134,7 +134,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       // Process train images
       for (var train in trainsData) {
         final images = train['Images'];
-        final name = train['name'] ?? train['Name'];
+        final name = train['Tags']?['name'] ?? train['name'] ?? train['Name'];
         if (images != null && images is List) {
           for (var image in images) {
             if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
@@ -152,7 +152,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       // Process tram images
       for (var tram in tramsData) {
         final images = tram['Images'];
-        final name = tram['name'] ?? tram['Name'];
+        final name = tram['Tags']?['name'] ?? tram['name'] ?? tram['Name'];
         if (images != null && images is List) {
           for (var image in images) {
             if (image is Map && image['approved_status'] == true && image['image_url'] != null) {
@@ -268,6 +268,27 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       _dragPosition = 0;
       _dragPercentage = 0;
     });
+  }
+
+  // Helper to get a proper display name for locations
+  String _getLocationDisplayName(Map<String, dynamic> imageData) {
+    final locationName = imageData['locationName'] as String?;
+    final locationType = imageData['locationType'] as String?;
+    
+    // Check if name is missing, empty, or just the generic type
+    if (locationName == null || locationName.trim().isEmpty) {
+      return 'Unnamed Location';
+    }
+    
+    // Return name only if it's not the same as the generic type
+    if ((locationType == 'hospital' && locationName == 'Unknown Hospital') ||
+        (locationType == 'toilet' && locationName == 'Public Toilet') ||
+        (locationType == 'train' && locationName == 'Train Station') ||
+        (locationType == 'tram' && locationName == 'Tram Stop')) {
+      return 'No specific name available';
+    }
+    
+    return locationName;
   }
 
   Future<void> _updateRemainingVotes() async {
@@ -450,7 +471,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          '$remainingVotes votes remaining',
+                                          '$remainingVotes daily votes remaining',
                                           style: const TextStyle(
                                             fontSize: 13,
                                             color: Colors.white,
@@ -725,12 +746,12 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                               child: Column(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  const SizedBox(height: 16),
+                                                  const SizedBox(height: 12),
                                                   // Flexible image area
                                                   ConstrainedBox(
                                                     constraints: BoxConstraints(
-                                                      maxHeight: MediaQuery.of(context).size.height * 0.32,
-                                                      minHeight: 120,
+                                                      maxHeight: MediaQuery.of(context).size.height * 0.30,
+                                                      minHeight: 100,
                                                     ),
                                                     child: Container(
                                                       width: double.infinity,
@@ -758,7 +779,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                                             ),
                                                     ),
                                                   ),
-                                                  const SizedBox(height: 16),
+                                                  const SizedBox(height: 12),
                                                   Padding(
                                                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                                                     child: Column(
@@ -778,22 +799,20 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                                           ),
                                                           textAlign: TextAlign.center,
                                                         ),
+                                                        const SizedBox(height: 6),
                                                         Text(
-                                                          (availableImages[currentImageIndex]['locationName'] != null &&
-                                                           (availableImages[currentImageIndex]['locationName'] as String).trim().isNotEmpty)
-                                                              ? availableImages[currentImageIndex]['locationName']
-                                                              : 'Unknown Location',
+                                                          _getLocationDisplayName(availableImages[currentImageIndex]),
                                                           style: TextStyle(
-                                                            fontSize: 17,
+                                                            fontSize: 20,
                                                             fontWeight: FontWeight.bold,
                                                             color: isDark ? Colors.white : Colors.black,
                                                           ),
-                                                          textAlign: TextAlign.left,
+                                                          textAlign: TextAlign.center,
                                                         ),
                                                       ],
                                                     ),
                                                   ),
-                                                  const SizedBox(height: 16),
+                                                  const SizedBox(height: 12),
                                                 ],
                                               ),
                                             ),
@@ -863,14 +882,14 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(24),
                                       ),
-                                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 6),
                                   // Progress indicator
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                    margin: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                    margin: const EdgeInsets.fromLTRB(24, 0, 24, 6),
                                     decoration: BoxDecoration(
                                       color: isDark ? Colors.grey[800] : Colors.grey[50],
                                       borderRadius: BorderRadius.circular(16),
@@ -896,17 +915,17 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                             valueColor: AlwaysStoppedAnimation<Color>(
                                               isDark ? Colors.blue[400]! : Colors.blue[600]!,
                                             ),
-                                            minHeight: 8,
+                                            minHeight: 6,
                                           ),
                                         ),
-                                        const SizedBox(height: 8),
+                                        const SizedBox(height: 6),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              'Progress',
+                                              'Approved photos remaining',
                                               style: TextStyle(
-                                                fontSize: 14,
+                                                fontSize: 12,
                                                 color: isDark ? Colors.grey[400] : Colors.grey[600],
                                                 fontWeight: FontWeight.w500,
                                               ),
@@ -914,7 +933,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                             Text(
                                               '${currentImageIndex + 1} of ${availableImages.length}',
                                               style: TextStyle(
-                                                fontSize: 14,
+                                                fontSize: 12,
                                                 color: isDark ? Colors.grey[400] : Colors.grey[600],
                                                 fontWeight: FontWeight.w500,
                                               ),
