@@ -394,11 +394,11 @@ class _MapHomePageState extends State<MapHomePage> {
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                'Find Toilet',
+                                'Find',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: isDark ? Colors.blue.shade700 : Colors.blue.shade600,
-                                  fontSize: 7,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
