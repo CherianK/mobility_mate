@@ -917,7 +917,7 @@ class _MapHomePageState extends State<MapHomePage> {
                 _buildDrawerItem(
                   context,
                   icon: Icons.photo_library_outlined,
-                  title: 'Your Contributions',
+                  title: 'My Contributions',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
