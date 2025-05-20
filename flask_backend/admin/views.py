@@ -60,7 +60,12 @@ class ApprovalAdminView(BaseView):
             return redirect(url_for('admin.login_view'))
 
         locations = list(self.collection.find({
-            "Images": {"$elemMatch": {"approved_status": False}}
+            "Images": {
+                "$elemMatch": {
+                    "approved_status": False,
+                    "image_approved_time": None
+                }
+            }
         }))
         return self.render('admin/approve_list.html', locations=locations)
 
