@@ -16,6 +16,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/theme_provider.dart';
 import 'screens/report_issue_screen.dart';
 import 'package:uuid/uuid.dart';
+import 'package:confetti/confetti.dart';
+import 'dart:math';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,11 +62,15 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<MainScreen> createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
+  bool _showTutorial = false;
+  bool _isFromMenu = false;
+  bool _showConfetti = false;
+  late ConfettiController _confettiController;
   
   // Add GlobalKeys for navigation items
   final GlobalKey _homeKey = GlobalKey();
@@ -74,12 +80,31 @@ class _MainScreenState extends State<MainScreen> {
 
   static const List<Widget> _pages = <Widget>[
     MapHomePage(),
-    // FindToiletPage(),
-    // UploadPage(venueData: {}),
-    // SharePage(),
     GamePage(),
     EventsPage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAndShowTutorial();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+  }
+
+  Future<void> _checkAndShowTutorial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final dontShowAgain = prefs.getBool('dont_show_tutorial_again') ?? false;
+    
+    // Show tutorial if "Don't show again" wasn't checked
+    if (!dontShowAgain) {
+      if (mounted) {
+        setState(() {
+          _showTutorial = true;
+          _isFromMenu = false;
+        });
+      }
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -87,75 +112,137 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  // Add method to show tutorial
+  void showTutorial({bool fromMenu = false}) {
+    setState(() {
+      _showTutorial = true;
+      _isFromMenu = fromMenu;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final theme = Theme.of(context);
+
     return Material(
       child: Stack(
         children: [
           // Bottom layer: Scaffold with map and navigation
           Scaffold(
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: _pages,
-        ),
+            body: IndexedStack(
+              index: _selectedIndex,
+              children: _pages,
+            ),
             bottomNavigationBar: RepaintBoundary(
               key: _navBarKey,
               child: NavigationBar(
-          selectedIndex: _selectedIndex,
-          onDestinationSelected: _onItemTapped,
+                selectedIndex: _selectedIndex,
+                onDestinationSelected: (index) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                },
+                backgroundColor: isDark ? Colors.grey[800] : Colors.white,
+                elevation: 8,
+                shadowColor: Colors.black.withOpacity(0.3),
+                indicatorColor: isDark ? Colors.blue.shade900 : Colors.blue.shade100,
+                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                 destinations: [
-            NavigationDestination(
+                  NavigationDestination(
                     key: _homeKey,
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            // NavigationDestination(
-            //   icon: Icon(Icons.search_outlined),
-            //   selectedIcon: Icon(Icons.search),
-            //   label: 'Find Toilet',
-            // ),
-            // NavigationDestination(
-            //   icon: Icon(Icons.upload_outlined),
-            //   selectedIcon: Icon(Icons.upload),
-            //   label: 'Upload',
-            // ),
-            // NavigationDestination(
-            //   icon: Icon(Icons.share_outlined),
-            //   selectedIcon: Icon(Icons.share),
-            //   label: 'Share',
-            // ),
-            NavigationDestination(
+                    icon: Icon(
+                      Icons.home_outlined,
+                      color: isDark ? Colors.white.withOpacity(0.7) : Colors.grey[600],
+                    ),
+                    selectedIcon: Icon(
+                      Icons.home,
+                      color: isDark ? Colors.white : Colors.blue.shade700,
+                    ),
+                    label: 'Home',
+                  ),
+                  NavigationDestination(
                     key: _voteKey,
-              icon: Icon(Icons.sports_esports_outlined),
-              selectedIcon: Icon(Icons.sports_esports),
-              label: 'Game',
-            ),
-            NavigationDestination(
+                    icon: Icon(
+                      Icons.sports_esports_outlined,
+                      color: isDark ? Colors.white.withOpacity(0.7) : Colors.grey[600],
+                    ),
+                    selectedIcon: Icon(
+                      Icons.sports_esports,
+                      color: isDark ? Colors.white : Colors.blue.shade700,
+                    ),
+                    label: 'Game',
+                  ),
+                  NavigationDestination(
                     key: _eventsKey,
-              icon: Icon(Icons.event_outlined),
-              selectedIcon: Icon(Icons.event),
-              label: 'Events',
-            ),
-          ],
-        ),
+                    icon: Icon(
+                      Icons.event_outlined,
+                      color: isDark ? Colors.white.withOpacity(0.7) : Colors.grey[600],
+                    ),
+                    selectedIcon: Icon(
+                      Icons.event,
+                      color: isDark ? Colors.white : Colors.blue.shade700,
+                    ),
+                    label: 'Events',
+                  ),
+                ],
+              ),
             ),
           ),
           // Top layer: Spotlight overlay
-          Positioned.fill(
-            child: SpotlightTutorialOverlay(
-              navigationKeys: {
-                'home': _homeKey,
-                'vote': _voteKey,
-                'events': _eventsKey,
-                'navBar': _navBarKey,
-              },
-              child: Container(),
+          if (_showTutorial)
+            Positioned.fill(
+              child: SpotlightTutorialOverlay(
+                navigationKeys: {
+                  'home': _homeKey,
+                  'vote': _voteKey,
+                  'events': _eventsKey,
+                  'navBar': _navBarKey,
+                },
+                child: Container(),
+                onTutorialComplete: (bool wasSkipped) {
+                  setState(() {
+                    _showTutorial = false;
+                    _isFromMenu = false;
+                    if (!wasSkipped) {
+                      _showConfetti = true;
+                      _confettiController.play();
+                    }
+                  });
+                },
+                showDontShowAgain: !_isFromMenu,  // Show checkbox when NOT from menu
+              ),
             ),
-          ),
+          if (_showConfetti)
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: pi / 2,
+                maxBlastForce: 5,
+                minBlastForce: 2,
+                emissionFrequency: 0.05,
+                numberOfParticles: 50,
+                gravity: 0.1,
+                shouldLoop: false,
+                colors: const [
+                  Colors.blue,
+                  Colors.pink,
+                  Colors.orange,
+                  Colors.purple,
+                  Colors.green,
+                ],
+              ),
+            ),
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
   }
 }
 

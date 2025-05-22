@@ -85,29 +85,25 @@ class SearchBarWidget extends StatelessWidget {
         }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: isDark ? Colors.grey[900] : Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          color: isDark ? Colors.grey[800] : Colors.white,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
             Icon(
               Icons.search,
-              color: isDark ? Colors.grey[400] : Colors.grey,
+              color: isDark ? Colors.white : Colors.blue.shade700,
+              size: 22,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Text(
               "Search for a location...",
               style: TextStyle(
-                color: isDark ? Colors.grey[400] : Colors.black54,
+                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],

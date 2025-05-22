@@ -490,25 +490,13 @@ class _EventsPageState extends State<EventsPage> {
                   children: [
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(
-                                  Icons.event_available,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
                               const Text(
-                                'Wheelchair Accessible',
+                                'Wheelchair Accessible Events',
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -520,7 +508,7 @@ class _EventsPageState extends State<EventsPage> {
                           ),
                           const SizedBox(height: 4),
                           const Text(
-                            'Events in Melbourne',
+                            'in Melbourne',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.white70,
