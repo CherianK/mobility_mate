@@ -13,12 +13,15 @@ import '../utils/location_helper.dart'; //
 import '../providers/theme_provider.dart';
 import '../utils/tag_formatter.dart';
 import '../widgets/about_overlay.dart';
+import '../widgets/spotlight_tutorial_overlay.dart';
 import 'profile_page.dart';
 import 'leaderboard_page.dart';
 import '../utils/username_generator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'contributions_screen.dart';
+import '../main.dart';
+import 'privacy_policy_page.dart';
 
 
 class MapHomePage extends StatefulWidget {
@@ -29,21 +32,22 @@ class MapHomePage extends StatefulWidget {
 }
 
 class _MapHomePageState extends State<MapHomePage> {
-  late MapboxMap _mapboxMap;
-  bool _isLoading = true;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  MapboxMap? _mapboxMap;
+  bool _mapReady = false;
+  bool _isLoading = false;
+  Point? _userPosition;
+  Map<MarkerType, PointAnnotationManager> _annotationManagers = {};
+  Map<MarkerType, List<PointAnnotation>> _activeMarkers = {};
+  Map<String, Map<String, dynamic>> _markerData = {};
+  Future<void>? _activeSheet;
+  bool _showTutorial = false;
   bool _isLocating = false;
   Timer? _zoomTimer;
-  bool _mapReady = false;
   String? deviceId;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final Map<MarkerType, PointAnnotationManager> _annotationManagers = {};
   final Map<MarkerType, List<PointAnnotationOptions>> _markerOptions = {};
   final Map<MarkerType, List<Map<String, dynamic>>> _markerPayloads = {};
-  final Map<MarkerType, List<PointAnnotation>> _activeMarkers = {};
-  final Map<String, Map<String, dynamic>> _markerData = {};
-  /// Keeps track of the bottom‑sheet that is currently displayed
-  Future<void>? _activeSheet;
 
   static const _baseUrl = 'https://mobility-mate.onrender.com';
 
@@ -66,20 +70,28 @@ class _MapHomePageState extends State<MapHomePage> {
   }
 
   Future<void> _onMapInitialized(MapboxMap map) async {
+    setState(() {
+      _isLoading = true;
+    });
+    
     _mapboxMap = map;
     
     // Hide the compass
     try {
-      final compassSettings = CompassSettings(enabled: false);
-      await _mapboxMap.compass.updateSettings(compassSettings);
+      if (_mapboxMap != null) {
+        final compassSettings = CompassSettings(enabled: false);
+        await _mapboxMap!.compass.updateSettings(compassSettings);
+      }
     } catch (_) {
       // Ignore errors if compass can't be hidden
     }
 
     // Hide the scale bar
     try {
-      final scaleBarSettings = ScaleBarSettings(enabled: false);
-      await _mapboxMap.scaleBar.updateSettings(scaleBarSettings);
+      if (_mapboxMap != null) {
+        final scaleBarSettings = ScaleBarSettings(enabled: false);
+        await _mapboxMap!.scaleBar.updateSettings(scaleBarSettings);
+      }
     } catch (_) {
       // Ignore errors if scale bar can't be hidden
     }
@@ -90,9 +102,9 @@ class _MapHomePageState extends State<MapHomePage> {
     
     // Quietly try to get user location, fallback to Melbourne if not available
     final position = await LocationHelper.getCurrentLocation();
-    if (position != null) {
+    if (position != null && _mapboxMap != null) {
       // Enable the location component with pulsing effect before centering
-      await _mapboxMap.location.updateSettings(
+      await _mapboxMap!.location.updateSettings(
         LocationComponentSettings(
           enabled: true,
           pulsingEnabled: true,
@@ -101,7 +113,7 @@ class _MapHomePageState extends State<MapHomePage> {
         ),
       );
       
-      await _mapboxMap.flyTo(
+      await _mapboxMap!.flyTo(
         CameraOptions(
           center: Point(coordinates: Position(position.longitude, position.latitude)),
           zoom: 15.0,
@@ -194,24 +206,26 @@ class _MapHomePageState extends State<MapHomePage> {
 
       final position = await geo.Geolocator.getCurrentPosition();
       
-      // Enable the location component with pulsing effect
-      await _mapboxMap.location.updateSettings(
-        LocationComponentSettings(
-          enabled: true,
-          pulsingEnabled: true,
-          pulsingColor: Colors.blue.value,
-          pulsingMaxRadius: 50.0,
-        ),
-      );
+      if (_mapboxMap != null) {
+        // Enable the location component with pulsing effect
+        await _mapboxMap!.location.updateSettings(
+          LocationComponentSettings(
+            enabled: true,
+            pulsingEnabled: true,
+            pulsingColor: Colors.blue.value,
+            pulsingMaxRadius: 50.0,
+          ),
+        );
 
-      // Center the map on the user's location
-      await _mapboxMap.flyTo(
-        CameraOptions(
-          center: Point(coordinates: Position(position.longitude, position.latitude)),
-          zoom: 15.0,
-        ),
-        MapAnimationOptions(duration: 1000),
-      );
+        // Center the map on the user's location
+        await _mapboxMap!.flyTo(
+          CameraOptions(
+            center: Point(coordinates: Position(position.longitude, position.latitude)),
+            zoom: 15.0,
+          ),
+          MapAnimationOptions(duration: 1000),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -260,54 +274,69 @@ class _MapHomePageState extends State<MapHomePage> {
           ),
           if (_isLoading)
             const Center(child: CircularProgressIndicator()),
-          if (_mapReady) ...[
-            // Floating search bar with hamburger menu
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 8,
-              left: 16,
-              right: 16,
-              child: Row(
-                children: [
-                  // Hamburger menu button
-                  Container(
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[900] : Colors.white,
+          // Floating search bar with hamburger menu - moved outside _mapReady condition
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            left: 16,
+            right: 16,
+            child: Row(
+              children: [
+                // Hamburger menu button
+                Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[800] : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          _scaffoldKey.currentState?.openDrawer();
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Icon(
-                            Icons.menu,
-                            color: isDark ? Colors.white : Colors.black87,
-                            size: 24,
-                          ),
+                      onTap: () {
+                        _scaffoldKey.currentState?.openDrawer();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Icon(
+                          Icons.menu,
+                          color: isDark ? Colors.white : Colors.blue.shade700,
+                          size: 26,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  // Search bar
+                ),
+                const SizedBox(width: 8),
+                // Search bar
+                if (_mapboxMap != null)
                   Expanded(
-                    child: SearchBarWidget(mapboxMap: _mapboxMap),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.grey[800] : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: SearchBarWidget(mapboxMap: _mapboxMap!),
+                    ),
                   ),
-                ],
-              ),
+              ],
             ),
-            
+          ),
+          if (_mapReady) ...[
             // Map controls
             Positioned(
               right: 16,
@@ -333,9 +362,9 @@ class _MapHomePageState extends State<MapHomePage> {
                   FloatingActionButton(
                     heroTag: 'zoom_in',
                     backgroundColor: const Color(0xFF2196F3),
-                    onPressed: () async {
-                      final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
-                      await _mapboxMap.flyTo(
+                    onPressed: _mapboxMap == null ? null : () async {
+                      final zoom = await _mapboxMap!.getCameraState().then((s) => s.zoom);
+                      await _mapboxMap!.flyTo(
                         CameraOptions(zoom: zoom + 1),
                         MapAnimationOptions(duration: 300),
                       );
@@ -346,9 +375,9 @@ class _MapHomePageState extends State<MapHomePage> {
                   FloatingActionButton(
                     heroTag: 'zoom_out',
                     backgroundColor: const Color(0xFF2196F3),
-                    onPressed: () async {
-                      final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
-                      await _mapboxMap.flyTo(
+                    onPressed: _mapboxMap == null ? null : () async {
+                      final zoom = await _mapboxMap!.getCameraState().then((s) => s.zoom);
+                      await _mapboxMap!.flyTo(
                         CameraOptions(zoom: zoom - 1),
                         MapAnimationOptions(duration: 300),
                       );
@@ -418,12 +447,14 @@ class _MapHomePageState extends State<MapHomePage> {
   }
 
   Future<void> _initAllTypes() async {
+    if (_mapboxMap == null) return;
+    
     // Create a single click listener that will handle all marker types
     bool isProcessingClick = false;
 
     for (var type in MarkerType.values) {
       final currentType = type; // capture value for callbacks
-      final mgr = await _mapboxMap.annotations.createPointAnnotationManager();
+      final mgr = await _mapboxMap!.annotations.createPointAnnotationManager();
       _annotationManagers[type] = mgr;
       _activeMarkers[type] = [];
 
@@ -447,7 +478,7 @@ class _MapHomePageState extends State<MapHomePage> {
       );
     }
 
-    final z = await _mapboxMap.getCameraState().then((s) => s.zoom);
+    final z = await _mapboxMap!.getCameraState().then((s) => s.zoom);
     await _updateVisibility(z);
   }
 
@@ -482,8 +513,10 @@ class _MapHomePageState extends State<MapHomePage> {
 
   void _startZoomListener() {
     _zoomTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
-      final z = await _mapboxMap.getCameraState().then((s) => s.zoom);
-      await _updateVisibility(z);
+      if (_mapboxMap != null) {
+        final z = await _mapboxMap!.getCameraState().then((s) => s.zoom);
+        await _updateVisibility(z);
+      }
     });
   }
 
@@ -578,19 +611,21 @@ class _MapHomePageState extends State<MapHomePage> {
   }
 
   Future<void> _updateMapStyle(bool isDark) async {
+    if (_mapboxMap == null) return;
+    
     try {
-      await _mapboxMap.style.setStyleURI(isDark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS);
+      await _mapboxMap!.style.setStyleURI(isDark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS);
       
       // Re-hide the compass after style change
       try {
         final compassSettings = CompassSettings(enabled: false);
-        await _mapboxMap.compass.updateSettings(compassSettings);
+        await _mapboxMap!.compass.updateSettings(compassSettings);
       } catch (_) {
         // Ignore errors if compass can't be hidden
       }
       
       // Re-add markers after style change
-      final zoom = await _mapboxMap.getCameraState().then((s) => s.zoom);
+      final zoom = await _mapboxMap!.getCameraState().then((s) => s.zoom);
       await _updateVisibility(zoom);
     } catch (e) {
       // Error updating style
@@ -797,6 +832,19 @@ class _MapHomePageState extends State<MapHomePage> {
     }
   }
 
+  // Helper method to show the tutorial
+  Future<void> _startTutorial() async {
+    // Reset tutorial state
+    await SpotlightTutorialOverlay.resetTutorialState();
+    // Show tutorial using MainScreen's method
+    if (mounted) {
+      final mainScreen = context.findAncestorStateOfType<MainScreenState>();
+      if (mainScreen != null) {
+        mainScreen.showTutorial(fromMenu: true);
+      }
+    }
+  }
+
   // Build the drawer menu
   Widget _buildDrawer(BuildContext context, bool isDark) {
     return Drawer(
@@ -945,6 +993,33 @@ class _MapHomePageState extends State<MapHomePage> {
                         : ThemeMode.dark;
                     themeProvider.setThemeMode(newMode);
                     Navigator.pop(context);
+                  },
+                ),
+                
+                // Privacy Policy link
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.privacy_tip_outlined,
+                  title: 'Privacy Policy',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PrivacyPolicyPage(),
+                      ),
+                    );
+                  },
+                ),
+                
+                // Tutorial link
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.school_outlined,
+                  title: 'Tutorial',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _startTutorial();
                   },
                 ),
                 

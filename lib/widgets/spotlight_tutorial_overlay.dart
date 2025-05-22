@@ -9,16 +9,21 @@ import '../providers/theme_provider.dart';
 class SpotlightTutorialOverlay extends StatefulWidget {
   final Widget child;
   final Map<String, GlobalKey> navigationKeys;
+  final Function(bool wasSkipped)? onTutorialComplete;
+  final bool showDontShowAgain;
 
   const SpotlightTutorialOverlay({
     Key? key,
     required this.child,
     required this.navigationKeys,
+    this.onTutorialComplete,
+    this.showDontShowAgain = false,
   }) : super(key: key);
 
   static Future<void> resetTutorialState() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_shown_tutorial', false);
+    await prefs.setBool('dont_show_tutorial_again', false);
   }
 
   @override
@@ -73,7 +78,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
     TutorialStep(
       title: 'Menu',
       description: 'Access your profile, leaderboard, and toggle between light and dark themes through the menu.',
-      position: const Offset(0.09, 0.10),
+      position: const Offset(0.10, 0.095),
       radius: 20,
       icon: Icons.menu,
       isNavigationItem: false,
@@ -192,10 +197,17 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
   }
 
   Future<void> _checkTutorialPreference() async {
+    // Temporarily disabled for testing
+    setState(() {
+      _showTutorial = true;
+    });
+    
+    // Original code commented out for testing
+    /*
     try {
       final prefs = await SharedPreferences.getInstance();
-      final dontShowAgain = prefs.getBool('dont_show_tutorial_again') ?? false;
-      if (dontShowAgain) {
+      final hasShownTutorial = prefs.getBool('has_shown_tutorial') ?? false;
+      if (hasShownTutorial) {
         setState(() {
           _showTutorial = false;
         });
@@ -203,6 +215,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
     } catch (e) {
       // Handle error silently
     }
+    */
   }
 
   Future<void> _markTutorialAsShown() async {
@@ -229,20 +242,14 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
       });
       _updateSpotlightPosition();
     } else {
+      // This is the final step - show confetti
+      _confettiController.play();
       setState(() {
         _showTutorial = false;
         _showConfetti = true;
       });
-      _confettiController.play();
       _markTutorialAsShown();
-      
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
-          setState(() {
-            _showConfetti = false;
-          });
-        }
-      });
+      widget.onTutorialComplete?.call(false);
     }
   }
 
@@ -263,8 +270,10 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
   void _skipTutorial() {
     setState(() {
       _showTutorial = false;
+      _showConfetti = false;
     });
     _markTutorialAsShown();
+    widget.onTutorialComplete?.call(true);
   }
 
   @override
@@ -469,7 +478,7 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
                           ),
                         ],
                       ),
-                      if (_currentStep == _steps.length - 1)
+                      if (_currentStep == _steps.length - 1 && widget.showDontShowAgain)
                         Padding(
                         padding: const EdgeInsets.only(top: 8),
                           child: CheckboxListTile(
@@ -500,17 +509,22 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
             ),
           ),
         if (_showConfetti)
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirection: pi / 2,
-              maxBlastForce: 5,
-              minBlastForce: 2,
-              emissionFrequency: 0.05,
-              numberOfParticles: 50,
-              gravity: 0.1,
-            ),
+          ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirection: pi / 2,
+            maxBlastForce: 5,
+            minBlastForce: 2,
+            emissionFrequency: 0.05,
+            numberOfParticles: 50,
+            gravity: 0.1,
+            shouldLoop: false,
+            colors: const [
+              Colors.blue,
+              Colors.pink,
+              Colors.orange,
+              Colors.purple,
+              Colors.green,
+            ],
           ),
       ],
     );

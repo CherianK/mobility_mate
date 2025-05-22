@@ -5,6 +5,8 @@ import '../widgets/custom_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../utils/pattern_painters.dart';
+import 'package:flutter/services.dart';
 
 class ReportIssueScreen extends StatefulWidget {
   const ReportIssueScreen({super.key});
@@ -48,6 +50,13 @@ class ReportIssueScreenState extends State<ReportIssueScreen> with SingleTickerP
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
+    );
+    // Set status bar color to match header
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.blue,
+        statusBarIconBrightness: Brightness.light,
+      ),
     );
   }
 
@@ -239,180 +248,236 @@ class ReportIssueScreenState extends State<ReportIssueScreen> with SingleTickerP
     final isDark = context.watch<ThemeProvider>().isDarkMode;
 
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Report an Issue',
-        centerTitle: false,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: isDark ? theme.primaryColor.withOpacity(0.2) : theme.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
+      body: Column(
+        children: [
+          // Blue header
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-              ),
+              ],
+            ),
+            child: SafeArea(
+              bottom: false,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
+                      // Back button
                       Container(
-                        padding: EdgeInsets.all(8),
+                        margin: const EdgeInsets.only(right: 12),
                         decoration: BoxDecoration(
-                          color: isDark ? theme.primaryColor.withOpacity(0.4) : theme.primaryColor.withOpacity(0.1),
+                          color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(
-                          Icons.feedback_outlined,
-                          color: isDark ? Colors.white : theme.primaryColor,
-                          size: 24,
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () => Navigator.of(context).pop(),
+                          tooltip: 'Back',
+                          iconSize: 22,
+                          padding: const EdgeInsets.all(8),
+                          constraints: const BoxConstraints(),
                         ),
                       ),
-                      SizedBox(width: 16),
                       Expanded(
-                        child: Text(
-                          'Help us improve',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            color: isDark ? Colors.white : null,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Report an Issue',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                      // Add a SizedBox with the same width as the back button to balance the layout
+                      const SizedBox(width: 44),
                     ],
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Your feedback helps make our app better for everyone',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: isDark ? Colors.white70 : null,
-                    ),
                   ),
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionHeader('What\'s wrong?', '(Select all that apply)'),
-                  SizedBox(height: 12),
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(
-                        color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
+          ),
+          // Main content
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[900] : Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.blue.withOpacity(0.1) : Colors.blue.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark ? Colors.blue.withOpacity(0.2) : Colors.blue.withOpacity(0.1),
+                          width: 1.5,
+                        ),
                       ),
-                    ),
-                    child: Column(
-                      children: issueToggles.entries.map((entry) {
-                        return _buildSelectionOption(
-                          label: entry.key,
-                          isSelected: entry.value,
-                          onTap: () {
-                            setState(() {
-                              issueToggles[entry.key] = !entry.value;
-                            });
-                          },
-                          isMultiple: true,
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
-                  SizedBox(height: 32),
-                  _buildSectionHeader('Issue type', '(Select one)'),
-                  SizedBox(height: 12),
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(
-                        color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
-                      ),
-                    ),
-                    child: Column(
-                      children: issueTypeOptions.map((option) {
-                        return _buildSelectionOption(
-                          label: option['label'],
-                          isSelected: issueType == option['label'],
-                          onTap: () {
-                            setState(() {
-                              issueType = option['label'];
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
-                  SizedBox(height: 32),
-                  _buildSectionHeader('How do you know?', '(Select one)'),
-                  SizedBox(height: 12),
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(
-                        color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
-                      ),
-                    ),
-                    child: Column(
-                      children: knowledgeOptions.map((source) {
-                        return _buildSelectionOption(
-                          label: source,
-                          isSelected: knowledgeSource == source,
-                          onTap: () {
-                            setState(() {
-                              knowledgeSource = source;
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
-                  SizedBox(height: 40),
-                  Center(
-                    child: AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (context, child) {
-                        return Transform.scale(
-                          scale: 1.0 - (_animationController.value * 0.1),
-                          child: ElevatedButton.icon(
-                            onPressed: isSubmitting ? null : submitForm,
-                            icon: isSubmitting
-                                ? SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                    ),
-                                  )
-                                : Icon(Icons.send),
-                            label: Text(
-                              isSubmitting ? 'Submitting...' : 'Submit Report',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline,
+                            color: isDark ? Colors.blue[300] : Colors.blue[700],
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Your feedback helps make our app better for everyone',
                               style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                height: 1.4,
+                                letterSpacing: 0.2,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
-                        );
-                      },
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 32),
+                    _buildSectionHeader('What\'s wrong?', '(Select all that apply)'),
+                    SizedBox(height: 12),
+                    Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(
+                          color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
+                          width: 1.5,
+                        ),
+                      ),
+                      shadowColor: Colors.black.withOpacity(0.1),
+                      child: Column(
+                        children: issueToggles.entries.map((entry) {
+                          return _buildSelectionOption(
+                            label: entry.key,
+                            isSelected: entry.value,
+                            onTap: () {
+                              setState(() {
+                                issueToggles[entry.key] = !entry.value;
+                              });
+                            },
+                            isMultiple: true,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                    SizedBox(height: 32),
+                    _buildSectionHeader('Issue type', '(Select one)'),
+                    SizedBox(height: 12),
+                    Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(
+                          color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
+                          width: 1.5,
+                        ),
+                      ),
+                      shadowColor: Colors.black.withOpacity(0.1),
+                      child: Column(
+                        children: issueTypeOptions.map((option) {
+                          return _buildSelectionOption(
+                            label: option['label'],
+                            isSelected: issueType == option['label'],
+                            onTap: () {
+                              setState(() {
+                                issueType = option['label'];
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                    SizedBox(height: 32),
+                    _buildSectionHeader('How do you know?', '(Select one)'),
+                    SizedBox(height: 12),
+                    Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(
+                          color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
+                          width: 1.5,
+                        ),
+                      ),
+                      shadowColor: Colors.black.withOpacity(0.1),
+                      child: Column(
+                        children: knowledgeOptions.map((source) {
+                          return _buildSelectionOption(
+                            label: source,
+                            isSelected: knowledgeSource == source,
+                            onTap: () {
+                              setState(() {
+                                knowledgeSource = source;
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                    SizedBox(height: 40),
+                    Center(
+                      child: AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: 1.0 - (_animationController.value * 0.1),
+                            child: ElevatedButton.icon(
+                              onPressed: isSubmitting ? null : submitForm,
+                              icon: isSubmitting
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      ),
+                                    )
+                                  : Icon(Icons.send),
+                              label: Text(
+                                isSubmitting ? 'Submitting...' : 'Submit Report',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
