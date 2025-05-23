@@ -510,13 +510,13 @@ class _SpotlightTutorialOverlayState extends State<SpotlightTutorialOverlay> wit
           ),
         if (_showConfetti)
           ConfettiWidget(
-            confettiController: _confettiController,
-            blastDirection: pi / 2,
-            maxBlastForce: 5,
-            minBlastForce: 2,
-            emissionFrequency: 0.05,
-            numberOfParticles: 50,
-            gravity: 0.1,
+              confettiController: _confettiController,
+              blastDirection: pi / 2,
+              maxBlastForce: 5,
+              minBlastForce: 2,
+              emissionFrequency: 0.05,
+              numberOfParticles: 50,
+              gravity: 0.1,
             shouldLoop: false,
             colors: const [
               Colors.blue,

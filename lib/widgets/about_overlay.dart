@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../screens/video_player_screen.dart';
 
 class AboutOverlay extends StatelessWidget {
   const AboutOverlay({super.key});
@@ -61,13 +62,15 @@ class AboutOverlay extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          'About Mobility Mate',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.blue.shade900,
-                            letterSpacing: -0.5,
+                        Expanded(
+                          child: Text(
+                            'About Mobility Mate',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : Colors.blue.shade900,
+                              letterSpacing: -0.5,
+                            ),
                           ),
                         ),
                       ],
@@ -79,6 +82,52 @@ class AboutOverlay extends StatelessWidget {
                         fontSize: 16,
                         height: 1.5,
                         color: isDark ? Colors.white : Colors.grey.shade800,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    InkWell(
+                      onTap: () {
+                        Navigator.of(context).pop(); // Close the about overlay
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const VideoPlayerScreen(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.blue.withOpacity(0.1) : Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? Colors.blue.withOpacity(0.2) : Colors.blue.shade100,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.play_circle_outline,
+                              color: isDark ? Colors.blue[300] : Colors.blue[700],
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'See Product Video to learn more!',
+                                style: TextStyle(
+                                  color: isDark ? Colors.blue[300] : Colors.blue[700],
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),

@@ -79,7 +79,7 @@ class _MapHomePageState extends State<MapHomePage> {
     // Hide the compass
     try {
       if (_mapboxMap != null) {
-        final compassSettings = CompassSettings(enabled: false);
+      final compassSettings = CompassSettings(enabled: false);
         await _mapboxMap!.compass.updateSettings(compassSettings);
       }
     } catch (_) {
@@ -89,7 +89,7 @@ class _MapHomePageState extends State<MapHomePage> {
     // Hide the scale bar
     try {
       if (_mapboxMap != null) {
-        final scaleBarSettings = ScaleBarSettings(enabled: false);
+      final scaleBarSettings = ScaleBarSettings(enabled: false);
         await _mapboxMap!.scaleBar.updateSettings(scaleBarSettings);
       }
     } catch (_) {
@@ -207,24 +207,24 @@ class _MapHomePageState extends State<MapHomePage> {
       final position = await geo.Geolocator.getCurrentPosition();
       
       if (_mapboxMap != null) {
-        // Enable the location component with pulsing effect
+      // Enable the location component with pulsing effect
         await _mapboxMap!.location.updateSettings(
-          LocationComponentSettings(
-            enabled: true,
-            pulsingEnabled: true,
-            pulsingColor: Colors.blue.value,
-            pulsingMaxRadius: 50.0,
-          ),
-        );
+        LocationComponentSettings(
+          enabled: true,
+          pulsingEnabled: true,
+          pulsingColor: Colors.blue.value,
+          pulsingMaxRadius: 50.0,
+        ),
+      );
 
-        // Center the map on the user's location
+      // Center the map on the user's location
         await _mapboxMap!.flyTo(
-          CameraOptions(
-            center: Point(coordinates: Position(position.longitude, position.latitude)),
-            zoom: 15.0,
-          ),
-          MapAnimationOptions(duration: 1000),
-        );
+        CameraOptions(
+          center: Point(coordinates: Position(position.longitude, position.latitude)),
+          zoom: 15.0,
+        ),
+        MapAnimationOptions(duration: 1000),
+      );
       }
     } catch (e) {
       if (!mounted) return;
@@ -275,46 +275,46 @@ class _MapHomePageState extends State<MapHomePage> {
           if (_isLoading)
             const Center(child: CircularProgressIndicator()),
           // Floating search bar with hamburger menu - moved outside _mapReady condition
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            left: 16,
-            right: 16,
-            child: Row(
-              children: [
-                // Hamburger menu button
-                Container(
-                  decoration: BoxDecoration(
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              left: 16,
+              right: 16,
+              child: Row(
+                children: [
+                  // Hamburger menu button
+                  Container(
+                    decoration: BoxDecoration(
                     color: isDark ? Colors.grey[800] : Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
                         color: Colors.black.withOpacity(0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                         spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () {
-                        _scaffoldKey.currentState?.openDrawer();
-                      },
-                      child: Padding(
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          _scaffoldKey.currentState?.openDrawer();
+                        },
+                        child: Padding(
                         padding: const EdgeInsets.all(10.0),
-                        child: Icon(
-                          Icons.menu,
+                          child: Icon(
+                            Icons.menu,
                           color: isDark ? Colors.white : Colors.blue.shade700,
                           size: 26,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                // Search bar
+                  const SizedBox(width: 8),
+                  // Search bar
                 if (_mapboxMap != null)
                   Expanded(
                     child: Container(
@@ -327,15 +327,15 @@ class _MapHomePageState extends State<MapHomePage> {
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                             spreadRadius: 1,
-                          ),
-                        ],
-                      ),
+                  ),
+                ],
+              ),
                       child: SearchBarWidget(mapboxMap: _mapboxMap!),
                     ),
                   ),
               ],
             ),
-          ),
+            ),
           if (_mapReady) ...[
             // Map controls
             Positioned(
@@ -515,7 +515,7 @@ class _MapHomePageState extends State<MapHomePage> {
     _zoomTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
       if (_mapboxMap != null) {
         final z = await _mapboxMap!.getCameraState().then((s) => s.zoom);
-        await _updateVisibility(z);
+      await _updateVisibility(z);
       }
     });
   }

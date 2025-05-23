@@ -409,280 +409,280 @@ class _ContributionsScreenState extends State<ContributionsScreen> with SingleTi
       child: Scaffold(
         backgroundColor: Colors.blue,
         body: Column(
-          children: [
-            // Blue header section
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+              children: [
+                // Blue header section
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
-              ),
               child: SafeArea(
                 bottom: false,
-                child: Stack(
-                  children: [
-                    // Hexagonal pattern
-                    Positioned.fill(
-                      child: Opacity(
-                        opacity: 0.1,
-                        child: CustomPaint(
-                          painter: HexagonPatternPainter(),
+                  child: Stack(
+                    children: [
+                      // Hexagonal pattern
+                      Positioned.fill(
+                        child: Opacity(
+                          opacity: 0.1,
+                          child: CustomPaint(
+                            painter: HexagonPatternPainter(),
+                          ),
                         ),
                       ),
-                    ),
-                    // Header content
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            // Back button
-                            Container(
-                              margin: const EdgeInsets.only(right: 12),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(12),
+                      // Header content
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              // Back button
+                              Container(
+                                margin: const EdgeInsets.only(right: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  tooltip: 'Back',
+                                  iconSize: 22,
+                                  padding: const EdgeInsets.all(8),
+                                  constraints: const BoxConstraints(),
+                                ),
                               ),
-                              child: IconButton(
-                                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                                onPressed: () => Navigator.of(context).pop(),
-                                tooltip: 'Back',
-                                iconSize: 22,
-                                padding: const EdgeInsets.all(8),
-                                constraints: const BoxConstraints(),
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
+                              Expanded(
+                                child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'My Contributions',
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                      letterSpacing: -0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.2),
-                                        width: 1,
+                                  children: [
+                                    Text(
+                                      'My Contributions',
+                                      style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                        letterSpacing: -0.5,
                                       ),
                                     ),
-                                    child: Text(
-                                      'Track images you\'ve shared with the community',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.white.withOpacity(0.9),
-                                        fontWeight: FontWeight.w500,
+                                    const SizedBox(height: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: Colors.white.withOpacity(0.2),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Track images you\'ve shared with the community',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.white.withOpacity(0.9),
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
                             // Add a SizedBox with the same width as the back button to balance the layout
                             const SizedBox(width: 44),
-                          ],
-                        ),
-                        // Tab bar
-                        const SizedBox(height: 20),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
-                              width: 1,
-                            ),
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: Material(
-                            color: Colors.transparent,
-                            child: TabBar(
-                              controller: _tabController,
-                              indicator: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              indicatorPadding: EdgeInsets.zero,
-                              labelColor: Colors.blue,
-                              unselectedLabelColor: Colors.white,
-                              labelStyle: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                              indicatorSize: TabBarIndicatorSize.tab,
-                              dividerColor: Colors.transparent,
-                              dividerHeight: 0,
-                              splashBorderRadius: BorderRadius.circular(12),
-                              tabs: [
-                                Tab(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.check_circle, size: 18),
-                                      SizedBox(width: 6),
-                                      Text('Approved'),
-                                      SizedBox(width: 6),
-                                      Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: _tabController.index == 0 
-                                              ? Colors.blue.withOpacity(0.2) 
-                                              : Colors.white.withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Text(
-                                          '${_approvedImages.length}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: _tabController.index == 0 
-                                                ? Colors.blue 
-                                                : Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Tab(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.hourglass_top, size: 18),
-                                      SizedBox(width: 6),
-                                      Text('Pending'),
-                                      SizedBox(width: 6),
-                                      Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: _tabController.index == 1 
-                                              ? Colors.blue.withOpacity(0.2) 
-                                              : Colors.white.withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Text(
-                                          '${_pendingImages.length}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: _tabController.index == 1 
-                                                ? Colors.blue 
-                                                : Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // Add spacing between header and content
-            const SizedBox(height: 16),
-            // Main content
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[900] : Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: _isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : _error != null
-                        ? Center(
-                            child: Container(
-                              padding: EdgeInsets.all(20),
-                              margin: EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: isDark ? Colors.red[900]?.withOpacity(0.3) : Colors.red[50],
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    size: 48,
-                                    color: isDark ? Colors.red[300] : Colors.red[700],
-                                  ),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    'Error Loading Data',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark ? Colors.red[300] : Colors.red[700],
-                                    ),
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    _error!,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: isDark ? Colors.grey[300] : Colors.grey[700],
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  SizedBox(height: 16),
-                                  ElevatedButton.icon(
-                                    onPressed: _fetchImages,
-                                    icon: Icon(Icons.refresh),
-                                    label: Text('Try Again'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isDark ? Colors.red[700] : Colors.red[600],
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        : TabBarView(
-                            controller: _tabController,
-                            children: [
-                              _buildImageList(_approvedImages, true),
-                              _buildImageList(_pendingImages, false),
                             ],
                           ),
-              ),
-            ),
-          ],
+                          // Tab bar
+                          const SizedBox(height: 20),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: TabBar(
+                                controller: _tabController,
+                                indicator: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                indicatorPadding: EdgeInsets.zero,
+                                labelColor: Colors.blue,
+                                unselectedLabelColor: Colors.white,
+                                labelStyle: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                                indicatorSize: TabBarIndicatorSize.tab,
+                                dividerColor: Colors.transparent,
+                                dividerHeight: 0,
+                                splashBorderRadius: BorderRadius.circular(12),
+                                tabs: [
+                                  Tab(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.check_circle, size: 18),
+                                        SizedBox(width: 6),
+                                        Text('Approved'),
+                                        SizedBox(width: 6),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: _tabController.index == 0 
+                                                ? Colors.blue.withOpacity(0.2) 
+                                                : Colors.white.withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: Text(
+                                            '${_approvedImages.length}',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: _tabController.index == 0 
+                                                  ? Colors.blue 
+                                                  : Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Tab(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.hourglass_top, size: 18),
+                                        SizedBox(width: 6),
+                                        Text('Pending'),
+                                        SizedBox(width: 6),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: _tabController.index == 1 
+                                                ? Colors.blue.withOpacity(0.2) 
+                                                : Colors.white.withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: Text(
+                                            '${_pendingImages.length}',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: _tabController.index == 1 
+                                                  ? Colors.blue 
+                                                  : Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                ),
+                  ),
+                ),
+                // Add spacing between header and content
+                const SizedBox(height: 16),
+                // Main content
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[900] : Colors.white,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: _isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : _error != null
+                            ? Center(
+                                child: Container(
+                                  padding: EdgeInsets.all(20),
+                                  margin: EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.red[900]?.withOpacity(0.3) : Colors.red[50],
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        size: 48,
+                                        color: isDark ? Colors.red[300] : Colors.red[700],
+                                      ),
+                                      SizedBox(height: 16),
+                                      Text(
+                                        'Error Loading Data',
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.red[300] : Colors.red[700],
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        _error!,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      SizedBox(height: 16),
+                                      ElevatedButton.icon(
+                                        onPressed: _fetchImages,
+                                        icon: Icon(Icons.refresh),
+                                        label: Text('Try Again'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: isDark ? Colors.red[700] : Colors.red[600],
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(16),
+                                          ),
+                                          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : TabBarView(
+                                controller: _tabController,
+                                children: [
+                                  _buildImageList(_approvedImages, true),
+                                  _buildImageList(_pendingImages, false),
+                                ],
+                              ),
+                  ),
+                ),
+              ],
         ),
       ),
     );

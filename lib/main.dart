@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'config/mapbox_config.dart';
 import 'config/theme.dart';
@@ -21,6 +22,11 @@ import 'dart:math';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Lock orientation to portrait mode
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   
   // Initialize SharedPreferences and get/create device ID
   final prefs = await SharedPreferences.getInstance();
