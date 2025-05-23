@@ -40,9 +40,9 @@
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app uses your location to enhance accessibility mapping features.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>This app needs access to location when in the background to show you nearby accessible locations.</string>
+	<string>This app needs access to location when in the background to show your position on the map.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to your location to show your position on the map.</string>
+	<string>This app needs access to location when open to show your position on the map.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Mobility Mate needs photo library access to let you upload photos of locations for accessibility information.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

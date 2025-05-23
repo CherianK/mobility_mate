@@ -249,11 +249,11 @@ class ReportIssueScreenState extends State<ReportIssueScreen> with SingleTickerP
 
     return Scaffold(
       body: Column(
-        children: [
+          children: [
           // Blue header
-          Container(
+            Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-            decoration: BoxDecoration(
+              decoration: BoxDecoration(
               color: Colors.blue,
               boxShadow: [
                 BoxShadow(
@@ -297,11 +297,11 @@ class ReportIssueScreenState extends State<ReportIssueScreen> with SingleTickerP
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
                                 letterSpacing: -0.5,
-                              ),
-                            ),
+                          ),
+                        ),
                           ],
                         ),
-                      ),
+                  ),
                       // Add a SizedBox with the same width as the back button to balance the layout
                       const SizedBox(width: 44),
                     ],
@@ -320,9 +320,9 @@ class ReportIssueScreenState extends State<ReportIssueScreen> with SingleTickerP
               clipBehavior: Clip.antiAlias,
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -357,127 +357,127 @@ class ReportIssueScreenState extends State<ReportIssueScreen> with SingleTickerP
                       ),
                     ),
                     const SizedBox(height: 32),
-                    _buildSectionHeader('What\'s wrong?', '(Select all that apply)'),
-                    SizedBox(height: 12),
-                    Card(
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(
-                          color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
+                  _buildSectionHeader('What\'s wrong?', '(Select all that apply)'),
+                  SizedBox(height: 12),
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
                           width: 1.5,
                         ),
                       ),
                       shadowColor: Colors.black.withOpacity(0.1),
-                      child: Column(
-                        children: issueToggles.entries.map((entry) {
-                          return _buildSelectionOption(
-                            label: entry.key,
-                            isSelected: entry.value,
-                            onTap: () {
-                              setState(() {
-                                issueToggles[entry.key] = !entry.value;
-                              });
-                            },
-                            isMultiple: true,
-                          );
-                        }).toList(),
-                      ),
+                    child: Column(
+                      children: issueToggles.entries.map((entry) {
+                        return _buildSelectionOption(
+                          label: entry.key,
+                          isSelected: entry.value,
+                          onTap: () {
+                            setState(() {
+                              issueToggles[entry.key] = !entry.value;
+                            });
+                          },
+                          isMultiple: true,
+                        );
+                      }).toList(),
                     ),
+                  ),
 
-                    SizedBox(height: 32),
-                    _buildSectionHeader('Issue type', '(Select one)'),
-                    SizedBox(height: 12),
-                    Card(
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(
-                          color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
+                  SizedBox(height: 32),
+                  _buildSectionHeader('Issue type', '(Select one)'),
+                  SizedBox(height: 12),
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
                           width: 1.5,
                         ),
                       ),
                       shadowColor: Colors.black.withOpacity(0.1),
-                      child: Column(
-                        children: issueTypeOptions.map((option) {
-                          return _buildSelectionOption(
-                            label: option['label'],
-                            isSelected: issueType == option['label'],
-                            onTap: () {
-                              setState(() {
-                                issueType = option['label'];
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
+                    child: Column(
+                      children: issueTypeOptions.map((option) {
+                        return _buildSelectionOption(
+                          label: option['label'],
+                          isSelected: issueType == option['label'],
+                          onTap: () {
+                            setState(() {
+                              issueType = option['label'];
+                            });
+                          },
+                        );
+                      }).toList(),
                     ),
+                  ),
 
-                    SizedBox(height: 32),
-                    _buildSectionHeader('How do you know?', '(Select one)'),
-                    SizedBox(height: 12),
-                    Card(
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(
-                          color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
+                  SizedBox(height: 32),
+                  _buildSectionHeader('How do you know?', '(Select one)'),
+                  SizedBox(height: 12),
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: isDark ? Colors.grey[800]! : Colors.grey.shade200,
                           width: 1.5,
                         ),
                       ),
                       shadowColor: Colors.black.withOpacity(0.1),
-                      child: Column(
-                        children: knowledgeOptions.map((source) {
-                          return _buildSelectionOption(
-                            label: source,
-                            isSelected: knowledgeSource == source,
-                            onTap: () {
-                              setState(() {
-                                knowledgeSource = source;
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
+                    child: Column(
+                      children: knowledgeOptions.map((source) {
+                        return _buildSelectionOption(
+                          label: source,
+                          isSelected: knowledgeSource == source,
+                          onTap: () {
+                            setState(() {
+                              knowledgeSource = source;
+                            });
+                          },
+                        );
+                      }).toList(),
                     ),
+                  ),
 
-                    SizedBox(height: 40),
-                    Center(
-                      child: AnimatedBuilder(
-                        animation: _animationController,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: 1.0 - (_animationController.value * 0.1),
-                            child: ElevatedButton.icon(
-                              onPressed: isSubmitting ? null : submitForm,
-                              icon: isSubmitting
-                                  ? SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                      ),
-                                    )
-                                  : Icon(Icons.send),
-                              label: Text(
-                                isSubmitting ? 'Submitting...' : 'Submit Report',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                  SizedBox(height: 40),
+                  Center(
+                    child: AnimatedBuilder(
+                      animation: _animationController,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: 1.0 - (_animationController.value * 0.1),
+                          child: ElevatedButton.icon(
+                            onPressed: isSubmitting ? null : submitForm,
+                            icon: isSubmitting
+                                ? SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : Icon(Icons.send),
+                            label: Text(
+                              isSubmitting ? 'Submitting...' : 'Submit Report',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     ),
-                  ],
+                  ),
+                ],
                 ),
               ),
+              ),
             ),
-          ),
-        ],
+          ],
       ),
     );
   }

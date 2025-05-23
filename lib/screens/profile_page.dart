@@ -180,7 +180,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
                                   letterSpacing: -0.5,
-                                ),
+      ),
                               ),
                             ),
                           ),
@@ -197,8 +197,8 @@ class _ProfilePageState extends State<ProfilePage> {
           // Main content
           Expanded(
             child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -584,7 +584,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ],
-      ),
+            ),
     );
   }
 }
